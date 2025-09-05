@@ -1,165 +1,117 @@
-# Development Task List - **Current Progress Reflected**
+# 자기성장 플랫폼 개발 Task List - **기존 코드베이스 활용**
 
-> **Documentation Workflow**: This task list is maintained according to documentation workflow rules and updated after each task completion.
+> **기존 코드 재사용률**: Backend 95%, Frontend 85%, 인프라 100%, AI 80%
+> **총 개발 시간**: 6-9시간 (기존 12-15시간에서 단축)
 
-## Phase 1: Foundation Setup (2 hours) - ✅ **100% Complete**
+## Phase 1: 기록 시스템 확장 (1-2시간) - **기존 코드 활용**
 
-### Backend Team
+### 1.1 문서 타입 확장 (30분) - ❌ **0% Complete**
+**기존 활용**: DocumentEditor 컴포넌트, CRUD API 재사용
+1. ❌ 새 문서 타입 추가: `daily_record`, `mood_tracker`, `reflection`, `values_archive`
+2. ❌ types/index.ts에 새 인터페이스 정의
+3. ❌ 기존 문서 검증 로직 확장
+4. ❌ 문서 타입별 UI 아이콘/색상 추가
 
-#### Backend Developer #1 (Infrastructure) - ✅ **100% Complete**
-1. ✅ Initialize AWS CDK project structure
-2. ✅ Create DynamoDB tables (Users, Documents, Analysis, Resumes) - **Complete with GSI**
-3. ✅ Set up API Gateway with CORS configuration - **Complete**
-4. ✅ Configure Lambda functions with proper permissions - **Complete**
-5. ✅ Create Lambda function implementations - **Complete**
-6. ✅ Set up environment variables and table permissions - **Complete**
+### 1.2 일상 기록 UI 추가 (1시간) - ❌ **0% Complete**
+**기존 활용**: documents/page.tsx, DocumentList 컴포넌트 확장
+1. ❌ 기분/에너지 레벨 입력 필드 (1-5점 스케일)
+2. ❌ 날짜별 필터링 기능 추가
+3. ❌ 간단한 차트 시각화 (기분 변화 추이)
+4. ❌ 활동 태그 입력 시스템
+5. ❌ 일일 성찰 템플릿 제공
 
-#### Backend Developer #2 (Authentication & Documents API) - ✅ **100% Complete**
-1. ✅ Implement user registration Lambda function - **Complete with testing**
-2. ✅ Implement user login Lambda function - **Complete with testing**
-3. ✅ Create JWT token validation middleware - **Complete**
-4. ✅ Implement document creation API endpoint - **Complete with validation**
-5. ✅ Implement document retrieval API endpoint - **Complete with filtering**
-6. ✅ Implement document update/delete API endpoints - **Complete with PATCH support**
+## Phase 2: 테스트 결과 관리 시스템 (2-3시간) - **기존 코드 활용**
 
-### Frontend Team
+### 2.1 테스트 목록 및 결과 저장 (1시간) - ❌ **0% Complete**
+**기존 활용**: documents 테이블, CRUD API, DocumentList 컴포넌트
+1. ❌ 새 문서 타입 추가: `test_result`
+2. ❌ 테스트 목록 데이터 구조 설계 (MBTI, DISC, 애니어그램 등)
+3. ❌ 테스트 결과 입력 폼 구현
+4. ❌ 외부 테스트 링크 연동 시스템
+5. ❌ 테스트 히스토리 관리 기능
 
-#### Frontend Developer #1 (Project Setup & Authentication) - ✅ **90% Complete**
-1. ✅ Initialize Next.js 14 project with TypeScript
-2. ✅ Configure Tailwind CSS v4 and shadcn/ui
-3. ✅ Set up project folder structure and routing
-4. ✅ Create authentication context and hooks
-5. ✅ Implement login/register pages with form validation
-6. ⏳ Create protected route wrapper component - **API integration needed**
+### 2.2 테스트 관리 페이지 (1-2시간) - ❌ **0% Complete**
+**기존 활용**: DocumentList, DocumentEditor 컴포넌트 재사용
+1. ❌ /app/tests/page.tsx 새 페이지 생성
+2. ❌ 테스트 카테고리별 분류 UI
+3. ❌ 테스트 설명 및 외부 링크 제공
+4. ❌ 결과 입력 및 저장 인터페이스
+5. ❌ 테스트 완료 상태 관리
+6. ❌ 테스트 결과 요약 대시보드
 
-#### Frontend Developer #2 (Document Editor) - ✅ **95% Complete**
-1. ✅ Research and implement rich text editor (TipTap with SSR support)
-2. ✅ Create document type selection component
-3. ✅ Implement document creation/editing interface
-4. ✅ Create document list/grid view component with tabs
-5. ✅ Add document save functionality (manual save)
-6. ✅ Implement responsive design with modal system
-7. ✅ Create DocumentViewer for read-only display
-8. ✅ Implement proper HTML styling for TipTap output
+## Phase 3: 분석 및 시각화 확장 (3-4시간) - **기존 AI 시스템 활용**
 
-## Phase 2: Core Features (3 hours) - ✅ **100% Complete**
+### 3.1 기존 AI 분석 확장 (2시간) - ❌ **0% Complete**
+**기존 활용**: analysis/ Lambda 함수, Bedrock 연동, 분석 UI 컴포넌트들
+1. ❌ 기존 분석 프롬프트에 새 데이터 타입 추가
+2. ❌ 기록 데이터 + 테스트 결과 통합 분석 로직
+3. ❌ 기존 AnalysisResults 컴포넌트 확장
+4. ❌ 다차원 성격 분석 결과 표시
+5. ❌ 강점/약점 변화 추적 기능
+6. ❌ 개선 방향 제시 알고리즘
 
-### Backend Team
+### 3.2 변화 추적 기능 (1-2시간) - ❌ **0% Complete**
+**기존 활용**: 분석 히스토리 시스템, 기존 UI 컴포넌트들
+1. ❌ 시간대별 비교 UI 추가
+2. ❌ 기간별 성장 시각화 (일주일/한달/1년)
+3. ❌ 직무용 분석 옵션 추가
+4. ❌ 성장 패턴 인사이트 제공
+5. ❌ 목표 설정 및 추적 기능
+6. ❌ 변화 요약 리포트 생성
 
-#### Backend Developer #1 (AI Integration) - ✅ **100% Complete**
-1. ✅ Set up AWS Bedrock Claude integration - **Complete with Claude 3 Sonnet**
-2. ✅ Create document analysis Lambda function - **Complete with full implementation**
-3. ✅ Implement personality analysis prompt engineering - **Complete with detailed prompts**
-4. ✅ Create analysis result processing logic - **Complete with JSON parsing**
-5. ✅ Implement analysis caching mechanism - **Complete with DynamoDB storage**
-6. ✅ Add error handling for AI service failures - **Complete with fallback responses**
-7. ✅ Fix API endpoint integration issues - **Complete with CORS and permissions**
+## Phase 4: 통합 및 배포 (1-2시간) - **기존 인프라 활용**
 
-#### Backend Developer #2 (Resume Generation) - ✅ **100% Complete**
-1. ✅ Create resume generation Lambda function - **Complete with full implementation**
-2. ✅ Implement job category-specific templates - **Complete with 5 job categories**
-3. ✅ Create resume content formatting logic - **Complete with structured output**
-4. ✅ Implement resume storage and retrieval - **Complete with DynamoDB**
-5. ✅ Add resume export functionality (JSON/HTML) - **Complete with JSON format**
-6. ✅ Create resume versioning system - **Complete with timestamps**
-7. ✅ Fix API endpoint integration issues - **Complete with CORS and permissions**
+### 4.1 기능 통합 (1시간) - ❌ **0% Complete**
+**기존 활용**: 기존 인증, API, 인프라 시스템 100% 재사용
+1. ❌ 새 문서 타입들 API 연동 테스트
+2. ❌ 확장된 AI 분석 기능 연동
+3. ❌ 전체 사용자 플로우 테스트
+4. ❌ 에러 처리 및 로딩 상태 확인
 
-### Frontend Team
+### 4.2 데모 준비 (1시간) - ❌ **0% Complete**
+1. ❌ 샘플 데이터 생성 (일상 기록, 테스트 결과)
+2. ❌ 데모 시나리오 준비
+3. ❌ 자기성장 플랫폼 스토리 구성
+4. ❌ 발표 자료 작성
 
-#### Frontend Developer #1 (Analysis Dashboard) - ✅ **100% Complete**
-1. ✅ Create analysis results display components - **Complete with enhanced UI and error handling**
-2. ✅ Implement personality type visualization - **Complete with PersonalityCard and accessibility**
-3. ✅ Create strengths/weaknesses display cards - **Complete with improved styling and hover effects**
-4. ✅ Add values and interests visualization - **Complete with InsightsDisplay**
-5. ✅ Implement analysis loading states - **Complete with enhanced animations and UX**
-6. ✅ Create analysis history view - **Complete with tabs**
-7. ✅ Fix API integration issues - **Complete with comprehensive error boundaries**
+## 📊 새로운 자기성장 플랫폼 진행 상황
+- **기존 인프라**: ✅ 100% 재사용 가능 (인증, DB, API, AI 시스템)
+- **Phase 1 (기록 시스템)**: ❌ 0% Complete - **1-2시간 예상**
+- **Phase 2 (테스트 관리)**: ❌ 0% Complete - **2-3시간 예상**
+- **Phase 3 (분석 확장)**: ❌ 0% Complete - **3-4시간 예상**
+- **Phase 4 (통합/배포)**: ❌ 0% Complete - **1-2시간 예상**
 
-#### Frontend Developer #2 (Resume Interface) - ✅ **95% Complete**
-1. ✅ Create job category selection component - **Complete with full UI**
-2. ✅ Implement resume generation interface - **Complete with step-by-step flow**
-3. ✅ Create resume preview component - **Complete with styling**
-4. ✅ Add resume download/export functionality - **Complete with text export**
-5. ✅ Implement resume templates styling - **Complete with ResumeTemplates**
-6. ✅ Fix API integration issues - **Complete with endpoint corrections**
-7. ❌ Create resume sharing functionality - **Not implemented**
+**총 예상 시간**: 6-9시간 (기존 대비 50% 단축)
 
-## Phase 3: Integration & Deployment (3 hours) - **0% Complete**
+## 🚨 자기성장 플랫폼 우선순위 작업
 
-### Full Team Collaboration
+### 1단계: 기록 시스템 (30분-1시간)
+1. ❌ **문서 타입 확장** - daily_record, mood_tracker, reflection 추가
+2. ❌ **일상 기록 UI** - 기분/에너지 입력 필드 추가
+3. ❌ **기본 시각화** - 간단한 차트로 변화 추이 표시
 
-#### All Developers (Integration Tasks) - ❌ **0% Complete**
-1. ❌ Connect frontend authentication with Cognito
-2. ❌ Integrate document CRUD operations
-3. ❌ Connect AI analysis frontend with backend
-4. ❌ Integrate resume generation flow
-5. ❌ Implement comprehensive error handling
-6. ❌ Add loading states and user feedback
+### 2단계: 테스트 관리 (1-2시간)
+1. ❌ **테스트 목록 페이지** - MBTI, DISC 등 테스트 소개
+2. ❌ **결과 입력 시스템** - 외부 테스트 후 결과 저장
+3. ❌ **테스트 히스토리** - 시간별 테스트 결과 관리
 
-#### Backend Team (Deployment) - ❌ **0% Complete**
-1. ❌ Deploy CDK stack to AWS
-2. ❌ Configure production environment variables
-3. ❌ Set up CloudWatch logging and monitoring
-4. ❌ Test all API endpoints in production
-5. ❌ Configure API rate limiting
-6. ❌ Create deployment documentation
+## 자기성장 플랫폼 우선순위 (시간 부족시)
 
-#### Frontend Team (Deployment) - ❌ **0% Complete**
-1. ❌ Build and optimize Next.js application
-2. ❌ Deploy to S3 with CloudFront distribution
-3. ❌ Configure custom error pages
-4. ❌ Test responsive design on multiple devices
-5. ❌ Optimize performance and loading times
-6. ❌ Create user documentation
-
-## Final Tasks (All Teams) - ❌ **0% Complete**
-
-#### Demo Preparation
-1. ❌ Create sample user accounts and data
-2. ❌ Prepare demo script and user flow
-3. ❌ Test complete user journey end-to-end
-4. ❌ Create presentation slides
-5. ❌ Record demo video (backup)
-6. ❌ Prepare for live demonstration
-
-## 📊 Overall Progress Summary
-- **Phase 1**: ✅ 100% Complete (Frontend + Backend + Infrastructure all complete)
-- **Phase 2**: ✅ 100% Complete (All APIs complete, Frontend UI complete, AI integration complete)
-- **Phase 3**: ⏳ 25% Complete (Integration ready, deployment and testing pending)
-- **Documentation**: ✅ 100% Complete (Workflow rules + logging system established)
-
-**Most urgent tasks**: CDK deployment and end-to-end testing
-
-## 🚨 Immediate Tasks (Next 1-2 hours)
-
-### Critical Priority
-1. ✅ **Complete Backend API Implementation** - Auth, Document CRUD Lambda functions
-2. ✅ **Infrastructure Deployment** - CDK stack, API Gateway, DynamoDB
-3. ✅ **Frontend-Backend Integration** - API client, real data connection
-
-### High Priority
-1. ⏳ **AI Analysis Feature** - Backend complete, Frontend UI complete, **Testing needed**
-2. ⏳ **Basic Resume Generation** - Backend complete, Frontend UI complete, **Testing needed**
-
-## Priority Order (If Time Runs Short)
-
-### Must Have (MVP) - **Current Status**
-1. ✅ User authentication - **Complete with API integration**
-2. ✅ Document creation and editing - **Complete**
-3. ✅ Basic AI analysis - **Frontend UI complete, Backend API ready**
-4. ✅ Simple resume generation - **Frontend UI complete, Backend API ready**
+### Must Have (MVP)
+1. ❌ **일상 기록 기능** - 기분/에너지 추적
+2. ❌ **테스트 결과 저장** - MBTI 등 결과 관리
+3. ❌ **기본 통합 분석** - 기록+테스트 데이터 분석
+4. ✅ **기존 이력서 생성** - 이미 완성됨
 
 ### Should Have
-1. ✅ Rich text editor features - **Complete**
-2. ✅ Multiple document types - **Complete**
-3. ✅ Detailed analysis results - **Complete with PersonalityCard, InsightsDisplay**
-4. ✅ Job category templates - **Complete with JobCategorySelector**
+1. ❌ **변화 추적 시각화** - 시간별 성장 패턴
+2. ❌ **직무별 분석** - 커리어 맞춤 인사이트
+3. ❌ **개선 방향 제시** - AI 기반 성장 가이드
 
 ### Nice to Have
-1. ✅ Advanced UI/UX features - **Complete with animations, gradients, responsive design**
-2. ✅ Resume export formats - **Complete with text export**
-3. ✅ Analysis history - **Complete with tabs and history view**
-4. ❌ Performance optimizations - **Not started**
+1. ❌ **고급 시각화** - 인터랙티브 차트
+2. ❌ **소셜 기능** - 성장 공유
+3. ❌ **목표 설정** - 개인 성장 목표 관리
 
 ## 🔧 Technical Blockers
 
