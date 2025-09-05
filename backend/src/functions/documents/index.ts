@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { verifyToken } from '../../shared/auth';
 import { validateDocumentType, validateDocumentData } from '../../shared/validation';
 import { handleDynamoDBError } from '../../shared/error-handler';
+import { createErrorResponse, createSuccessResponse } from '../../shared/utils';
 import { DocumentType } from '../../types/document';
 
 const client = new DynamoDBClient({});
@@ -26,11 +27,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     // Verify JWT token using shared utility
     const authResult = verifyToken(event.headers.Authorization || event.headers.authorization);
     if (!authResult.success) {
-      return {
-        statusCode: 401,
-        headers,
-        body: JSON.stringify({ success: false, error: { message: 'Unauthorized' } }),
-      };
+      return createErrorResponse(401, 'Unauthorized');
     }
 
     const userId = authResult.userId!;
@@ -43,11 +40,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       try {
         requestBody = JSON.parse(event.body);
       } catch (error) {
-        return {
-          statusCode: 400,
-          headers,
-          body: JSON.stringify({ success: false, error: { message: 'Invalid JSON in request body' } }),
-        };
+        return createErrorResponse(400, 'Invalid JSON in request body');
       }
     }
 
@@ -61,37 +54,21 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         return await createDocument(userId, requestBody);
       case 'PUT':
         if (!pathParameters?.id) {
-          return {
-            statusCode: 400,
-            headers,
-            body: JSON.stringify({ success: false, error: { message: 'Document ID is required' } }),
-          };
+          return createErrorResponse(400, 'Document ID is required');
         }
         return await updateDocument(pathParameters.id, requestBody, userId);
       case 'PATCH':
         if (!pathParameters?.id) {
-          return {
-            statusCode: 400,
-            headers,
-            body: JSON.stringify({ success: false, error: { message: 'Document ID is required' } }),
-          };
+          return createErrorResponse(400, 'Document ID is required');
         }
         return await patchDocument(pathParameters.id, requestBody, userId);
       case 'DELETE':
         if (!pathParameters?.id) {
-          return {
-            statusCode: 400,
-            headers,
-            body: JSON.stringify({ success: false, error: { message: 'Document ID is required' } }),
-          };
+          return createErrorResponse(400, 'Document ID is required');
         }
         return await deleteDocument(pathParameters.id, userId);
       default:
-        return {
-          statusCode: 405,
-          headers,
-          body: JSON.stringify({ success: false, error: { message: 'Method not allowed' } }),
-        };
+        return createErrorResponse(405, 'Method not allowed');
     }
   } catch (error: any) {
     console.error('Error:', error);
@@ -125,29 +102,14 @@ async function getDocument(documentId: string, userId: string) {
   }));
 
   if (!document.Item) {
-    return {
-      statusCode: 404,
-      headers,
-      body: JSON.stringify({ success: false, error: { message: 'Document not found' } }),
-    };
+    return createErrorResponse(404, 'Document not found');
   }
 
   if (document.Item.userId !== userId) {
-    return {
-      statusCode: 403,
-      headers,
-      body: JSON.stringify({ success: false, error: { message: 'Access denied' } }),
-    };
+    return createErrorResponse(403, 'Access denied');
   }
 
-  return {
-    statusCode: 200,
-    headers,
-    body: JSON.stringify({
-      success: true,
-      data: document.Item,
-    }),
-  };
+  return createSuccessResponse(document.Item);
 }
 
 async function getDocuments(userId: string, queryParams?: QueryParams) {
@@ -188,7 +150,9 @@ async function getDocuments(userId: string, queryParams?: QueryParams) {
         data: {
           documents: result.Items || [],
           total: result.Count || 0,
+          hasMore: false // TODO: Implement pagination logic
         },
+        timestamp: new Date().toISOString()
       }),
     };
   } catch (error) {
