@@ -1,5 +1,7 @@
 # Project Terminology
 
+> **Documentation Workflow**: This terminology document is maintained according to documentation workflow rules and updated when new terms are introduced.
+
 ## Core Concepts
 - **Document**: User-created content containing personal information
 - **Document Type**: Category of document (experience, skills, values, achievements)
@@ -51,4 +53,10 @@
 - **401**: Unauthorized
 - **403**: Forbidden
 - **404**: Not Found
+- **409**: Conflict (Document version mismatch)
 - **500**: Internal Server Error
+
+## Documentation Terms
+- **Documentation Workflow**: Mandatory process for checking @docs context before work and updating docs after completion
+- **Work Log**: Chronological record of all development activities stored in docs/log/
+- **Documentation Rules**: Automated rules ensuring documentation accuracy and consistency
