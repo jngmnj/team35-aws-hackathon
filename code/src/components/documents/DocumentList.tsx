@@ -2,15 +2,7 @@
 
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { DocumentType } from './DocumentEditor';
-
-export interface Document {
-  id: string;
-  title: string;
-  type: DocumentType;
-  content: string;
-  createdAt: string;
-}
+import { Document, DocumentType } from '@/types';
 
 interface DocumentListProps {
   documents: Document[];
@@ -37,7 +29,7 @@ export function DocumentList({ documents, onEdit, onDelete }: DocumentListProps)
   return (
     <div className="grid gap-4">
       {documents.map((doc) => (
-        <Card key={doc.id} className="p-4">
+        <Card key={doc.documentId} className="p-4">
           <div className="flex justify-between items-start">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
@@ -58,7 +50,7 @@ export function DocumentList({ documents, onEdit, onDelete }: DocumentListProps)
               <Button size="sm" variant="outline" onClick={() => onEdit(doc)}>
                 수정
               </Button>
-              <Button size="sm" variant="destructive" onClick={() => onDelete(doc.id)}>
+              <Button size="sm" variant="destructive" onClick={() => onDelete(doc.documentId)}>
                 삭제
               </Button>
             </div>
