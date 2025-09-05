@@ -20,29 +20,28 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Check for stored auth token
+    // Check for stored auth token on mount
     const token = localStorage.getItem('auth-token');
-    if (token) {
-      // TODO: Validate token with backend
-      const userData = localStorage.getItem('user-data');
-      if (userData) {
-        setUser(JSON.parse(userData));
-      }
+    const userData = localStorage.getItem('user-data');
+    if (token && userData) {
+      setUser(JSON.parse(userData));
     }
-    setIsLoading(false);
   }, []);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
       // TODO: Replace with actual API call
-      const mockUser = { userId: '1', email, name: email.split('@')[0] };
-      const mockToken = 'mock-jwt-token';
+      const mockUser = {
+        userId: '1',
+        email,
+        name: email.split('@')[0]
+      };
       
-      localStorage.setItem('auth-token', mockToken);
+      localStorage.setItem('auth-token', 'mock-token');
       localStorage.setItem('user-data', JSON.stringify(mockUser));
       setUser(mockUser);
     } catch (error) {
@@ -56,10 +55,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     try {
       // TODO: Replace with actual API call
-      const mockUser = { userId: '1', email, name };
-      const mockToken = 'mock-jwt-token';
+      const mockUser = {
+        userId: '1',
+        email,
+        name
+      };
       
-      localStorage.setItem('auth-token', mockToken);
+      localStorage.setItem('auth-token', 'mock-token');
       localStorage.setItem('user-data', JSON.stringify(mockUser));
       setUser(mockUser);
     } catch (error) {
