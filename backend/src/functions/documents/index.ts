@@ -54,11 +54,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         return await createDocument(userId, requestBody);
       case 'PUT':
         if (!pathParameters?.id) {
-          return {
-            statusCode: 400,
-            headers,
-            body: JSON.stringify({ success: false, error: { message: 'Document ID is required' } }),
-          };
+          return createErrorResponse(400, 'Document ID is required');
         }
         return await updateDocument(pathParameters.id, requestBody, userId);
       case 'PATCH':
