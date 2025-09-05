@@ -12,8 +12,8 @@ const docClient = DynamoDBDocumentClient.from(client);
 const headers = {
   'Content-Type': 'application/json',
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, If-Match',
 };
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -44,6 +44,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         return await createDocument(userId, JSON.parse(event.body || '{}'));
       case 'PUT':
         return await updateDocument(pathParameters?.id!, JSON.parse(event.body || '{}'));
+      case 'PATCH':
+        return await patchDocument(pathParameters?.id!, JSON.parse(event.body || '{}'));
       case 'DELETE':
         return await deleteDocument(pathParameters?.id!);
       default:
@@ -133,6 +135,7 @@ async function createDocument(userId: string, body: any) {
     type,
     title,
     content: content || '',
+    version: 1,
     createdAt: now,
     updatedAt: now,
   };
@@ -196,13 +199,92 @@ async function updateDocument(documentId: string, body: any) {
     expressionAttributeValues[':content'] = content;
   }
 
-  updateExpression.push('updatedAt = :updatedAt');
+  updateExpression.push('updatedAt = :updatedAt', '#version = #version + :inc');
   expressionAttributeValues[':updatedAt'] = new Date().toISOString();
+  expressionAttributeValues[':inc'] = 1;
 
   const result = await docClient.send(new UpdateCommand({
     TableName: process.env.DOCUMENTS_TABLE_NAME,
     Key: { documentId },
     UpdateExpression: `SET ${updateExpression.join(', ')}`,
+    ExpressionAttributeNames: { '#version': 'version' },
+    ExpressionAttributeValues: expressionAttributeValues,
+    ReturnValues: 'ALL_NEW',
+  }));
+
+  return {
+    statusCode: 200,
+    headers,
+    body: JSON.stringify({
+      success: true,
+      data: result.Attributes,
+    }),
+  };
+}
+
+async function patchDocument(documentId: string, body: any) {
+  const { title, content, version: clientVersion } = body;
+
+  if (!title && !content) {
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ success: false, error: { message: 'No fields to update' } }),
+    };
+  }
+
+  // Get current document for version check
+  const currentDoc = await docClient.send(new GetCommand({
+    TableName: process.env.DOCUMENTS_TABLE_NAME,
+    Key: { documentId },
+  }));
+
+  if (!currentDoc.Item) {
+    return {
+      statusCode: 404,
+      headers,
+      body: JSON.stringify({ success: false, error: { message: 'Document not found' } }),
+    };
+  }
+
+  // Version conflict check for concurrent editing
+  if (clientVersion && currentDoc.Item.version !== clientVersion) {
+    return {
+      statusCode: 409,
+      headers,
+      body: JSON.stringify({ 
+        success: false, 
+        error: { 
+          message: 'Document has been modified by another user',
+          currentVersion: currentDoc.Item.version,
+          conflictData: currentDoc.Item
+        }
+      }),
+    };
+  }
+
+  const updateExpression = [];
+  const expressionAttributeValues: any = {};
+
+  if (title !== undefined) {
+    updateExpression.push('title = :title');
+    expressionAttributeValues[':title'] = title;
+  }
+
+  if (content !== undefined) {
+    updateExpression.push('content = :content');
+    expressionAttributeValues[':content'] = content;
+  }
+
+  updateExpression.push('updatedAt = :updatedAt', '#version = #version + :inc');
+  expressionAttributeValues[':updatedAt'] = new Date().toISOString();
+  expressionAttributeValues[':inc'] = 1;
+
+  const result = await docClient.send(new UpdateCommand({
+    TableName: process.env.DOCUMENTS_TABLE_NAME,
+    Key: { documentId },
+    UpdateExpression: `SET ${updateExpression.join(', ')}`,
+    ExpressionAttributeNames: { '#version': 'version' },
     ExpressionAttributeValues: expressionAttributeValues,
     ReturnValues: 'ALL_NEW',
   }));

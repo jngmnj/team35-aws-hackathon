@@ -6,6 +6,7 @@ export interface BaseDocument {
   type: DocumentType;
   title: string;
   content: string;
+  version: number;
   createdAt: string;
   updatedAt: string;
 }
