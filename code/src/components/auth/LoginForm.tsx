@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
+import { useToast } from '@/components/ui/toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -10,24 +11,21 @@ import { Card } from '@/components/ui/card';
 export function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [localError, setLocalError] = useState('');
-  const { login, isLoading, error: authError } = useAuth();
+  const { login, isLoading } = useAuth();
+  const { showToast } = useToast();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLocalError('');
     
     try {
       await login(email, password);
+      showToast('로그인에 성공했습니다!', 'success');
       router.push('/dashboard');
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Login failed';
-      setLocalError(errorMessage);
+    } catch {
+      // 오류는 API 클라이언트에서 토스트로 처리됨
     }
   };
-
-  const displayError = localError || authError;
 
   return (
     <Card className="w-full max-w-md p-6">
@@ -51,7 +49,7 @@ export function LoginForm() {
             required
           />
         </div>
-        {displayError && <p className="text-red-500 text-sm">{displayError}</p>}
+
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? 'Logging in...' : 'Login'}
         </Button>

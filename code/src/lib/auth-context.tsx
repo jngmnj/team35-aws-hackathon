@@ -2,7 +2,8 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '@/types';
-import { apiClient } from './api';
+import { apiClient, setToastCallback } from './api';
+import { useToast } from '@/components/ui/toast';
 
 interface AuthContextType {
   user: User | null;
@@ -19,8 +20,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { showToast } = useToast();
 
   useEffect(() => {
+    setToastCallback(showToast);
     apiClient.loadToken();
     const token = localStorage.getItem('auth_token');
     const userData = localStorage.getItem('user_data');
@@ -34,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
     setIsLoading(false);
-  }, []);
+  }, [showToast]);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);

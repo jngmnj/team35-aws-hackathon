@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useDocuments } from '@/hooks/useDocuments';
+import { useToast } from '@/components/ui/toast';
 import { DocumentList } from '@/components/documents/DocumentList';
 import { DocumentEditor } from '@/components/documents/DocumentEditor';
 import { DocumentViewer } from '@/components/documents/DocumentViewer';
@@ -10,6 +11,7 @@ import { Document, DocumentType } from '@/types';
 
 export default function DocumentsPage() {
   const { documents, createDocument, updateDocument, deleteDocument, isLoading, error } = useDocuments();
+  const { showToast } = useToast();
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
@@ -46,8 +48,10 @@ export default function DocumentsPage() {
       let savedDocument;
       if (editingDocument) {
         savedDocument = await updateDocument(editingDocument.documentId, data);
+        showToast('문서가 성공적으로 수정되었습니다.', 'success');
       } else {
         savedDocument = await createDocument(data);
+        showToast('새 문서가 성공적으로 생성되었습니다.', 'success');
       }
       
       setIsEditorOpen(false);
@@ -58,17 +62,18 @@ export default function DocumentsPage() {
         setViewingDocument(savedDocument || { ...viewingDocument, ...data });
         setIsViewerOpen(true);
       }
-    } catch (error) {
-      console.error('Failed to save document:', error);
+    } catch {
+      // 오류는 API 클라이언트에서 토스트로 처리됨
     }
   };
 
   const handleDelete = async (documentId: string) => {
-    if (confirm('Are you sure you want to delete this document?')) {
+    if (confirm('정말로 이 문서를 삭제하시겠습니까?')) {
       try {
         await deleteDocument(documentId);
-      } catch (error) {
-        console.error('Failed to delete document:', error);
+        showToast('문서가 성공적으로 삭제되었습니다.', 'success');
+      } catch {
+        // 오류는 API 클라이언트에서 토스트로 처리됨
       }
     }
   };
