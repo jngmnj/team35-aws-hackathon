@@ -23,7 +23,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     const id = Math.random().toString(36).substr(2, 9);
     const newToast: Toast = { id, message, type, duration };
     
-    setToasts(prev => [...prev, newToast]);
+    setToasts(prev => {
+      const updated = [...prev, newToast];
+      return updated.length > 5 ? updated.slice(-5) : updated;
+    });
     
     setTimeout(() => {
       setToasts(prev => prev.filter(toast => toast.id !== id));

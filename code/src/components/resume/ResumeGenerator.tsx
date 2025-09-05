@@ -8,6 +8,7 @@ import { ResumePreview } from './ResumePreview';
 import { ResumeTemplates } from './ResumeTemplates';
 import { ResumeEditor } from './ResumeEditor';
 import { Loader2 } from 'lucide-react';
+import { useToast } from '@/components/ui/toast';
 import { apiClient } from '@/lib/api';
 import { ResumeContent } from '@/types';
 
@@ -50,6 +51,8 @@ export function ResumeGenerator({ onGenerate }: ResumeGeneratorProps) {
     loadDocuments();
   }, []);
 
+  const { showToast } = useToast();
+
   const handleGenerate = async () => {
     if (!selectedCategory || !selectedTemplate) return;
     
@@ -59,8 +62,9 @@ export function ResumeGenerator({ onGenerate }: ResumeGeneratorProps) {
     try {
       const generatedResume = await apiClient.generateResume(selectedCategory);
       setResume(generatedResume);
+      showToast('이력서가 성공적으로 생성되었습니다!', 'success');
     } catch (err: any) {
-      setError(err.message);
+      showToast('이력서 생성 중 오류가 발생했습니다. 다시 시도해주세요.', 'error');
     } finally {
       setIsGenerating(false);
     }
@@ -218,19 +222,7 @@ ${resume.content.achievements.map(achievement => `• ${achievement}`).join('\n'
               </div>
             </div>
             
-            {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-600">{error}</p>
-                <Button 
-                  onClick={() => setError(null)} 
-                  variant="outline"
-                  size="sm"
-                  className="mt-2"
-                >
-                  다시 시도
-                </Button>
-              </div>
-            )}
+
             
             <Button 
               onClick={handleGenerate}

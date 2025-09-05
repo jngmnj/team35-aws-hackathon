@@ -15,10 +15,10 @@ interface DocumentEditorProps {
 }
 
 const placeholders = {
-  experience: 'Describe your work experience, projects, and achievements...',
-  skills: 'List your technical and soft skills...',
-  values: 'What values are important to you in work and life?...',
-  achievements: 'Highlight your key accomplishments and awards...'
+  experience: '업무 경험, 프로젝트, 성과를 설명해주세요...',
+  skills: '기술적 능력과 소프트 스킬을 나열해주세요...',
+  values: '업무와 삶에서 중요하게 생각하는 가치는 무엇인가요?...',
+  achievements: '주요 성취와 수상 경력을 강조해주세요...'
 };
 
 export function DocumentEditor({ onSave, initialData }: DocumentEditorProps) {
@@ -56,7 +56,7 @@ export function DocumentEditor({ onSave, initialData }: DocumentEditorProps) {
     <Card className="p-6">
       <div className="space-y-4">
         <Input
-          placeholder="Document title"
+          placeholder="문서 제목"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
@@ -66,10 +66,10 @@ export function DocumentEditor({ onSave, initialData }: DocumentEditorProps) {
           value={type} 
           onChange={(e) => setType(e.target.value as DocumentType)}
         >
-          <option value="experience">Experience</option>
-          <option value="skills">Skills</option>
-          <option value="values">Values</option>
-          <option value="achievements">Achievements</option>
+          <option value="experience">경험</option>
+          <option value="skills">기술</option>
+          <option value="values">가치관</option>
+          <option value="achievements">성과</option>
         </select>
 
         <div className="border rounded-md p-4 min-h-[500px] prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-strong:text-gray-900 prose-ul:text-gray-700 prose-ol:text-gray-700 prose-blockquote:text-gray-600 prose-code:text-blue-600 prose-pre:bg-gray-100">
@@ -77,7 +77,7 @@ export function DocumentEditor({ onSave, initialData }: DocumentEditorProps) {
         </div>
 
         <Button onClick={handleSave} disabled={!title.trim() || isSaving}>
-          {isSaving ? 'Saving...' : 'Save'}
+          {isSaving ? '저장 중...' : '저장'}
         </Button>
       </div>
     </Card>

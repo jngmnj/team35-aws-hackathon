@@ -18,17 +18,17 @@ export function DocumentViewer({ document, onEdit }: DocumentViewerProps) {
           <h2 className="text-2xl font-bold mb-2">{document.title}</h2>
           <div className="flex items-center gap-4 text-sm text-gray-500">
             <span className="capitalize bg-gray-100 px-2 py-1 rounded">
-              {document.type}
+              {document.type === 'experience' ? '경험' : document.type === 'skills' ? '기술' : document.type === 'values' ? '가치관' : '성과'}
             </span>
             <div className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              <span>Updated: {new Date(document.updatedAt).toLocaleDateString()}</span>
+              <span>수정일: {new Date(document.updatedAt).toLocaleDateString()}</span>
             </div>
           </div>
         </div>
         <Button onClick={onEdit}>
           <Pencil className="h-4 w-4 mr-2" />
-          Edit
+          수정
         </Button>
       </div>
 

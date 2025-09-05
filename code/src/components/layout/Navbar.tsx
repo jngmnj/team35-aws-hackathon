@@ -21,24 +21,24 @@ export function Navbar() {
             <div className="flex space-x-4">
               <Link href="/dashboard" className="flex items-center space-x-2 text-gray-600 hover:text-blue-600">
                 <Home className="h-4 w-4" />
-                <span>Dashboard</span>
+                <span>대시보드</span>
               </Link>
               <Link href="/documents" className="flex items-center space-x-2 text-gray-600 hover:text-blue-600">
                 <FileText className="h-4 w-4" />
-                <span>Documents</span>
+                <span>문서 관리</span>
               </Link>
               <Link href="/analysis" className="flex items-center space-x-2 text-gray-600 hover:text-blue-600">
                 <Brain className="h-4 w-4" />
-                <span>Analysis</span>
+                <span>성격 분석</span>
               </Link>
               <Link href="/resume" className="flex items-center space-x-2 text-gray-600 hover:text-blue-600">
                 <FileUser className="h-4 w-4" />
-                <span>Resume</span>
+                <span>이력서 생성</span>
               </Link>
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-600">Welcome, {user.name}</span>
+            <span className="text-sm text-gray-600">{user.name}님 환영합니다</span>
             <Button variant="ghost" onClick={logout}>
               <LogOut className="h-4 w-4" />
             </Button>

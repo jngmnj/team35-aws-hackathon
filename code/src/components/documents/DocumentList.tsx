@@ -19,10 +19,10 @@ interface DocumentListProps {
 }
 
 const documentTypes: { value: DocumentType; label: string }[] = [
-  { value: 'experience', label: 'Experience' },
-  { value: 'skills', label: 'Skills' },
-  { value: 'values', label: 'Values' },
-  { value: 'achievements', label: 'Achievements' }
+  { value: 'experience', label: '경험' },
+  { value: 'skills', label: '기술' },
+  { value: 'values', label: '가치관' },
+  { value: 'achievements', label: '성과' }
 ];
 
 export function DocumentList({ documents, onEdit, onDelete, onCreate, onView, isLoading, error }: DocumentListProps) {
@@ -66,7 +66,7 @@ export function DocumentList({ documents, onEdit, onDelete, onCreate, onView, is
         {document.content.replace(/<[^>]*>/g, '').substring(0, 200)}...
       </div>
       <p className="text-xs text-gray-400 mt-2">
-        Updated: {new Date(document.updatedAt).toLocaleDateString()}
+수정일: {new Date(document.updatedAt).toLocaleDateString()}
       </p>
     </Card>
   );
@@ -74,11 +74,11 @@ export function DocumentList({ documents, onEdit, onDelete, onCreate, onView, is
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">My Documents</h2>
+        <h2 className="text-2xl font-bold">내 문서</h2>
         <Button onClick={() => onCreate(activeTab)} disabled={isLoading}>
           {isLoading && <LoadingSpinner size="sm" />}
           <Plus className="h-4 w-4 mr-2" />
-          New {activeTab}
+새 {activeTab === 'experience' ? '경험' : activeTab === 'skills' ? '기술' : activeTab === 'values' ? '가치관' : '성과'}
         </Button>
       </div>
 
@@ -97,7 +97,7 @@ export function DocumentList({ documents, onEdit, onDelete, onCreate, onView, is
               <div className="text-center py-8 text-red-500">
                 <p>{error}</p>
                 <Button className="mt-4" onClick={() => window.location.reload()}>
-                  Retry
+다시 시도
                 </Button>
               </div>
             )}
@@ -116,14 +116,14 @@ export function DocumentList({ documents, onEdit, onDelete, onCreate, onView, is
                   ))
                 ) : (
                   <div className="col-span-full text-center py-8 text-gray-500">
-                    <p>No {type.label.toLowerCase()} documents yet.</p>
+                    <p>아직 {type.label} 문서가 없습니다.</p>
                     <Button 
                       className="mt-4" 
                       onClick={() => onCreate(type.value)}
                       variant="outline"
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      Create your first {type.label.toLowerCase()}
+                      첫 번째 {type.label} 작성하기
                     </Button>
                   </div>
                 )}

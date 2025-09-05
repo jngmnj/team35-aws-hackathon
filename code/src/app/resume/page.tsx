@@ -61,7 +61,10 @@ ${selectedResume.content.achievements.map(achievement => `• ${achievement}`).j
         <div className="mb-6">
           <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
             <button
-              onClick={() => setActiveTab('create')}
+              onClick={() => {
+                setActiveTab('create');
+                setSelectedResume(null);
+              }}
               className={`px-4 py-2 rounded-md font-medium transition-colors ${
                 activeTab === 'create'
                   ? 'bg-white text-blue-600 shadow-sm'
