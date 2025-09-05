@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 
 interface ApiStackProps extends cdk.StackProps {
@@ -50,9 +51,13 @@ export class ApiStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: 'index.handler',
       code: lambda.Code.fromAsset('../src/functions/analysis'),
+      timeout: cdk.Duration.minutes(5),
+      memorySize: 512,
       environment: {
         ANALYSIS_TABLE_NAME: props.analysisTable.tableName,
+        DOCUMENTS_TABLE_NAME: props.documentsTable.tableName,
         JWT_SECRET: 'your-jwt-secret',
+        BEDROCK_REGION: this.region,
       },
     });
 
@@ -60,9 +65,13 @@ export class ApiStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: 'index.handler',
       code: lambda.Code.fromAsset('../src/functions/resume'),
+      timeout: cdk.Duration.minutes(5),
+      memorySize: 512,
       environment: {
         RESUMES_TABLE_NAME: props.resumesTable.tableName,
+        DOCUMENTS_TABLE_NAME: props.documentsTable.tableName,
         JWT_SECRET: 'your-jwt-secret',
+        BEDROCK_REGION: this.region,
       },
     });
 
@@ -70,7 +79,25 @@ export class ApiStack extends cdk.Stack {
     props.usersTable.grantReadWriteData(authFunction);
     props.documentsTable.grantReadWriteData(documentsFunction);
     props.analysisTable.grantReadWriteData(analysisFunction);
+    props.documentsTable.grantReadData(analysisFunction); // Analysis needs to read documents
     props.resumesTable.grantReadWriteData(resumeFunction);
+    props.documentsTable.grantReadData(resumeFunction); // Resume needs to read documents
+    
+    // Grant Bedrock permissions
+    const bedrockPolicy = new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'bedrock:InvokeModel',
+        'bedrock:InvokeModelWithResponseStream'
+      ],
+      resources: [
+        `arn:aws:bedrock:${this.region}::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0`,
+        `arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0`
+      ]
+    });
+    
+    analysisFunction.addToRolePolicy(bedrockPolicy);
+    resumeFunction.addToRolePolicy(bedrockPolicy);
 
     // API routes
     const auth = api.root.addResource('auth');

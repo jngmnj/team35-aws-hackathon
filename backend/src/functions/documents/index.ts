@@ -49,9 +49,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         if (pathParameters?.id) {
           return await getDocument(pathParameters.id, userId);
         }
-        return await getDocuments(userId, event.queryStringParameters);
+        return await getDocuments(userId, event.queryStringParameters || undefined);
       case 'POST':
-        return await createDocument(userId, requestBody);
+        return await createDocument(userId, requestBody as CreateDocumentRequest);
       case 'PUT':
         if (!pathParameters?.id) {
           return createErrorResponse(400, 'Document ID is required');
@@ -76,18 +76,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     // Handle DynamoDB specific errors
     if (error.name && error.name.includes('Exception')) {
       const dbError = handleDynamoDBError(error);
-      return {
-        statusCode: dbError.statusCode,
-        headers,
-        body: JSON.stringify({ success: false, error: dbError.error }),
-      };
+      return createErrorResponse(dbError.statusCode, dbError.error.message);
     }
 
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ success: false, error: { message: 'Internal server error' } }),
-    };
+    return createErrorResponse(500, 'Internal server error');
   }
 };
 
@@ -95,7 +87,7 @@ interface QueryParams {
   type?: string;
 }
 
-async function getDocument(documentId: string, userId: string) {
+async function getDocument(documentId: string, userId: string): Promise<APIGatewayProxyResult> {
   const document = await docClient.send(new GetCommand({
     TableName: process.env.DOCUMENTS_TABLE_NAME,
     Key: { documentId },
@@ -112,14 +104,10 @@ async function getDocument(documentId: string, userId: string) {
   return createSuccessResponse(document.Item);
 }
 
-async function getDocuments(userId: string, queryParams?: QueryParams) {
+async function getDocuments(userId: string, queryParams?: QueryParams | null): Promise<APIGatewayProxyResult> {
   // Validate userId to prevent injection
   if (!userId || typeof userId !== 'string' || userId.length === 0) {
-    return {
-      statusCode: 400,
-      headers,
-      body: JSON.stringify({ success: false, error: { message: 'Invalid user ID' } }),
-    };
+    return createErrorResponse(400, 'Invalid user ID');
   }
 
   let keyConditionExpression = 'userId = :userId';
@@ -157,11 +145,7 @@ async function getDocuments(userId: string, queryParams?: QueryParams) {
     };
   } catch (error) {
     console.error('DynamoDB query error:', error);
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ success: false, error: { message: 'Database query failed' } }),
-    };
+    return createErrorResponse(500, 'Database query failed');
   }
 }
 
@@ -171,41 +155,25 @@ interface CreateDocumentRequest {
   content?: string;
 }
 
-async function createDocument(userId: string, body: CreateDocumentRequest) {
+async function createDocument(userId: string, body: CreateDocumentRequest): Promise<APIGatewayProxyResult> {
   // Validate userId to prevent injection
   if (!userId || typeof userId !== 'string' || userId.length === 0) {
-    return {
-      statusCode: 400,
-      headers,
-      body: JSON.stringify({ success: false, error: { message: 'Invalid user ID' } }),
-    };
+    return createErrorResponse(400, 'Invalid user ID');
   }
 
   const { type, title, content } = body;
 
   if (!type || !title) {
-    return {
-      statusCode: 400,
-      headers,
-      body: JSON.stringify({ success: false, error: { message: 'Missing required fields' } }),
-    };
+    return createErrorResponse(400, 'Missing required fields');
   }
 
   if (!validateDocumentType(type)) {
-    return {
-      statusCode: 400,
-      headers,
-      body: JSON.stringify({ success: false, error: { message: 'Invalid document type' } }),
-    };
+    return createErrorResponse(400, 'Invalid document type');
   }
 
   const validation = validateDocumentData(type as DocumentType, title, content);
   if (!validation.isValid) {
-    return {
-      statusCode: 400,
-      headers,
-      body: JSON.stringify({ success: false, error: { message: 'Validation failed', details: validation.errors } }),
-    };
+    return createErrorResponse(400, 'Validation failed', undefined, validation.errors);
   }
 
   const documentId = uuidv4();
@@ -228,21 +196,10 @@ async function createDocument(userId: string, body: CreateDocumentRequest) {
       Item: document,
     }));
 
-    return {
-      statusCode: 201,
-      headers,
-      body: JSON.stringify({
-        success: true,
-        data: document,
-      }),
-    };
+    return createSuccessResponse(document, 201);
   } catch (error) {
     console.error('DynamoDB put error:', error);
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ success: false, error: { message: 'Failed to create document' } }),
-    };
+    return createErrorResponse(500, 'Failed to create document');
   }
 }
 
@@ -252,7 +209,7 @@ interface UpdateDocumentRequest {
   type?: string;
 }
 
-async function updateDocument(documentId: string, body: UpdateDocumentRequest, userId: string) {
+async function updateDocument(documentId: string, body: UpdateDocumentRequest, userId: string): Promise<APIGatewayProxyResult> {
   const { title, content, type } = body;
 
   if (!documentId) {
@@ -339,7 +296,7 @@ interface PatchDocumentRequest {
   version?: number;
 }
 
-async function patchDocument(documentId: string, body: PatchDocumentRequest, userId: string) {
+async function patchDocument(documentId: string, body: PatchDocumentRequest, userId: string): Promise<APIGatewayProxyResult> {
   const { title, content, version: clientVersion } = body;
 
   if (!title && !content) {
@@ -422,7 +379,7 @@ async function patchDocument(documentId: string, body: PatchDocumentRequest, use
   };
 }
 
-async function deleteDocument(documentId: string, userId: string) {
+async function deleteDocument(documentId: string, userId: string): Promise<APIGatewayProxyResult> {
   if (!documentId) {
     return {
       statusCode: 400,

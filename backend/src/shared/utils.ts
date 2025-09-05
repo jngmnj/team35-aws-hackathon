@@ -7,7 +7,7 @@ export function getHeaders() {
   };
 }
 
-export function createResponse(statusCode: number, data: Record<string, unknown>) {
+export function createResponse(statusCode: number, data: Record<string, unknown>): { statusCode: number; headers: Record<string, string>; body: string } {
   try {
     const responseData = {
       ...data,
@@ -35,23 +35,33 @@ export function createResponse(statusCode: number, data: Record<string, unknown>
   }
 }
 
-export function createErrorResponse(statusCode: number, message: string, code?: string, details?: unknown) {
+export function createErrorResponse(statusCode: number, message: string, code?: string, details?: unknown): { statusCode: number; headers: Record<string, string>; body: string } {
+  const errorObj: Record<string, unknown> = {
+    code: code || getErrorCode(statusCode),
+    message
+  };
+  
+  if (details) {
+    errorObj.details = details;
+  }
+  
   return createResponse(statusCode, {
     success: false,
-    error: { 
-      code: code || getErrorCode(statusCode),
-      message,
-      ...(details && { details })
-    },
+    error: errorObj
   });
 }
 
-export function createSuccessResponse(data: unknown, statusCode: number = 200, message?: string) {
-  return createResponse(statusCode, {
+export function createSuccessResponse(data: unknown, statusCode: number = 200, message?: string): { statusCode: number; headers: Record<string, string>; body: string } {
+  const responseObj: Record<string, unknown> = {
     success: true,
-    data,
-    ...(message && { message })
-  });
+    data
+  };
+  
+  if (message) {
+    responseObj.message = message;
+  }
+  
+  return createResponse(statusCode, responseObj);
 }
 
 function getErrorCode(statusCode: number): string {

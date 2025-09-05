@@ -9,7 +9,15 @@ import { createErrorResponse, createSuccessResponse } from '../../shared/utils';
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
     if (event.httpMethod === 'OPTIONS') {
-      return { statusCode: 200, headers: {}, body: '' };
+      return { 
+        statusCode: 200, 
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        }, 
+        body: '' 
+      };
     }
 
     const authResult = verifyToken(event.headers.Authorization || event.headers.authorization);
@@ -67,6 +75,8 @@ interface AnalysisRequest {
 }
 
 async function createAnalysis(userId: string, body: any) {
+  console.log('Creating analysis for userId:', userId);
+  
   // Get user's documents from database
   const result = await docClient.send(new QueryCommand({
     TableName: TABLE_NAMES.DOCUMENTS,
@@ -77,11 +87,21 @@ async function createAnalysis(userId: string, body: any) {
     },
   }));
 
-  const documents = result.Items || [];
+  console.log('Documents query result:', JSON.stringify(result, null, 2));
+  const rawDocuments = result.Items || [];
   
-  if (documents.length === 0) {
+  if (rawDocuments.length === 0) {
     return createErrorResponse(400, 'No documents found for analysis');
   }
+
+  // Map documents to the expected format
+  const documents = rawDocuments.map(doc => ({
+    type: doc.type || 'Unknown',
+    title: doc.title || 'Untitled',
+    content: doc.content || ''
+  }));
+
+  console.log('Mapped documents for analysis:', documents.length);
 
   try {
     const analysisResult = await generatePersonalityAnalysis({ documents });

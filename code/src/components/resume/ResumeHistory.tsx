@@ -28,14 +28,8 @@ export function ResumeHistory({ onSelectResume }: ResumeHistoryProps) {
     const loadResumes = async () => {
       try {
         setIsLoading(true);
-        const categories: JobCategory[] = ['developer', 'pm', 'designer', 'marketer', 'data'];
-        const resumePromises = categories.map(category => 
-          apiClient.getResume(category).catch(() => null)
-        );
-        
-        const results = await Promise.all(resumePromises);
-        const validResumes = results.filter((resume): resume is ResumeContent => resume !== null);
-        setResumes(validResumes);
+        const allResumes = await apiClient.getResumes();
+        setResumes(allResumes);
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
@@ -99,7 +93,7 @@ export function ResumeHistory({ onSelectResume }: ResumeHistoryProps) {
                   {new Date(resume.createdAt).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
                 </span>
               </div>
-              <h4 className="font-bold text-xl text-foreground mb-1">{resume.content.personalInfo.name}</h4>
+              <h4 className="font-bold text-xl text-foreground mb-1">{resume.jobCategory} 이력서</h4>
               <p className="text-muted-foreground text-sm mb-3">
                 {resume.content.experience[0]?.title || '경험 정보 없음'} • {resume.content.experience[0]?.company || ''}
               </p>

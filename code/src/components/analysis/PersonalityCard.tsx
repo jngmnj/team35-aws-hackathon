@@ -1,10 +1,10 @@
-import { PersonalityType } from '@/types';
+import { PersonalityType, StrengthItem, WeaknessItem } from '@/types';
 import { Card } from '@/components/ui/card';
 
 interface PersonalityCardProps {
   personalityType: PersonalityType;
-  strengths: string[];
-  weaknesses: string[];
+  strengths: StrengthItem[];
+  weaknesses: WeaknessItem[];
 }
 
 export function PersonalityCard({ personalityType, strengths, weaknesses }: PersonalityCardProps) {
@@ -27,7 +27,9 @@ export function PersonalityCard({ personalityType, strengths, weaknesses }: Pers
           <ul className="space-y-2" role="list">
             {strengths.map((strength, index) => (
               <li key={index} className="text-sm bg-muted p-3 rounded-lg border border-border hover:bg-accent transition-colors">
-                {strength}
+                <div className="font-medium text-foreground mb-1">{strength.title}</div>
+                <div className="text-muted-foreground mb-2">{strength.description}</div>
+                <div className="text-xs text-primary italic">근거: {strength.evidence}</div>
               </li>
             ))}
           </ul>
@@ -41,7 +43,9 @@ export function PersonalityCard({ personalityType, strengths, weaknesses }: Pers
           <ul className="space-y-2" role="list">
             {weaknesses.map((weakness, index) => (
               <li key={index} className="text-sm bg-muted p-3 rounded-lg border border-border hover:bg-accent transition-colors">
-                {weakness}
+                <div className="font-medium text-foreground mb-1">{weakness.title}</div>
+                <div className="text-muted-foreground mb-2">{weakness.description}</div>
+                <div className="text-xs text-green-600 italic">개선방법: {weakness.improvement}</div>
               </li>
             ))}
           </ul>
