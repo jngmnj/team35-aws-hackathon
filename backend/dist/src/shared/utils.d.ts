@@ -4,7 +4,7 @@ export declare function getHeaders(): {
     'Access-Control-Allow-Methods': string;
     'Access-Control-Allow-Headers': string;
 };
-export declare function createResponse(statusCode: number, data: any): {
+export declare function createResponse(statusCode: number, data: Record<string, unknown>): {
     statusCode: number;
     headers: {
         'Content-Type': string;
@@ -14,7 +14,7 @@ export declare function createResponse(statusCode: number, data: any): {
     };
     body: string;
 };
-export declare function createErrorResponse(statusCode: number, message: string): {
+export declare function createErrorResponse(statusCode: number, message: string, code?: string, details?: unknown): {
     statusCode: number;
     headers: {
         'Content-Type': string;
@@ -24,7 +24,7 @@ export declare function createErrorResponse(statusCode: number, message: string)
     };
     body: string;
 };
-export declare function createSuccessResponse(data: any, statusCode?: number): {
+export declare function createSuccessResponse(data: unknown, statusCode?: number, message?: string): {
     statusCode: number;
     headers: {
         'Content-Type': string;

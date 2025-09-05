@@ -81,28 +81,28 @@ export function AnalysisHistory({ onSelectAnalysis }: AnalysisHistoryProps) {
         <Card key={analysis.analysisId} className="p-6 hover:shadow-lg transition-all cursor-pointer border-l-4 border-l-primary hover:border-l-primary/80" onClick={() => onSelectAnalysis(analysis)}>
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h3 className="font-bold text-xl text-foreground">{analysis.personalityType.type}</h3>
+              <h3 className="font-bold text-xl text-foreground">{analysis.result.personalityType.type}</h3>
               <p className="text-muted-foreground text-sm">{new Date(analysis.createdAt).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
             </div>
             <div className="flex space-x-2">
               <span className="px-3 py-1 bg-secondary text-secondary-foreground rounded-full text-xs font-medium">
-                강점 {analysis.strengths.length}개
+                강점 {analysis.result.strengths.length}개
               </span>
               <span className="px-3 py-1 bg-destructive/10 text-destructive rounded-full text-xs font-medium">
-                개선점 {analysis.weaknesses.length}개
+                개선점 {analysis.result.weaknesses.length}개
               </span>
             </div>
           </div>
-          <p className="text-muted-foreground text-sm mb-4 leading-relaxed">{analysis.personalityType.description}</p>
+          <p className="text-muted-foreground text-sm mb-4 leading-relaxed">{analysis.result.personalityType.description}</p>
           <div className="flex flex-wrap gap-2">
-            {analysis.personalityType.traits.slice(0, 3).map((trait, index) => (
+            {analysis.result.personalityType.traits.slice(0, 3).map((trait, index) => (
               <span key={index} className="px-3 py-1 bg-accent text-accent-foreground rounded-full text-xs font-medium">
                 {trait}
               </span>
             ))}
-            {analysis.personalityType.traits.length > 3 && (
+            {analysis.result.personalityType.traits.length > 3 && (
               <span className="px-3 py-1 bg-muted text-muted-foreground rounded-full text-xs font-medium">
-                +{analysis.personalityType.traits.length - 3}개 더
+                +{analysis.result.personalityType.traits.length - 3}개 더
               </span>
             )}
           </div>
