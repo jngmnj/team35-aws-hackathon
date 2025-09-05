@@ -36,8 +36,8 @@ export function ResumeHistory({ onSelectResume }: ResumeHistoryProps) {
         const results = await Promise.all(resumePromises);
         const validResumes = results.filter((resume): resume is ResumeContent => resume !== null);
         setResumes(validResumes);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
         setIsLoading(false);
       }

@@ -26,8 +26,8 @@ export function AnalysisHistory({ onSelectAnalysis }: AnalysisHistoryProps) {
         } else {
           setHistory([]);
         }
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
         setIsLoading(false);
       }

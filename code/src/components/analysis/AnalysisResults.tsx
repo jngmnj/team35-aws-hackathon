@@ -56,7 +56,7 @@ export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
       const newAnalysis = await apiClient.generateAnalysis();
       setAnalysis(newAnalysis);
       showToast('성격 분석이 완료되었습니다!', 'success');
-    } catch (err: any) {
+    } catch {
       showToast('분석 중 오류가 발생했습니다. 다시 시도해주세요.', 'error');
     } finally {
       setIsLoading(false);
