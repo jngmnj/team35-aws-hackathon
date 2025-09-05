@@ -1,5 +1,10 @@
 node_modules/
+*.js
+*.js.map
+*.d.ts
+!jest.config.js
+cdk.out/
 .env
-*.log
 .DS_Store
-function.zip
+dist/
+build/

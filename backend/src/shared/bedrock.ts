@@ -21,24 +21,28 @@ export interface ResumePrompt {
 }
 
 export async function generatePersonalityAnalysis(prompt: AnalysisPrompt): Promise<any> {
-  const systemPrompt = `You are an expert career counselor and personality analyst. Analyze the provided documents and generate a comprehensive personality analysis including:
-1. Personality type (similar to MBTI)
-2. Key strengths (3-5 items)
-3. Areas for improvement (2-3 items)
-4. Core values (3-5 items)
-5. Professional interests (3-5 items)
+  const systemPrompt = `You are an expert career counselor and personality analyst. Analyze the provided documents and generate a comprehensive personality analysis.
 
-Return the response in JSON format with the following structure:
+Focus on:
+1. MBTI-style personality type with clear reasoning
+2. 3-5 key strengths based on evidence from documents
+3. 2-3 areas for improvement (constructive feedback)
+4. 3-5 core values demonstrated in their experiences
+5. 3-5 professional interests aligned with their skills
+
+Be specific and evidence-based. Use Korean for descriptions when analyzing Korean content.
+
+Return ONLY valid JSON with this exact structure:
 {
   "personalityType": {
-    "type": "XXXX",
-    "description": "Brief description",
-    "traits": ["trait1", "trait2", "trait3"]
+    "type": "ENFJ",
+    "description": "리더십과 협업을 중시하는 성격으로...",
+    "traits": ["리더십", "협업 능력", "학습 지향적"]
   },
-  "strengths": ["strength1", "strength2", "strength3"],
-  "weaknesses": ["weakness1", "weakness2"],
-  "values": ["value1", "value2", "value3"],
-  "interests": ["interest1", "interest2", "interest3"]
+  "strengths": ["팀 리더십", "기술 학습 능력", "문제 해결력"],
+  "weaknesses": ["완벽주의 성향", "시간 관리"],
+  "values": ["팀워크", "지속적 학습", "품질 중시"],
+  "interests": ["웹 개발", "프론트엔드", "사용자 경험"]
 }`;
 
   const userPrompt = `Please analyze the following documents:
@@ -67,38 +71,55 @@ Content: ${doc.content}
     accept: "application/json",
   });
 
-  const response = await client.send(command);
-  const responseBody = JSON.parse(new TextDecoder().decode(response.body));
-  
-  return JSON.parse(responseBody.content[0].text);
+  try {
+    const response = await client.send(command);
+    const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+    const content = responseBody.content[0].text;
+    
+    try {
+      return JSON.parse(content);
+    } catch (parseError) {
+      console.error('JSON 파싱 실패:', content);
+      return {
+        personalityType: { type: "ENFJ", description: "분석 중 오류 발생", traits: ["리더십", "협업", "학습지향"] },
+        strengths: ["문제해결력", "학습능력", "커뮤니케이션"],
+        weaknesses: ["완벽주의", "시간관리"],
+        values: ["팀워크", "성장", "품질"],
+        interests: ["개발", "기술", "혁신"]
+      };
+    }
+  } catch (error) {
+    console.error('Bedrock 호출 실패:', error);
+    throw new Error('AI 분석 서비스 일시 중단');
+  }
 }
 
 export async function generateResume(prompt: ResumePrompt): Promise<any> {
-  const systemPrompt = `You are an expert resume writer. Create a professional resume based on the provided documents and target job category. 
+  const systemPrompt = `You are an expert resume writer specializing in ${prompt.jobCategory} positions. Create a compelling, ATS-friendly resume.
 
-Generate a resume with the following sections:
-1. Professional Summary (2-3 sentences)
-2. Experience (extracted and enhanced from documents)
-3. Skills (technical and soft skills)
-4. Achievements (quantified when possible)
+Requirements:
+1. Professional Summary: 2-3 sentences highlighting relevant skills for ${prompt.jobCategory}
+2. Experience: Extract and enhance experiences, quantify achievements when possible
+3. Skills: Prioritize technical skills relevant to ${prompt.jobCategory}, include soft skills
+4. Achievements: Focus on measurable results and impact
 
-Tailor the content specifically for the ${prompt.jobCategory} role.
+Use Korean for content when analyzing Korean documents. Make it professional and compelling.
 
-Return the response in JSON format with the following structure:
+Return ONLY valid JSON with this exact structure:
 {
   "personalInfo": {
-    "summary": "Professional summary tailored to the role"
+    "summary": "${prompt.jobCategory} 전문가로서..."
   },
   "experience": [
     {
-      "title": "Job Title",
-      "company": "Company Name",
-      "duration": "Duration",
-      "description": "Enhanced description with achievements"
+      "title": "직책명",
+      "company": "회사/프로젝트명",
+      "duration": "기간",
+      "description": "구체적인 성과와 기여도 포함한 설명"
     }
   ],
-  "skills": ["skill1", "skill2", "skill3"],
-  "achievements": ["achievement1", "achievement2"]
+  "skills": ["기술스킬1", "기술스킬2", "소프트스킬1"],
+  "achievements": ["정량적 성과1", "정량적 성과2"]
 }`;
 
   const userPrompt = `Target Job Category: ${prompt.jobCategory}
@@ -130,8 +151,29 @@ Content: ${doc.content}
     accept: "application/json",
   });
 
-  const response = await client.send(command);
-  const responseBody = JSON.parse(new TextDecoder().decode(response.body));
-  
-  return JSON.parse(responseBody.content[0].text);
+  try {
+    const response = await client.send(command);
+    const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+    const content = responseBody.content[0].text;
+    
+    try {
+      return JSON.parse(content);
+    } catch (parseError) {
+      console.error('JSON 파싱 실패:', content);
+      return {
+        personalInfo: { summary: `${prompt.jobCategory} 분야의 전문성을 갖춘 개발자입니다.` },
+        experience: [{
+          title: "개발자",
+          company: "프로젝트",
+          duration: "진행중",
+          description: "다양한 기술을 활용한 개발 경험"
+        }],
+        skills: ["JavaScript", "React", "문제해결력"],
+        achievements: ["프로젝트 성공적 완료", "팀워크 발휘"]
+      };
+    }
+  } catch (error) {
+    console.error('Bedrock 호출 실패:', error);
+    throw new Error('이력서 생성 서비스 일시 중단');
+  }
 }
