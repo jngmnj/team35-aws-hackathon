@@ -1,12 +1,12 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { PutCommand, GetCommand } from '@aws-sdk/lib-dynamodb';
 import * as bcrypt from 'bcryptjs';
-import { generateToken } from '../../shared/jwt';
+import { generateToken } from './shared/jwt';
 import { v4 as uuidv4 } from 'uuid';
-import { docClient, TABLE_NAMES } from '../../shared/database';
-import { createErrorResponse, createSuccessResponse } from '../../shared/utils';
-import { validateEmail } from '../../shared/validation';
-import { handleDynamoDBError } from '../../shared/error-handler';
+import { docClient, TABLE_NAMES } from './shared/database';
+import { createErrorResponse, createSuccessResponse } from './shared/utils';
+import { validateEmail } from './shared/validation';
+import { handleDynamoDBError } from './shared/error-handler';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
@@ -81,12 +81,10 @@ async function handleRegister(body: RegisterRequest) {
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const userId = uuidv4();
-
   await docClient.send(new PutCommand({
     TableName: TABLE_NAMES.USERS,
     Item: {
-      userId,
+      userId: email,
       email,
       name,
       password: hashedPassword,
@@ -95,9 +93,9 @@ async function handleRegister(body: RegisterRequest) {
     },
   }));
 
-  const token = generateToken({ userId, email });
+  const token = generateToken({ userId: email, email });
 
-  return createSuccessResponse({ userId, email, name, token }, 201);
+  return createSuccessResponse({ userId: email, email, name, token }, 201);
 }
 
 interface LoginRequest {

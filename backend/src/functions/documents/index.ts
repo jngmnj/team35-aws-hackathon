@@ -2,11 +2,11 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand, GetCommand, QueryCommand, UpdateCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
-import { verifyToken } from '../../shared/auth';
-import { validateDocumentType, validateDocumentData } from '../../shared/validation';
-import { handleDynamoDBError } from '../../shared/error-handler';
-import { createErrorResponse, createSuccessResponse } from '../../shared/utils';
-import { DocumentType } from '../../types/document';
+import { verifyToken } from './shared/auth';
+import { validateDocumentType, validateDocumentData } from './shared/validation';
+import { handleDynamoDBError } from './shared/error-handler';
+import { createErrorResponse, createSuccessResponse } from './shared/utils';
+import { DocumentType } from './shared/types';
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
