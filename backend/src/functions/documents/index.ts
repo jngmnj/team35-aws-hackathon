@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { verifyToken } from '../../shared/auth';
 import { validateDocumentType, validateDocumentData } from '../../shared/validation';
 import { handleDynamoDBError } from '../../shared/error-handler';
+import { createErrorResponse, createSuccessResponse } from '../../shared/utils';
 import { DocumentType } from '../../types/document';
 
 const client = new DynamoDBClient({});
@@ -188,7 +189,9 @@ async function getDocuments(userId: string, queryParams?: QueryParams) {
         data: {
           documents: result.Items || [],
           total: result.Count || 0,
+          hasMore: false // TODO: Implement pagination logic
         },
+        timestamp: new Date().toISOString()
       }),
     };
   } catch (error) {
