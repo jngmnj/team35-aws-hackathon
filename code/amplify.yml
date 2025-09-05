@@ -36,6 +36,9 @@ applications:
         postTest:
           commands:
             - echo "Tests completed"
+      artifacts:
+        files:
+          - '**/*'
     env:
       variables:
         NODE_ENV: production
