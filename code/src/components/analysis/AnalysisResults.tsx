@@ -4,17 +4,27 @@ import { useState, useEffect } from 'react';
 import { AnalysisResult } from '@/types';
 import { PersonalityCard } from './PersonalityCard';
 import { InsightsDisplay } from './InsightsDisplay';
+import { PersonalityVisualization } from './PersonalityVisualization';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { apiClient } from '@/lib/api';
 
-export function AnalysisResults() {
+interface AnalysisResultsProps {
+  selectedAnalysis?: AnalysisResult | null;
+}
+
+export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [documentCount, setDocumentCount] = useState(0);
 
   useEffect(() => {
+    if (selectedAnalysis) {
+      setAnalysis(selectedAnalysis);
+      return;
+    }
+
     const loadData = async () => {
       try {
         const [existingAnalysis, documents] = await Promise.all([
@@ -32,7 +42,7 @@ export function AnalysisResults() {
     };
     
     loadData();
-  }, []);
+  }, [selectedAnalysis]);
 
   const handleGenerateAnalysis = async () => {
     setIsLoading(true);
@@ -69,6 +79,11 @@ export function AnalysisResults() {
               분석을 위해 먼저 문서를 작성해주세요.
             </p>
           )}
+          {error && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          )}
         </div>
         <Button 
           onClick={handleGenerateAnalysis} 
@@ -78,6 +93,15 @@ export function AnalysisResults() {
         >
           분석 시작하기
         </Button>
+        {error && (
+          <Button 
+            onClick={() => setError(null)} 
+            variant="outline"
+            className="mt-4 px-4 py-2"
+          >
+            다시 시도
+          </Button>
+        )}
 
       </Card>
     );
@@ -107,22 +131,31 @@ export function AnalysisResults() {
         </Card>
       ) : analysis && (
         <>
-          <PersonalityCard 
-            personalityType={analysis.personalityType}
-            strengths={analysis.strengths}
-            weaknesses={analysis.weaknesses}
-          />
-          <InsightsDisplay analysis={analysis} />
-          <div className="text-center pt-4">
-            <Button 
-              onClick={handleGenerateAnalysis} 
-              variant="outline"
-              className="px-6 py-2 font-semibold"
-              aria-label="성격 분석 다시 실행하기"
-            >
-              다시 분석하기
-            </Button>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <PersonalityCard 
+              personalityType={analysis.personalityType}
+              strengths={analysis.strengths}
+              weaknesses={analysis.weaknesses}
+            />
+            <PersonalityVisualization 
+              personalityType={analysis.personalityType}
+              strengths={analysis.strengths}
+              weaknesses={analysis.weaknesses}
+            />
           </div>
+          <InsightsDisplay analysis={analysis} />
+          {!selectedAnalysis && (
+            <div className="text-center pt-4">
+              <Button 
+                onClick={handleGenerateAnalysis} 
+                variant="outline"
+                className="px-6 py-2 font-semibold"
+                aria-label="성격 분석 다시 실행하기"
+              >
+                다시 분석하기
+              </Button>
+            </div>
+          )}
         </>
       )}
     </div>
