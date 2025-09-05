@@ -1,12 +1,8 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-interface User {
-  userId: string;
-  email: string;
-  name: string;
-}
+import { User } from '@/types';
+import { apiClient } from './api';
 
 interface AuthContextType {
   user: User | null;
@@ -20,60 +16,43 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for stored auth token on mount
-    const token = localStorage.getItem('auth-token');
-    const userData = localStorage.getItem('user-data');
-    if (token && userData) {
-      setUser(JSON.parse(userData));
+    // Load mock user from localStorage
+    const mockUser = localStorage.getItem('mock_user');
+    if (mockUser) {
+      setUser(JSON.parse(mockUser));
     }
+    setIsLoading(false);
   }, []);
 
   const login = async (email: string, password: string) => {
-    setIsLoading(true);
-    try {
-      // TODO: Replace with actual API call
-      const mockUser = {
-        userId: '1',
-        email,
-        name: email.split('@')[0]
-      };
-      
-      localStorage.setItem('auth-token', 'mock-token');
-      localStorage.setItem('user-data', JSON.stringify(mockUser));
-      setUser(mockUser);
-    } catch (error) {
-      throw new Error('Login failed');
-    } finally {
-      setIsLoading(false);
-    }
+    // Mock login
+    const mockUser: User = {
+      userId: '1',
+      email,
+      name: email.split('@')[0],
+      createdAt: new Date().toISOString()
+    };
+    setUser(mockUser);
+    localStorage.setItem('mock_user', JSON.stringify(mockUser));
   };
 
   const register = async (email: string, password: string, name: string) => {
-    setIsLoading(true);
-    try {
-      // TODO: Replace with actual API call
-      const mockUser = {
-        userId: '1',
-        email,
-        name
-      };
-      
-      localStorage.setItem('auth-token', 'mock-token');
-      localStorage.setItem('user-data', JSON.stringify(mockUser));
-      setUser(mockUser);
-    } catch (error) {
-      throw new Error('Registration failed');
-    } finally {
-      setIsLoading(false);
-    }
+    // Mock register
+    const mockUser: User = {
+      userId: '1',
+      email,
+      name,
+      createdAt: new Date().toISOString()
+    };
+    setUser(mockUser);
+    localStorage.setItem('mock_user', JSON.stringify(mockUser));
   };
 
   const logout = () => {
-    localStorage.removeItem('auth-token');
-    localStorage.removeItem('user-data');
+    localStorage.removeItem('mock_user');
     setUser(null);
   };
 

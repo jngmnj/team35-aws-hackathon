@@ -1,39 +1,31 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '@/lib/auth-context';
 import { useDocuments } from '@/hooks/useDocuments';
-import { DocumentEditor, DocumentType } from '@/components/documents/DocumentEditor';
-import { DocumentList, Document } from '@/components/documents/DocumentList';
+import { DocumentEditor } from '@/components/documents/DocumentEditor';
+import { DocumentList } from '@/components/documents/DocumentList';
+import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
 import { Button } from '@/components/ui/button';
-
+import { Document, DocumentType } from '@/types';
 import Link from 'next/link';
 
 export default function DocumentsPage() {
-  const { user } = useAuth();
   const { documents, createDocument, updateDocument, deleteDocument } = useDocuments();
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingDoc, setEditingDoc] = useState<Document | null>(null);
 
-  if (!user) {
-    return (
-      <div className="container mx-auto p-6 text-center">
-        <p>로그인이 필요합니다.</p>
-        <Link href="/login">
-          <Button>로그인</Button>
-        </Link>
-      </div>
-    );
-  }
-
-  const handleSave = (data: { title: string; type: DocumentType; content: string }) => {
-    if (editingDoc) {
-      updateDocument(editingDoc.id, data);
-    } else {
-      createDocument(data);
+  const handleSave = async (data: { title: string; type: DocumentType; content: string }) => {
+    try {
+      if (editingDoc) {
+        await updateDocument(editingDoc.documentId, data);
+      } else {
+        await createDocument(data);
+      }
+      setIsEditorOpen(false);
+      setEditingDoc(null);
+    } catch (error) {
+      console.error('Failed to save document:', error);
     }
-    setIsEditorOpen(false);
-    setEditingDoc(null);
   };
 
   const handleEdit = (doc: Document) => {
@@ -47,6 +39,7 @@ export default function DocumentsPage() {
   };
 
   return (
+    <ProtectedRoute>
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -64,7 +57,7 @@ export default function DocumentsPage() {
         <DocumentList
           documents={documents}
           onEdit={handleEdit}
-          onDelete={deleteDocument}
+          onDelete={(id) => deleteDocument(id)}
         />
       </main>
 
@@ -93,5 +86,6 @@ export default function DocumentsPage() {
         </div>
       )}
     </div>
+    </ProtectedRoute>
   );
 }
