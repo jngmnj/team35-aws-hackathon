@@ -23,11 +23,17 @@ class ApiClient {
   private token: string | null = null;
 
   constructor() {
+    // 환경 변수 또는 기본값 사용
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://oxunoozv13.execute-api.us-east-1.amazonaws.com/prod';
+    
+    console.log('API URL:', apiUrl); // 디버깅용
+    
     this.client = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://oxunoozv13.execute-api.us-east-1.amazonaws.com/prod',
+      baseURL: apiUrl,
       headers: {
         'Content-Type': 'application/json',
       },
+      timeout: 30000, // 30초 타임아웃
     });
 
     this.client.interceptors.request.use((config) => {

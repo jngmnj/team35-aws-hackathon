@@ -4,13 +4,15 @@ import { PersonalityType, StrengthItem, WeaknessItem } from '@/types';
 import { Card } from '@/components/ui/card';
 
 interface PersonalityVisualizationProps {
-  personalityType: PersonalityType;
-  strengths: StrengthItem[];
-  weaknesses: WeaknessItem[];
+  personalityType?: PersonalityType;
+  strengths?: StrengthItem[];
+  weaknesses?: WeaknessItem[];
 }
 
-export function PersonalityVisualization({ personalityType, strengths, weaknesses }: PersonalityVisualizationProps) {
-
+export function PersonalityVisualization({ personalityType, strengths = [], weaknesses = [] }: PersonalityVisualizationProps) {
+  if (!personalityType) {
+    return null;
+  }
 
   const strengthsPercentage = Math.min((strengths.length / 5) * 100, 100);
   const improvementPercentage = Math.min((weaknesses.length / 5) * 100, 100);
@@ -22,20 +24,20 @@ export function PersonalityVisualization({ personalityType, strengths, weaknesse
       {/* Personality Type Circle */}
       <div className="flex justify-center mb-8">
         <div className="w-32 h-32 bg-primary rounded-full flex items-center justify-center shadow-lg">
-          <span className="text-3xl font-bold text-primary-foreground">{personalityType.type}</span>
+          <span className="text-3xl font-bold text-primary-foreground">{personalityType?.type || '?'}</span>
         </div>
       </div>
 
       {/* Traits Visualization */}
       <div className="grid grid-cols-2 gap-4 mb-6">
-        {personalityType.traits.map((trait, index) => (
+        {personalityType?.traits?.map((trait, index) => (
           <div key={index} className="text-center p-3 bg-background rounded-lg border border-border">
             <div className="w-8 h-8 bg-primary rounded-full mx-auto mb-2 flex items-center justify-center">
-              <span className="text-primary-foreground text-sm font-bold">{trait[0]}</span>
+              <span className="text-primary-foreground text-sm font-bold">{trait?.[0] || '?'}</span>
             </div>
             <span className="text-sm font-medium text-foreground">{trait}</span>
           </div>
-        ))}
+        )) || []}
       </div>
 
       {/* Strengths vs Improvements Chart */}
