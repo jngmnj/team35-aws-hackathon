@@ -1,5 +1,5 @@
 // 로컬 인증 함수 테스트
-const { handler } = require('./index');
+const { handler } = require('../src/functions/auth/index');
 
 async function testAuth() {
   console.log('🧪 인증 함수 로컬 테스트');
@@ -44,6 +44,34 @@ async function testAuth() {
 
 // 환경변수 설정
 process.env.USERS_TABLE_NAME = 'users';
-process.env.JWT_SECRET = 'test-secret';
+process.env.JWT_SECRET = 'test-secret-key-for-development';
+process.env.AWS_REGION = 'us-east-1';
 
-testAuth();
+// DynamoDB 로컬 모킹
+const mockDynamoDB = {
+  users: new Map()
+};
+
+// AWS SDK 모킹
+jest.mock('@aws-sdk/lib-dynamodb', () => ({
+  DynamoDBDocumentClient: {
+    from: () => ({
+      send: async (command) => {
+        if (command.constructor.name === 'GetCommand') {
+          const user = mockDynamoDB.users.get(command.input.Key.userId);
+          return { Item: user };
+        }
+        if (command.constructor.name === 'PutCommand') {
+          mockDynamoDB.users.set(command.input.Item.userId, command.input.Item);
+          return {};
+        }
+      }
+    })
+  },
+  GetCommand: class GetCommand { constructor(input) { this.input = input; } },
+  PutCommand: class PutCommand { constructor(input) { this.input = input; } }
+}));
+
+if (require.main === module) {
+  testAuth();
+}

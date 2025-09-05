@@ -1,4 +1,4 @@
-import * as jwt from 'jsonwebtoken';
+import { verifyToken as verifyJWT } from './jwt';
 
 export interface AuthResult {
   success: boolean;
@@ -13,15 +13,15 @@ export function verifyToken(authHeader?: string): AuthResult {
   }
 
   const token = authHeader.substring(7);
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-    return {
-      success: true,
-      userId: decoded.userId,
-      email: decoded.email,
-    };
-  } catch (error) {
-    return { success: false, error: 'Invalid token' };
+  const result = verifyJWT(token);
+  
+  if (!result.success || !result.payload) {
+    return { success: false, error: result.error };
   }
+
+  return {
+    success: true,
+    userId: result.payload.userId,
+    email: result.payload.email,
+  };
 }
