@@ -1,5 +1,7 @@
 # Frontend Development Guide - **Current Progress Reflected**
 
+> **Documentation Workflow**: This guide follows documentation workflow rules and is updated after each frontend change.
+
 ## Current Implementation Status
 - ✅ **Next.js 14 Project Complete** (TypeScript, Tailwind CSS v4)
 - ✅ **shadcn/ui Components Complete**
@@ -11,10 +13,11 @@
 - ❌ **Error Handling and Loading States Incomplete**
 
 ## 🚨 Priority Tasks
-1. **API Client Implementation** - axios setup and endpoint integration
+1. **API Client Implementation** - axios setup and endpoint integration (최우선)
 2. **Authentication State Management Integration** - Context API with real login handling
-3. **Document CRUD Integration** - connect with real API
+3. **Document CRUD Integration** - connect with real API (Backend API 준비 완료)
 4. **Error Handling and Loading States** - improve user experience
+5. **Documentation Updates** - Update docs after each implementation
 
 ## Project Structure
 ```
