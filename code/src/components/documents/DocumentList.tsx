@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Document, DocumentType } from '@/types';
 import { Pencil, Trash2, Plus } from 'lucide-react';
+import { LoadingCard, LoadingSpinner } from '@/components/ui/loading';
 
 interface DocumentListProps {
   documents: Document[];
@@ -13,6 +14,8 @@ interface DocumentListProps {
   onDelete: (documentId: string) => void;
   onCreate: (type: DocumentType) => void;
   onView: (document: Document) => void;
+  isLoading?: boolean;
+  error?: string | null;
 }
 
 const documentTypes: { value: DocumentType; label: string }[] = [
@@ -22,7 +25,7 @@ const documentTypes: { value: DocumentType; label: string }[] = [
   { value: 'achievements', label: 'Achievements' }
 ];
 
-export function DocumentList({ documents, onEdit, onDelete, onCreate, onView }: DocumentListProps) {
+export function DocumentList({ documents, onEdit, onDelete, onCreate, onView, isLoading, error }: DocumentListProps) {
   const [activeTab, setActiveTab] = useState<DocumentType>('experience');
 
   const getDocumentsByType = (type: DocumentType) => {
@@ -72,7 +75,8 @@ export function DocumentList({ documents, onEdit, onDelete, onCreate, onView }: 
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">My Documents</h2>
-        <Button onClick={() => onCreate(activeTab)}>
+        <Button onClick={() => onCreate(activeTab)} disabled={isLoading}>
+          {isLoading && <LoadingSpinner size="sm" />}
           <Plus className="h-4 w-4 mr-2" />
           New {activeTab}
         </Button>
@@ -89,25 +93,42 @@ export function DocumentList({ documents, onEdit, onDelete, onCreate, onView }: 
 
         {documentTypes.map(type => (
           <TabsContent key={type.value} value={type.value} className="mt-4">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {getDocumentsByType(type.value).length > 0 ? (
-                getDocumentsByType(type.value).map(document => (
-                  <DocumentCard key={document.documentId} document={document} />
-                ))
-              ) : (
-                <div className="col-span-full text-center py-8 text-gray-500">
-                  <p>No {type.label.toLowerCase()} documents yet.</p>
-                  <Button 
-                    className="mt-4" 
-                    onClick={() => onCreate(type.value)}
-                    variant="outline"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create your first {type.label.toLowerCase()}
-                  </Button>
-                </div>
-              )}
-            </div>
+            {error && (
+              <div className="text-center py-8 text-red-500">
+                <p>{error}</p>
+                <Button className="mt-4" onClick={() => window.location.reload()}>
+                  Retry
+                </Button>
+              </div>
+            )}
+            
+            {isLoading ? (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {[...Array(3)].map((_, i) => (
+                  <LoadingCard key={i} />
+                ))}
+              </div>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {getDocumentsByType(type.value).length > 0 ? (
+                  getDocumentsByType(type.value).map(document => (
+                    <DocumentCard key={document.documentId} document={document} />
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-8 text-gray-500">
+                    <p>No {type.label.toLowerCase()} documents yet.</p>
+                    <Button 
+                      className="mt-4" 
+                      onClick={() => onCreate(type.value)}
+                      variant="outline"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create your first {type.label.toLowerCase()}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
           </TabsContent>
         ))}
       </Tabs>

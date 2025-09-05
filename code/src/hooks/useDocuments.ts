@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Document, DocumentType } from '@/types';
 import { useAuth } from '@/lib/auth-context';
+import { apiClient } from '@/lib/api';
 
 interface CreateDocumentData {
   title: string;
@@ -23,6 +24,7 @@ interface UseDocumentsReturn {
   deleteDocument: (id: string) => Promise<void>;
   isLoading: boolean;
   error: string | null;
+  refetch: () => Promise<void>;
 }
 
 export function useDocuments(): UseDocumentsReturn {
@@ -31,102 +33,63 @@ export function useDocuments(): UseDocumentsReturn {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  // Mock data for development
-  useEffect(() => {
-    const loadDocuments = async () => {
-      setIsLoading(true);
-      try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Mock documents
-        const mockDocuments: Document[] = [
-          {
-            documentId: '1',
-            userId: user?.userId || 'mock-user',
-            type: 'experience',
-            title: 'Software Developer at TechCorp',
-            content: '<p>Worked as a full-stack developer for 3 years...</p>',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-          {
-            documentId: '2',
-            userId: user?.userId || 'mock-user',
-            type: 'skills',
-            title: 'Technical Skills',
-            content: '<p>JavaScript, TypeScript, React, Node.js...</p>',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          }
-        ];
-        
-        setDocuments(mockDocuments);
-      } catch (err) {
-        setError('Failed to load documents');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (user) {
-      loadDocuments();
+  const loadDocuments = async () => {
+    if (!user) return;
+    
+    setIsLoading(true);
+    setError(null);
+    try {
+      const docs = await apiClient.getDocuments();
+      setDocuments(docs);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load documents';
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  useEffect(() => {
+    loadDocuments();
   }, [user]);
 
   const createDocument = async (data: CreateDocumentData): Promise<Document> => {
+    setError(null);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const newDocument: Document = {
-        documentId: Date.now().toString(),
-        userId: user?.userId || 'mock-user',
-        type: data.type,
-        title: data.title,
-        content: data.content,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
+      const newDocument = await apiClient.createDocument(data);
       setDocuments(prev => [...prev, newDocument]);
       return newDocument;
     } catch (err) {
-      setError('Failed to create document');
-      throw err;
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create document';
+      setError(errorMessage);
+      throw new Error(errorMessage);
     }
   };
 
   const updateDocument = async (id: string, data: UpdateDocumentData): Promise<Document> => {
+    setError(null);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      const updatedDocument = await apiClient.updateDocument(id, data);
       setDocuments(prev => prev.map(doc => 
-        doc.documentId === id 
-          ? { ...doc, ...data, updatedAt: new Date().toISOString() }
-          : doc
+        doc.documentId === id ? updatedDocument : doc
       ));
-
-      const updatedDoc = documents.find(doc => doc.documentId === id);
-      if (!updatedDoc) throw new Error('Document not found');
-      
-      return { ...updatedDoc, ...data, updatedAt: new Date().toISOString() };
+      return updatedDocument;
     } catch (err) {
-      setError('Failed to update document');
-      throw err;
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update document';
+      setError(errorMessage);
+      throw new Error(errorMessage);
     }
   };
 
   const deleteDocument = async (id: string): Promise<void> => {
+    setError(null);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      await apiClient.deleteDocument(id);
       setDocuments(prev => prev.filter(doc => doc.documentId !== id));
     } catch (err) {
-      setError('Failed to delete document');
-      throw err;
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete document';
+      setError(errorMessage);
+      throw new Error(errorMessage);
     }
   };
 
@@ -137,5 +100,6 @@ export function useDocuments(): UseDocumentsReturn {
     deleteDocument,
     isLoading,
     error,
+    refetch: loadDocuments,
   };
 }

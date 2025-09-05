@@ -11,26 +11,29 @@ export function RegisterForm() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const { register, isLoading } = useAuth();
+  const [localError, setLocalError] = useState('');
+  const { register, isLoading, error: authError } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setLocalError('');
     
     if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setLocalError('Password must be at least 6 characters');
       return;
     }
     
     try {
       await register(email, password, name);
       router.push('/dashboard');
-    } catch {
-      setError('Registration failed. Please try again.');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Registration failed';
+      setLocalError(errorMessage);
     }
   };
+
+  const displayError = localError || authError;
 
   return (
     <Card className="w-full max-w-md p-6">
@@ -63,7 +66,7 @@ export function RegisterForm() {
             required
           />
         </div>
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {displayError && <p className="text-red-500 text-sm">{displayError}</p>}
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? 'Creating account...' : 'Register'}
         </Button>

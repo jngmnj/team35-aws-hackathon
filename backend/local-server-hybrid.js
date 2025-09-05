@@ -29,6 +29,35 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// 헬스체크 엔드포인트
+app.get('/', (req, res) => {
+  res.json({
+    message: '🚀 Resume Generator API Server',
+    status: 'running',
+    version: '1.0.0',
+    endpoints: {
+      auth: {
+        register: 'POST /auth/register',
+        login: 'POST /auth/login'
+      },
+      documents: {
+        list: 'GET /documents',
+        create: 'POST /documents',
+        update: 'PUT /documents/:id',
+        delete: 'DELETE /documents/:id'
+      }
+    },
+    database: {
+      users: mockDB.users.size,
+      documents: mockDB.documents.size
+    }
+  });
+});
+
+app.get('/health', (req, res) => {
+  res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
+
 // 메모리 기반 DB (실제 로직은 유지)
 const mockDB = {
   users: new Map(),

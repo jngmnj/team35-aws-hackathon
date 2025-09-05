@@ -10,21 +10,24 @@ import { Card } from '@/components/ui/card';
 export function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const { login, isLoading } = useAuth();
+  const [localError, setLocalError] = useState('');
+  const { login, isLoading, error: authError } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setLocalError('');
     
     try {
       await login(email, password);
       router.push('/dashboard');
-    } catch {
-      setError('Invalid email or password');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Login failed';
+      setLocalError(errorMessage);
     }
   };
+
+  const displayError = localError || authError;
 
   return (
     <Card className="w-full max-w-md p-6">
@@ -48,7 +51,7 @@ export function LoginForm() {
             required
           />
         </div>
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {displayError && <p className="text-red-500 text-sm">{displayError}</p>}
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? 'Logging in...' : 'Login'}
         </Button>

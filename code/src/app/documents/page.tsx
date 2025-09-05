@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Document, DocumentType } from '@/types';
 
 export default function DocumentsPage() {
-  const { documents, createDocument, updateDocument, deleteDocument, isLoading } = useDocuments();
+  const { documents, createDocument, updateDocument, deleteDocument, isLoading, error } = useDocuments();
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
@@ -73,13 +73,7 @@ export default function DocumentsPage() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
+
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -90,6 +84,8 @@ export default function DocumentsPage() {
           onDelete={handleDelete}
           onCreate={handleCreate}
           onView={handleView}
+          isLoading={isLoading}
+          error={error}
         />
 
         {/* View Document Modal */}
