@@ -27,31 +27,31 @@ export function InsightsDisplay({ analysis, isLoading }: InsightsDisplayProps) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <Card className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
+      <Card className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200 hover:shadow-lg transition-shadow">
         <h3 className="text-xl font-bold mb-4 text-purple-700 flex items-center">
-          <div className="w-4 h-4 bg-purple-500 rounded-full mr-3"></div>
+          <div className="w-4 h-4 bg-purple-500 rounded-full mr-3 shadow-sm"></div>
           핵심 가치관
         </h3>
-        <ul className="space-y-3">
+        <ul className="space-y-3" role="list" aria-label="핵심 가치관 목록">
           {analysis.values.map((value, index) => (
-            <li key={index} className="flex items-start">
-              <div className="w-2 h-2 bg-purple-400 rounded-full mr-3 mt-2 flex-shrink-0"></div>
-              <span className="text-gray-700 leading-relaxed">{value}</span>
+            <li key={index} className="flex items-start group">
+              <div className="w-2 h-2 bg-purple-400 rounded-full mr-3 mt-2 flex-shrink-0 group-hover:bg-purple-500 transition-colors"></div>
+              <span className="text-gray-700 leading-relaxed group-hover:text-gray-800 transition-colors">{value}</span>
             </li>
           ))}
         </ul>
       </Card>
 
-      <Card className="p-6 bg-gradient-to-br from-indigo-50 to-blue-50 border-indigo-200">
+      <Card className="p-6 bg-gradient-to-br from-indigo-50 to-blue-50 border-indigo-200 hover:shadow-lg transition-shadow">
         <h3 className="text-xl font-bold mb-4 text-indigo-700 flex items-center">
-          <div className="w-4 h-4 bg-indigo-500 rounded-full mr-3"></div>
+          <div className="w-4 h-4 bg-indigo-500 rounded-full mr-3 shadow-sm"></div>
           관심 분야
         </h3>
-        <ul className="space-y-3">
+        <ul className="space-y-3" role="list" aria-label="관심 분야 목록">
           {analysis.interests.map((interest, index) => (
-            <li key={index} className="flex items-start">
-              <div className="w-2 h-2 bg-indigo-400 rounded-full mr-3 mt-2 flex-shrink-0"></div>
-              <span className="text-gray-700 leading-relaxed">{interest}</span>
+            <li key={index} className="flex items-start group">
+              <div className="w-2 h-2 bg-indigo-400 rounded-full mr-3 mt-2 flex-shrink-0 group-hover:bg-indigo-500 transition-colors"></div>
+              <span className="text-gray-700 leading-relaxed group-hover:text-gray-800 transition-colors">{interest}</span>
             </li>
           ))}
         </ul>
