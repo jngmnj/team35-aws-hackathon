@@ -24,5 +24,6 @@
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist"
   },
-  "exclude": ["node_modules", "cdk.out", "dist"]
+  "exclude": ["node_modules", "cdk.out", "dist", "**/*.d.ts"],
+  "include": ["src/**/*", "infrastructure/**/*"]
 }
