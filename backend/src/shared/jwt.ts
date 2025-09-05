@@ -23,7 +23,7 @@ export function verifyToken(token: string): TokenResult {
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET!) as TokenPayload;
     return { success: true, payload };
-  } catch (error) {
+  } catch {
     return { success: false, error: 'Invalid token' };
   }
 }
