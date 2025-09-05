@@ -43,11 +43,11 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       case 'POST':
         return await createDocument(userId, JSON.parse(event.body || '{}'));
       case 'PUT':
-        return await updateDocument(pathParameters?.id!, JSON.parse(event.body || '{}'));
+        return await updateDocument(pathParameters?.id!, JSON.parse(event.body || '{}'), userId);
       case 'PATCH':
-        return await patchDocument(pathParameters?.id!, JSON.parse(event.body || '{}'));
+        return await patchDocument(pathParameters?.id!, JSON.parse(event.body || '{}'), userId);
       case 'DELETE':
-        return await deleteDocument(pathParameters?.id!);
+        return await deleteDocument(pathParameters?.id!, userId);
       default:
         return {
           statusCode: 405,
@@ -155,8 +155,14 @@ async function createDocument(userId: string, body: any) {
   };
 }
 
-async function updateDocument(documentId: string, body: any) {
+async function updateDocument(documentId: string, body: any, userId: string) {
   const { title, content, type } = body;
+
+  // Check document ownership
+  const ownershipCheck = await verifyDocumentOwnership(documentId, userId);
+  if (!ownershipCheck.success) {
+    return ownershipCheck.response;
+  }
 
   if (!title && !content) {
     return {
@@ -222,7 +228,7 @@ async function updateDocument(documentId: string, body: any) {
   };
 }
 
-async function patchDocument(documentId: string, body: any) {
+async function patchDocument(documentId: string, body: any, userId: string) {
   const { title, content, version: clientVersion } = body;
 
   if (!title && !content) {
@@ -231,6 +237,12 @@ async function patchDocument(documentId: string, body: any) {
       headers,
       body: JSON.stringify({ success: false, error: { message: 'No fields to update' } }),
     };
+  }
+
+  // Check document ownership
+  const ownershipCheck = await verifyDocumentOwnership(documentId, userId);
+  if (!ownershipCheck.success) {
+    return ownershipCheck.response;
   }
 
   // Get current document for version check
@@ -299,7 +311,13 @@ async function patchDocument(documentId: string, body: any) {
   };
 }
 
-async function deleteDocument(documentId: string) {
+async function deleteDocument(documentId: string, userId: string) {
+  // Check document ownership
+  const ownershipCheck = await verifyDocumentOwnership(documentId, userId);
+  if (!ownershipCheck.success) {
+    return ownershipCheck.response;
+  }
+
   await docClient.send(new DeleteCommand({
     TableName: process.env.DOCUMENTS_TABLE_NAME,
     Key: { documentId },
@@ -313,5 +331,36 @@ async function deleteDocument(documentId: string) {
       message: 'Document deleted successfully',
     }),
   };
+}
+
+async function verifyDocumentOwnership(documentId: string, userId: string) {
+  const document = await docClient.send(new GetCommand({
+    TableName: process.env.DOCUMENTS_TABLE_NAME,
+    Key: { documentId },
+  }));
+
+  if (!document.Item) {
+    return {
+      success: false,
+      response: {
+        statusCode: 404,
+        headers,
+        body: JSON.stringify({ success: false, error: { message: 'Document not found' } }),
+      }
+    };
+  }
+
+  if (document.Item.userId !== userId) {
+    return {
+      success: false,
+      response: {
+        statusCode: 403,
+        headers,
+        body: JSON.stringify({ success: false, error: { message: 'Access denied: You can only modify your own documents' } }),
+      }
+    };
+  }
+
+  return { success: true, document: document.Item };
 }
 
