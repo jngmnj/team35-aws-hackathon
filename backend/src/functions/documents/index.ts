@@ -4,6 +4,7 @@ import { DynamoDBDocumentClient, PutCommand, GetCommand, QueryCommand, UpdateCom
 import { v4 as uuidv4 } from 'uuid';
 import { verifyToken } from '../../shared/auth';
 import { validateDocumentType, validateDocumentData } from '../../shared/validation';
+import { handleDynamoDBError } from '../../shared/error-handler';
 import { DocumentType } from '../../types/document';
 
 const client = new DynamoDBClient({});
@@ -71,8 +72,19 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
           body: JSON.stringify({ success: false, error: { message: 'Method not allowed' } }),
         };
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error:', error);
+    
+    // Handle DynamoDB specific errors
+    if (error.name && error.name.includes('Exception')) {
+      const dbError = handleDynamoDBError(error);
+      return {
+        statusCode: dbError.statusCode,
+        headers,
+        body: JSON.stringify({ success: false, error: dbError.error }),
+      };
+    }
+
     return {
       statusCode: 500,
       headers,

@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { docClient, TABLE_NAMES } from '../../shared/database';
 import { createErrorResponse, createSuccessResponse } from '../../shared/utils';
 import { validateEmail } from '../../shared/validation';
+import { handleDynamoDBError } from '../../shared/error-handler';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
@@ -32,8 +33,19 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     }
 
     return createErrorResponse(404, 'Not found');
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error:', error);
+    
+    // Handle DynamoDB specific errors
+    if (error.name && error.name.includes('Exception')) {
+      const dbError = handleDynamoDBError(error);
+      return {
+        statusCode: dbError.statusCode,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ success: false, error: dbError.error }),
+      };
+    }
+
     return createErrorResponse(500, 'Internal server error');
   }
 };
