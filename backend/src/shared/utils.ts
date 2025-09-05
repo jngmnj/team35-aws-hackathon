@@ -7,12 +7,21 @@ export function getHeaders() {
   };
 }
 
-export function createResponse(statusCode: number, data: any) {
-  return {
-    statusCode,
-    headers: getHeaders(),
-    body: JSON.stringify(data),
-  };
+export function createResponse(statusCode: number, data: Record<string, unknown>) {
+  try {
+    return {
+      statusCode,
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    };
+  } catch (error) {
+    console.error('JSON serialization error:', error);
+    return {
+      statusCode: 500,
+      headers: getHeaders(),
+      body: JSON.stringify({ success: false, error: { message: 'Serialization error' } }),
+    };
+  }
 }
 
 export function createErrorResponse(statusCode: number, message: string) {
@@ -22,7 +31,7 @@ export function createErrorResponse(statusCode: number, message: string) {
   });
 }
 
-export function createSuccessResponse(data: any, statusCode: number = 200) {
+export function createSuccessResponse(data: unknown, statusCode: number = 200) {
   return createResponse(statusCode, {
     success: true,
     data,

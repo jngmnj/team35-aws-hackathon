@@ -34,8 +34,22 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   }
 };
 
-async function getResumes(userId: string, queryParams: any) {
+interface QueryParams {
+  jobCategory?: string;
+}
+
+async function getResumes(userId: string, queryParams: QueryParams | null) {
+  // Validate userId to prevent injection
+  if (!userId || typeof userId !== 'string' || userId.length === 0) {
+    return createErrorResponse(400, 'Invalid user ID');
+  }
+
   const jobCategory = queryParams?.jobCategory;
+
+  // Validate jobCategory if provided
+  if (jobCategory && (typeof jobCategory !== 'string' || jobCategory.length === 0)) {
+    return createErrorResponse(400, 'Invalid job category');
+  }
 
   let queryCommand;
   if (jobCategory) {
@@ -59,23 +73,50 @@ async function getResumes(userId: string, queryParams: any) {
     });
   }
 
-  const result = await docClient.send(queryCommand);
+  try {
+    const result = await docClient.send(queryCommand);
+    return createSuccessResponse({
+      resumes: result.Items || [],
+      total: result.Count || 0,
+    });
+  } catch (error) {
+    console.error('DynamoDB query error:', error);
+    return createErrorResponse(500, 'Failed to retrieve resumes');
+  }
 
-  return createSuccessResponse({
-    resumes: result.Items || [],
-    total: result.Count || 0,
-  });
 }
 
-async function createResume(userId: string, body: any) {
+interface CreateResumeRequest {
+  documents: Array<{
+    type: string;
+    title: string;
+    content: string;
+  }>;
+  jobCategory: string;
+  jobTitle?: string;
+}
+
+async function createResume(userId: string, body: CreateResumeRequest) {
+  // Validate userId to prevent injection
+  if (!userId || typeof userId !== 'string' || userId.length === 0) {
+    return createErrorResponse(400, 'Invalid user ID');
+  }
+
   const { documents, jobCategory, jobTitle } = body;
 
   if (!documents || !Array.isArray(documents)) {
     return createErrorResponse(400, 'Documents array is required');
   }
 
-  if (!jobCategory) {
-    return createErrorResponse(400, 'Job category is required');
+  if (!jobCategory || typeof jobCategory !== 'string' || jobCategory.length === 0) {
+    return createErrorResponse(400, 'Valid job category is required');
+  }
+
+  // Validate documents array
+  for (const doc of documents) {
+    if (!doc.type || !doc.title || typeof doc.type !== 'string' || typeof doc.title !== 'string') {
+      return createErrorResponse(400, 'Invalid document format');
+    }
   }
 
   try {

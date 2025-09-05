@@ -13,18 +13,34 @@ export interface TokenResult {
 }
 
 export function generateToken(payload: TokenPayload): string {
-  return jwt.sign(payload, process.env.JWT_SECRET!, { 
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is required');
+  }
+  
+  return jwt.sign(payload, secret, { 
     expiresIn: '24h',
     issuer: 'resume-generator'
   });
 }
 
 export function verifyToken(token: string): TokenResult {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    return { success: false, error: 'JWT configuration error' };
+  }
+  
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET!) as TokenPayload;
+    const payload = jwt.verify(token, secret) as TokenPayload;
     return { success: true, payload };
-  } catch {
-    return { success: false, error: 'Invalid token' };
+  } catch (error: any) {
+    if (error.name === 'TokenExpiredError') {
+      return { success: false, error: 'Token expired' };
+    }
+    if (error.name === 'JsonWebTokenError') {
+      return { success: false, error: 'Invalid token format' };
+    }
+    return { success: false, error: 'Token verification failed' };
   }
 }
 
