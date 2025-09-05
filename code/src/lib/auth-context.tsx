@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '@/types';
+import { apiClient } from './api';
 
 interface AuthContextType {
   user: User | null;
@@ -9,6 +10,7 @@ interface AuthContextType {
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
+  error: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -16,47 +18,67 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Load mock user from localStorage
-    const mockUser = localStorage.getItem('mock_user');
-    if (mockUser) {
-      setUser(JSON.parse(mockUser));
+    apiClient.loadToken();
+    const token = localStorage.getItem('auth_token');
+    const userData = localStorage.getItem('user_data');
+    
+    if (token && userData) {
+      try {
+        setUser(JSON.parse(userData));
+      } catch {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_data');
+      }
     }
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, _password: string) => {
-    // Mock login
-    const mockUser: User = {
-      userId: '1',
-      email,
-      name: email.split('@')[0],
-      createdAt: new Date().toISOString()
-    };
-    setUser(mockUser);
-    localStorage.setItem('mock_user', JSON.stringify(mockUser));
+  const login = async (email: string, password: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await apiClient.login(email, password);
+      apiClient.setToken(response.token);
+      setUser(response.user);
+      localStorage.setItem('user_data', JSON.stringify(response.user));
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Login failed';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const register = async (email: string, _password: string, name: string) => {
-    // Mock register
-    const mockUser: User = {
-      userId: '1',
-      email,
-      name,
-      createdAt: new Date().toISOString()
-    };
-    setUser(mockUser);
-    localStorage.setItem('mock_user', JSON.stringify(mockUser));
+  const register = async (email: string, password: string, name: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await apiClient.register(email, password, name);
+      apiClient.setToken(response.token);
+      setUser(response.user);
+      localStorage.setItem('user_data', JSON.stringify(response.user));
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Registration failed';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const logout = () => {
-    localStorage.removeItem('mock_user');
+    apiClient.clearToken();
+    localStorage.removeItem('user_data');
     setUser(null);
+    setError(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, isLoading, error }}>
       {children}
     </AuthContext.Provider>
   );

@@ -18,7 +18,7 @@ class ApiClient {
 
   constructor() {
     this.client = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api',
+      baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -30,6 +30,17 @@ class ApiClient {
       }
       return config;
     });
+
+    this.client.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          this.clearToken();
+        }
+        const message = error.response?.data?.error?.message || error.message || 'An error occurred';
+        throw new Error(message);
+      }
+    );
   }
 
   setToken(token: string) {
@@ -58,28 +69,28 @@ class ApiClient {
   // Auth methods
   async login(email: string, password: string): Promise<AuthResponse> {
     const { data } = await this.client.post('/auth/login', { email, password });
-    return data;
+    return { user: data.data, token: data.data.token };
   }
 
   async register(email: string, password: string, name: string): Promise<AuthResponse> {
     const { data } = await this.client.post('/auth/register', { email, password, name });
-    return data;
+    return { user: data.data, token: data.data.token };
   }
 
   // Document methods
   async getDocuments(): Promise<Document[]> {
     const { data } = await this.client.get('/documents');
-    return data;
+    return data.data.documents;
   }
 
   async createDocument(documentData: CreateDocumentData): Promise<Document> {
     const { data } = await this.client.post('/documents', documentData);
-    return data;
+    return data.data;
   }
 
   async updateDocument(id: string, documentData: Partial<CreateDocumentData>): Promise<Document> {
     const { data } = await this.client.put(`/documents/${id}`, documentData);
-    return data;
+    return data.data;
   }
 
   async deleteDocument(id: string): Promise<void> {
@@ -89,9 +100,7 @@ class ApiClient {
   // Analysis methods
   async generateAnalysis(): Promise<AnalysisResult> {
     const documents = await this.getDocuments();
-    const { data } = await this.client.post('/analysis', { 
-      documents: Array.isArray(documents) ? documents : (documents as unknown as { documents: Document[] }).documents || [] 
-    });
+    const { data } = await this.client.post('/analysis', { documents });
     return data;
   }
 
@@ -103,10 +112,7 @@ class ApiClient {
   // Resume methods
   async generateResume(jobCategory: string): Promise<ResumeContent> {
     const documents = await this.getDocuments();
-    const { data } = await this.client.post('/resume', { 
-      documents: Array.isArray(documents) ? documents : (documents as unknown as { documents: Document[] }).documents || [],
-      jobCategory 
-    });
+    const { data } = await this.client.post('/resume', { documents, jobCategory });
     return data.content;
   }
 
