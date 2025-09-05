@@ -1,12 +1,12 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { PutCommand, GetCommand } from '@aws-sdk/lib-dynamodb';
 import * as bcrypt from 'bcryptjs';
-import { generateToken } from './shared/jwt';
+import { generateToken } from '../../shared/jwt';
 import { v4 as uuidv4 } from 'uuid';
-import { docClient, TABLE_NAMES } from './shared/database';
-import { createErrorResponse, createSuccessResponse } from './shared/utils';
-import { validateEmail } from './shared/validation';
-import { handleDynamoDBError } from './shared/error-handler';
+import { docClient, TABLE_NAMES } from '../../shared/database';
+import { createErrorResponse, createSuccessResponse } from '../../shared/utils';
+import { validateEmail } from '../../shared/validation';
+import { handleDynamoDBError } from '../../shared/error-handler';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
@@ -14,15 +14,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const method = event.httpMethod;
 
     if (method === 'OPTIONS') {
-      return {
-        statusCode: 200,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        },
-        body: ''
-      };
+      return { statusCode: 200, headers: {}, body: '' };
     }
 
     let body = {};
@@ -35,9 +27,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     }
 
     if (path.endsWith('/register')) {
-      return await handleRegister(body as RegisterRequest);
+      return await handleRegister(body);
     } else if (path.endsWith('/login')) {
-      return await handleLogin(body as LoginRequest);
+      return await handleLogin(body);
     }
 
     return createErrorResponse(404, 'Not found');
@@ -89,7 +81,7 @@ async function handleRegister(body: RegisterRequest) {
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const userId = email; // Use email as userId for consistency
+  const userId = uuidv4();
 
   await docClient.send(new PutCommand({
     TableName: TABLE_NAMES.USERS,
