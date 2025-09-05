@@ -1,0 +1,11 @@
+{
+  "name": "ai-integration",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test-ai.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.0.0"
+  }
+}
