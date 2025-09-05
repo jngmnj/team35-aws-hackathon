@@ -1,103 +1,366 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { PutCommand, QueryCommand, UpdateCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, PutCommand, GetCommand, QueryCommand, UpdateCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
-import { docClient, TABLE_NAMES } from '../../shared/database';
 import { verifyToken } from '../../shared/auth';
-import { createErrorResponse, createSuccessResponse } from '../../shared/utils';
+import { validateDocumentType, validateDocumentData } from '../../shared/validation';
+import { DocumentType } from '../../types/document';
+
+const client = new DynamoDBClient({});
+const docClient = DynamoDBDocumentClient.from(client);
+
+const headers = {
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, If-Match',
+};
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
     if (event.httpMethod === 'OPTIONS') {
-      return { statusCode: 200, headers: {}, body: '' };
+      return { statusCode: 200, headers, body: '' };
     }
 
+    // Verify JWT token using shared utility
     const authResult = verifyToken(event.headers.Authorization || event.headers.authorization);
     if (!authResult.success) {
-      return createErrorResponse(401, 'Unauthorized');
+      return {
+        statusCode: 401,
+        headers,
+        body: JSON.stringify({ success: false, error: { message: 'Unauthorized' } }),
+      };
     }
 
     const userId = authResult.userId!;
+
     const method = event.httpMethod;
     const pathParameters = event.pathParameters;
 
     switch (method) {
       case 'GET':
-        return await getDocuments(userId);
+        return await getDocuments(userId, event.queryStringParameters);
       case 'POST':
         return await createDocument(userId, JSON.parse(event.body || '{}'));
       case 'PUT':
-        return await updateDocument(pathParameters?.id!, JSON.parse(event.body || '{}'));
+        return await updateDocument(pathParameters?.id!, JSON.parse(event.body || '{}'), userId);
+      case 'PATCH':
+        return await patchDocument(pathParameters?.id!, JSON.parse(event.body || '{}'), userId);
       case 'DELETE':
-        return await deleteDocument(pathParameters?.id!);
+        return await deleteDocument(pathParameters?.id!, userId);
       default:
-        return createErrorResponse(405, 'Method not allowed');
+        return {
+          statusCode: 405,
+          headers,
+          body: JSON.stringify({ success: false, error: { message: 'Method not allowed' } }),
+        };
     }
   } catch (error) {
     console.error('Error:', error);
-    return createErrorResponse(500, 'Internal server error');
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({ success: false, error: { message: 'Internal server error' } }),
+    };
   }
 };
 
-async function getDocuments(userId: string) {
+async function getDocuments(userId: string, queryParams?: any) {
+  let keyConditionExpression = 'userId = :userId';
+  const expressionAttributeValues: any = {
+    ':userId': userId,
+  };
+
+  // Add type filter if provided
+  if (queryParams?.type && validateDocumentType(queryParams.type)) {
+    keyConditionExpression += ' AND #type = :type';
+    expressionAttributeValues[':type'] = queryParams.type;
+  }
+
   const result = await docClient.send(new QueryCommand({
-    TableName: TABLE_NAMES.DOCUMENTS,
+    TableName: process.env.DOCUMENTS_TABLE_NAME,
     IndexName: 'userId-index',
-    KeyConditionExpression: 'userId = :userId',
-    ExpressionAttributeValues: {
-      ':userId': userId,
-    },
+    KeyConditionExpression: keyConditionExpression,
+    ExpressionAttributeNames: queryParams?.type ? { '#type': 'type' } : undefined,
+    ExpressionAttributeValues: expressionAttributeValues,
   }));
 
-  return createSuccessResponse({
-    documents: result.Items || [],
-    total: result.Count || 0,
-  });
+  return {
+    statusCode: 200,
+    headers,
+    body: JSON.stringify({
+      success: true,
+      data: {
+        documents: result.Items || [],
+        total: result.Count || 0,
+      },
+    }),
+  };
 }
 
 async function createDocument(userId: string, body: any) {
   const { type, title, content } = body;
+
+  if (!type || !title) {
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ success: false, error: { message: 'Missing required fields' } }),
+    };
+  }
+
+  if (!validateDocumentType(type)) {
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ success: false, error: { message: 'Invalid document type' } }),
+    };
+  }
+
+  const validation = validateDocumentData(type as DocumentType, title, content);
+  if (!validation.isValid) {
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ success: false, error: { message: 'Validation failed', details: validation.errors } }),
+    };
+  }
+
   const documentId = uuidv4();
+  const now = new Date().toISOString();
 
   const document = {
     documentId,
     userId,
     type,
     title,
-    content,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    content: content || '',
+    version: 1,
+    createdAt: now,
+    updatedAt: now,
   };
 
   await docClient.send(new PutCommand({
-    TableName: TABLE_NAMES.DOCUMENTS,
+    TableName: process.env.DOCUMENTS_TABLE_NAME,
     Item: document,
   }));
 
-  return createSuccessResponse(document, 201);
+  return {
+    statusCode: 201,
+    headers,
+    body: JSON.stringify({
+      success: true,
+      data: document,
+    }),
+  };
 }
 
-async function updateDocument(documentId: string, body: any) {
-  const { title, content } = body;
+async function updateDocument(documentId: string, body: any, userId: string) {
+  const { title, content, type } = body;
 
-  await docClient.send(new UpdateCommand({
-    TableName: TABLE_NAMES.DOCUMENTS,
+  // Check document ownership
+  const ownershipCheck = await verifyDocumentOwnership(documentId, userId);
+  if (!ownershipCheck.success) {
+    return ownershipCheck.response;
+  }
+
+  if (!title && !content) {
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ success: false, error: { message: 'No fields to update' } }),
+    };
+  }
+
+  // If type is provided, validate the document data
+  if (type && title) {
+    if (!validateDocumentType(type)) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ success: false, error: { message: 'Invalid document type' } }),
+      };
+    }
+
+    const validation = validateDocumentData(type as DocumentType, title, content);
+    if (!validation.isValid) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ success: false, error: { message: 'Validation failed', details: validation.errors } }),
+      };
+    }
+  }
+
+  const updateExpression = [];
+  const expressionAttributeValues: any = {};
+
+  if (title) {
+    updateExpression.push('title = :title');
+    expressionAttributeValues[':title'] = title;
+  }
+
+  if (content) {
+    updateExpression.push('content = :content');
+    expressionAttributeValues[':content'] = content;
+  }
+
+  updateExpression.push('updatedAt = :updatedAt', '#version = #version + :inc');
+  expressionAttributeValues[':updatedAt'] = new Date().toISOString();
+  expressionAttributeValues[':inc'] = 1;
+
+  const result = await docClient.send(new UpdateCommand({
+    TableName: process.env.DOCUMENTS_TABLE_NAME,
     Key: { documentId },
-    UpdateExpression: 'SET title = :title, content = :content, updatedAt = :updatedAt',
-    ExpressionAttributeValues: {
-      ':title': title,
-      ':content': content,
-      ':updatedAt': new Date().toISOString(),
-    },
+    UpdateExpression: `SET ${updateExpression.join(', ')}`,
+    ExpressionAttributeNames: { '#version': 'version' },
+    ExpressionAttributeValues: expressionAttributeValues,
+    ReturnValues: 'ALL_NEW',
   }));
 
-  return createSuccessResponse({ message: 'Document updated successfully' });
+  return {
+    statusCode: 200,
+    headers,
+    body: JSON.stringify({
+      success: true,
+      data: result.Attributes,
+    }),
+  };
 }
 
-async function deleteDocument(documentId: string) {
+async function patchDocument(documentId: string, body: any, userId: string) {
+  const { title, content, version: clientVersion } = body;
+
+  if (!title && !content) {
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ success: false, error: { message: 'No fields to update' } }),
+    };
+  }
+
+  // Check document ownership
+  const ownershipCheck = await verifyDocumentOwnership(documentId, userId);
+  if (!ownershipCheck.success) {
+    return ownershipCheck.response;
+  }
+
+  // Get current document for version check
+  const currentDoc = await docClient.send(new GetCommand({
+    TableName: process.env.DOCUMENTS_TABLE_NAME,
+    Key: { documentId },
+  }));
+
+  if (!currentDoc.Item) {
+    return {
+      statusCode: 404,
+      headers,
+      body: JSON.stringify({ success: false, error: { message: 'Document not found' } }),
+    };
+  }
+
+  // Version conflict check for concurrent editing
+  if (clientVersion && currentDoc.Item.version !== clientVersion) {
+    return {
+      statusCode: 409,
+      headers,
+      body: JSON.stringify({ 
+        success: false, 
+        error: { 
+          message: 'Document has been modified by another user',
+          currentVersion: currentDoc.Item.version,
+          conflictData: currentDoc.Item
+        }
+      }),
+    };
+  }
+
+  const updateExpression = [];
+  const expressionAttributeValues: any = {};
+
+  if (title !== undefined) {
+    updateExpression.push('title = :title');
+    expressionAttributeValues[':title'] = title;
+  }
+
+  if (content !== undefined) {
+    updateExpression.push('content = :content');
+    expressionAttributeValues[':content'] = content;
+  }
+
+  updateExpression.push('updatedAt = :updatedAt', '#version = #version + :inc');
+  expressionAttributeValues[':updatedAt'] = new Date().toISOString();
+  expressionAttributeValues[':inc'] = 1;
+
+  const result = await docClient.send(new UpdateCommand({
+    TableName: process.env.DOCUMENTS_TABLE_NAME,
+    Key: { documentId },
+    UpdateExpression: `SET ${updateExpression.join(', ')}`,
+    ExpressionAttributeNames: { '#version': 'version' },
+    ExpressionAttributeValues: expressionAttributeValues,
+    ReturnValues: 'ALL_NEW',
+  }));
+
+  return {
+    statusCode: 200,
+    headers,
+    body: JSON.stringify({
+      success: true,
+      data: result.Attributes,
+    }),
+  };
+}
+
+async function deleteDocument(documentId: string, userId: string) {
+  // Check document ownership
+  const ownershipCheck = await verifyDocumentOwnership(documentId, userId);
+  if (!ownershipCheck.success) {
+    return ownershipCheck.response;
+  }
+
   await docClient.send(new DeleteCommand({
-    TableName: TABLE_NAMES.DOCUMENTS,
+    TableName: process.env.DOCUMENTS_TABLE_NAME,
     Key: { documentId },
   }));
 
-  return createSuccessResponse({ message: 'Document deleted successfully' });
+  return {
+    statusCode: 200,
+    headers,
+    body: JSON.stringify({
+      success: true,
+      message: 'Document deleted successfully',
+    }),
+  };
 }
+
+async function verifyDocumentOwnership(documentId: string, userId: string) {
+  const document = await docClient.send(new GetCommand({
+    TableName: process.env.DOCUMENTS_TABLE_NAME,
+    Key: { documentId },
+  }));
+
+  if (!document.Item) {
+    return {
+      success: false,
+      response: {
+        statusCode: 404,
+        headers,
+        body: JSON.stringify({ success: false, error: { message: 'Document not found' } }),
+      }
+    };
+  }
+
+  if (document.Item.userId !== userId) {
+    return {
+      success: false,
+      response: {
+        statusCode: 403,
+        headers,
+        body: JSON.stringify({ success: false, error: { message: 'Access denied: You can only modify your own documents' } }),
+      }
+    };
+  }
+
+  return { success: true, document: document.Item };
+}
+
