@@ -20,7 +20,27 @@ export interface ResumePrompt {
   jobTitle?: string;
 }
 
-export async function generatePersonalityAnalysis(prompt: AnalysisPrompt): Promise<any> {
+export interface PersonalityAnalysisResult {
+  personalityType: {
+    type: string;
+    description: string;
+    traits: string[];
+  };
+  strengths: Array<{
+    title: string;
+    description: string;
+    evidence: string;
+  }>;
+  weaknesses: Array<{
+    title: string;
+    description: string;
+    improvement: string;
+  }>;
+  values: string[];
+  interests: string[];
+}
+
+export async function generatePersonalityAnalysis(prompt: AnalysisPrompt): Promise<PersonalityAnalysisResult> {
   const systemPrompt = `당신은 한국 IT 업계를 잘 아는 전문 커리어 컨설턴트입니다. 제공된 문서들을 종합적으로 분석하여 실무 중심의 성격 분석을 해주세요.
 
 📋 문서 분석 방법:
@@ -131,7 +151,21 @@ Content: ${doc.content}
   }
 }
 
-export async function generateResume(prompt: ResumePrompt): Promise<any> {
+export interface ResumeResult {
+  personalInfo: {
+    summary: string;
+  };
+  experience: Array<{
+    title: string;
+    company: string;
+    duration: string;
+    description: string;
+  }>;
+  skills: string[];
+  achievements: string[];
+}
+
+export async function generateResume(prompt: ResumePrompt): Promise<ResumeResult> {
   const systemPrompt = `You are an expert resume writer specializing in ${prompt.jobCategory} positions. Create a compelling, ATS-friendly resume.
 
 Requirements:

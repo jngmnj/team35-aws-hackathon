@@ -30,7 +30,13 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   }
 };
 
-async function handleRegister(body: any) {
+interface RegisterRequest {
+  email: string;
+  password: string;
+  name: string;
+}
+
+async function handleRegister(body: RegisterRequest) {
   const { email, password, name } = body;
 
   if (!email || !password || !name) {
@@ -66,7 +72,12 @@ async function handleRegister(body: any) {
   return createSuccessResponse({ userId, email, name, token }, 201);
 }
 
-async function handleLogin(body: any) {
+interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+async function handleLogin(body: LoginRequest) {
   const { email, password } = body;
 
   const result = await docClient.send(new GetCommand({

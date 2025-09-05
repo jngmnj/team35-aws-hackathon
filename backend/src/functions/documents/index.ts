@@ -65,9 +65,13 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   }
 };
 
-async function getDocuments(userId: string, queryParams?: any) {
+interface QueryParams {
+  type?: string;
+}
+
+async function getDocuments(userId: string, queryParams?: QueryParams) {
   let keyConditionExpression = 'userId = :userId';
-  const expressionAttributeValues: any = {
+  const expressionAttributeValues: Record<string, string> = {
     ':userId': userId,
   };
 
@@ -98,7 +102,13 @@ async function getDocuments(userId: string, queryParams?: any) {
   };
 }
 
-async function createDocument(userId: string, body: any) {
+interface CreateDocumentRequest {
+  type: string;
+  title: string;
+  content?: string;
+}
+
+async function createDocument(userId: string, body: CreateDocumentRequest) {
   const { type, title, content } = body;
 
   if (!type || !title) {
@@ -155,7 +165,13 @@ async function createDocument(userId: string, body: any) {
   };
 }
 
-async function updateDocument(documentId: string, body: any, userId: string) {
+interface UpdateDocumentRequest {
+  title?: string;
+  content?: string;
+  type?: string;
+}
+
+async function updateDocument(documentId: string, body: UpdateDocumentRequest, userId: string) {
   const { title, content, type } = body;
 
   // Check document ownership
@@ -192,8 +208,8 @@ async function updateDocument(documentId: string, body: any, userId: string) {
     }
   }
 
-  const updateExpression = [];
-  const expressionAttributeValues: any = {};
+  const updateExpression: string[] = [];
+  const expressionAttributeValues: Record<string, string | number> = {};
 
   if (title) {
     updateExpression.push('title = :title');
@@ -228,7 +244,13 @@ async function updateDocument(documentId: string, body: any, userId: string) {
   };
 }
 
-async function patchDocument(documentId: string, body: any, userId: string) {
+interface PatchDocumentRequest {
+  title?: string;
+  content?: string;
+  version?: number;
+}
+
+async function patchDocument(documentId: string, body: PatchDocumentRequest, userId: string) {
   const { title, content, version: clientVersion } = body;
 
   if (!title && !content) {
@@ -275,8 +297,8 @@ async function patchDocument(documentId: string, body: any, userId: string) {
     };
   }
 
-  const updateExpression = [];
-  const expressionAttributeValues: any = {};
+  const updateExpression: string[] = [];
+  const expressionAttributeValues: Record<string, string | number> = {};
 
   if (title !== undefined) {
     updateExpression.push('title = :title');

@@ -50,7 +50,15 @@ async function getAnalysis(userId: string) {
   });
 }
 
-async function createAnalysis(userId: string, body: any) {
+interface AnalysisRequest {
+  documents: Array<{
+    type: string;
+    title: string;
+    content: string;
+  }>;
+}
+
+async function createAnalysis(userId: string, body: AnalysisRequest) {
   const { documents } = body;
 
   if (!documents || !Array.isArray(documents)) {
