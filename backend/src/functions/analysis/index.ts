@@ -66,25 +66,21 @@ interface AnalysisRequest {
   }>;
 }
 
-async function createAnalysis(userId: string, body: AnalysisRequest) {
-  const { documents } = body;
+async function createAnalysis(userId: string, body: any) {
+  // Get user's documents from database
+  const result = await docClient.send(new QueryCommand({
+    TableName: TABLE_NAMES.DOCUMENTS,
+    IndexName: 'userId-index',
+    KeyConditionExpression: 'userId = :userId',
+    ExpressionAttributeValues: {
+      ':userId': userId,
+    },
+  }));
 
-  if (!documents || !Array.isArray(documents)) {
-    return createErrorResponse(400, 'Documents array is required');
-  }
-
+  const documents = result.Items || [];
+  
   if (documents.length === 0) {
-    return createErrorResponse(400, 'At least one document is required for analysis');
-  }
-
-  // Validate document structure
-  for (const doc of documents) {
-    if (!doc.type || !doc.title || !doc.content) {
-      return createErrorResponse(400, 'Each document must have type, title, and content');
-    }
-    if (typeof doc.content !== 'string' || doc.content.trim().length === 0) {
-      return createErrorResponse(400, 'Document content cannot be empty');
-    }
+    return createErrorResponse(400, 'No documents found for analysis');
   }
 
   try {
