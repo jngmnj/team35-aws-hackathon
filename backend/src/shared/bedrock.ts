@@ -1,6 +1,8 @@
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 
-const client = new BedrockRuntimeClient({ region: 'us-east-1' });
+const client = new BedrockRuntimeClient({ 
+  region: process.env.BEDROCK_REGION || process.env.AWS_REGION || 'us-east-1'
+});
 
 export interface AnalysisPrompt {
   documents: Array<{
@@ -63,19 +65,21 @@ export async function generatePersonalityAnalysis(prompt: AnalysisPrompt): Promi
 3. 단답형 (50자 미만): '정보 부족으로 일반적 추정' 명시
 
 예시:
-- '팀 프로젝트에서 리더 역할을...' → 상세 분석
-- 'React, Vue, JavaScript' → '프론트엔드 기술 관심' 수준
-- '팀워크' → '협업 가치 추정 (근거 부족)'
+- 팀 프로젝트에서 리더 역할을 한 경우 → 상세 분석
+- React, Vue, JavaScript 나열 → 프론트엔드 기술 관심 수준
+- 팀워크 단답 → 협업 가치 추정 (근거 부족)
 
 중요 원칙:
 - 문서 내용이 부족하면 추측하지 말고 분석 한계 명시
 - 반드시 문서에서 직접 인용할 수 있는 내용만 근거로 사용
 
 ✅ 강점/약점 작성 가이드:
-- ❌ 나쁜 예: "리더십이 뛰어남", "완벽주의 성향"
-- ✅ 좋은 예: "'5명 팀 리더 역할 수행' 경험을 통해 보여준 일정 관리와 갈등 조정 능력"
+- ❌ 나쁜 예: 리더십이 뛰어남, 완벽주의 성향
+- ✅ 좋은 예: 5명 팀 리더 역할 수행 경험을 통해 보여준 일정 관리와 갈등 조정 능력
 
 한국어로 답변하고, 모든 분석은 제공된 문서 내용을 근거로 해야 합니다.
+
+**중요: strengths와 weaknesses는 반드시 객체 배열로 작성해야 합니다. 문자열 배열이 아닙니다.**
 
 정확히 이 JSON 구조로만 응답:
 {
@@ -138,21 +142,49 @@ Content: ${doc.content}
       const cleanContent = content.replace(/```json\n?|```\n?/g, '').trim();
       return JSON.parse(cleanContent);
     } catch (parseError) {
-      console.error('JSON 파싱 실패:', content);
-      return {
-        personalityType: { type: "ENFJ", description: "분석 중 오류 발생", traits: ["리더십", "협업", "학습지향"] },
-        strengths: [
-          { title: "문제해결력", description: "다양한 상황에서 창의적 해결책 제시", evidence: "분석 오류로 인한 기본값" },
-          { title: "학습능력", description: "새로운 기술과 지식 습득에 적극적", evidence: "분석 오류로 인한 기본값" },
-          { title: "커뮤니케이션", description: "팀원과의 원활한 소통 능력", evidence: "분석 오류로 인한 기본값" }
-        ],
-        weaknesses: [
-          { title: "완벽주의", description: "과도한 완벽 추구로 인한 시간 소요", improvement: "우선순위 설정과 적정 품질 기준 수립" },
-          { title: "시간관리", description: "업무 일정 관리의 어려움", improvement: "체계적인 일정 관리 도구 활용" }
-        ],
-        values: ["팀워크", "성장", "품질"],
-        interests: ["개발", "기술", "혁신"]
-      };
+      console.error('JSON 파싱 실패:', parseError instanceof Error ? parseError.message : String(parseError));
+      console.error('원본 응답:', content);
+      
+      // Try to extract and fix the response
+      try {
+        // Look for the actual response structure and convert it
+        const result = JSON.parse(content);
+        
+        // Convert string arrays to object arrays if needed
+        if (result.strengths && Array.isArray(result.strengths) && typeof result.strengths[0] === 'string') {
+          result.strengths = result.strengths.map((strength: string) => ({
+            title: strength,
+            description: `${strength}에 대한 구체적 설명`,
+            evidence: "문서 분석 결과"
+          }));
+        }
+        
+        if (result.weaknesses && Array.isArray(result.weaknesses) && typeof result.weaknesses[0] === 'string') {
+          result.weaknesses = result.weaknesses.map((weakness: string) => ({
+            title: weakness,
+            description: `${weakness}에 대한 구체적 설명`,
+            improvement: "개선 방법 제안"
+          }));
+        }
+        
+        return result;
+      } catch {
+        // Final fallback
+        return {
+          personalityType: { type: "ENFJ", description: "분석 중 오류 발생", traits: ["리더십", "협업", "학습지향"] },
+          strengths: [
+            { title: "문제해결력", description: "다양한 상황에서 창의적 해결책 제시", evidence: "분석 오류로 인한 기본값" },
+            { title: "학습능력", description: "새로운 기술과 지식 습득에 적극적", evidence: "분석 오류로 인한 기본값" },
+            { title: "커뮤니케이션", description: "팀원과의 원활한 소통 능력", evidence: "분석 오류로 인한 기본값" }
+          ],
+          weaknesses: [
+            { title: "완벽주의", description: "과도한 완벽 추구로 인한 시간 소요", improvement: "우선순위 설정과 적정 품질 기준 수립" },
+            { title: "시간관리", description: "업무 일정 관리의 어려움", improvement: "체계적인 일정 관리 도구 활용" }
+          ],
+          values: ["팀워크", "성장", "품질"],
+          interests: ["개발", "기술", "혁신"]
+        };
+      }
     }
   } catch (error) {
     console.error('Bedrock 호출 실패:', error);
@@ -175,31 +207,29 @@ export interface ResumeResult {
 }
 
 export async function generateResume(prompt: ResumePrompt): Promise<ResumeResult> {
-  const systemPrompt = `You are an expert resume writer specializing in ${prompt.jobCategory} positions. Create a compelling, ATS-friendly resume.
+  const systemPrompt = `You are a resume writer. Create a resume for ${prompt.jobCategory} position.
 
-Requirements:
-1. Professional Summary: 2-3 sentences highlighting relevant skills for ${prompt.jobCategory}
-2. Experience: Extract and enhance experiences, quantify achievements when possible
-3. Skills: Prioritize technical skills relevant to ${prompt.jobCategory}, include soft skills
-4. Achievements: Focus on measurable results and impact
+Analyze the provided documents and create a professional resume.
 
-Use Korean for content when analyzing Korean documents. Make it professional and compelling.
+**IMPORTANT: All content must be written in Korean language. Write all text fields in Korean.**
 
-Return ONLY valid JSON with this exact structure:
+IMPORTANT: Return ONLY a valid JSON object. No markdown, no code blocks, no explanations. Just pure JSON.
+
+JSON structure:
 {
   "personalInfo": {
-    "summary": "${prompt.jobCategory} 전문가로서..."
+    "summary": "한국어로 작성된 직무에 맞춤 전문 요약"
   },
   "experience": [
     {
       "title": "직책명",
-      "company": "회사/프로젝트명",
+      "company": "회사명",
       "duration": "기간",
-      "description": "구체적인 성과와 기여도 포함한 설명"
+      "description": "성과를 포함한 한국어 업무 설명"
     }
   ],
-  "skills": ["기술스킬1", "기술스킬2", "소프트스킬1"],
-  "achievements": ["정량적 성과1", "정량적 성과2"]
+  "skills": ["기술1", "기술2", "기술3"],
+  "achievements": ["성과1", "성과2"]
 }`;
 
   const userPrompt = `Target Job Category: ${prompt.jobCategory}
@@ -231,31 +261,65 @@ Content: ${doc.content}
     accept: "application/json",
   });
 
+  let content = '';
   try {
+    console.log('Bedrock 호출 시작');
     const response = await client.send(command);
     const responseBody = JSON.parse(new TextDecoder().decode(response.body));
-    const content = responseBody.content[0].text;
     
-    try {
-      // Remove markdown code blocks if present
-      const cleanContent = content.replace(/```json\n?|```\n?/g, '').trim();
-      return JSON.parse(cleanContent);
-    } catch (parseError) {
-      console.error('JSON 파싱 실패:', content);
-      return {
-        personalInfo: { summary: `${prompt.jobCategory} 분야의 전문성을 갖춘 개발자입니다.` },
-        experience: [{
-          title: "개발자",
-          company: "프로젝트",
-          duration: "진행중",
-          description: "다양한 기술을 활용한 개발 경험"
-        }],
-        skills: ["JavaScript", "React", "문제해결력"],
-        achievements: ["프로젝트 성공적 완료", "팀워크 발휘"]
-      };
+    if (!responseBody.content || !responseBody.content[0] || !responseBody.content[0].text) {
+      throw new Error('Invalid response format from Bedrock');
     }
-  } catch (error) {
-    console.error('Bedrock 호출 실패:', error);
-    throw new Error('이력서 생성 서비스 일시 중단');
+    
+    content = responseBody.content[0].text;
+    console.log('Raw response first 200 chars:', content.substring(0, 200));
+    console.log('Content includes backticks:', content.includes('`'));
+    console.log('Content includes json marker:', content.toLowerCase().includes('json'));
+    
+    // Step 1: Find JSON boundaries first
+    const jsonStart = content.indexOf('{');
+    const jsonEnd = content.lastIndexOf('}');
+    
+    if (jsonStart === -1 || jsonEnd === -1) {
+      console.error('No JSON brackets found in content');
+      throw new Error('No JSON found');
+    }
+    
+    // Step 2: Extract only the JSON part
+    const jsonStr = content.substring(jsonStart, jsonEnd + 1);
+    console.log('Extracted JSON first 100 chars:', jsonStr.substring(0, 100));
+    
+    const result = JSON.parse(jsonStr);
+    console.log('이력서 생성 성공');
+    return result;
+  } catch (parseError) {
+    console.error('JSON 파싱 실패:', parseError instanceof Error ? parseError.message : String(parseError));
+    console.error('원본 응답 전체:', content);
+    
+    // Try alternative parsing methods
+    try {
+      // Method 1: Remove everything before first { and after last }
+      const start = content.indexOf('{');
+      const end = content.lastIndexOf('}') + 1;
+      if (start !== -1 && end > start) {
+        const extracted = content.slice(start, end);
+        return JSON.parse(extracted);
+      }
+    } catch (e) {
+      console.error('Alternative parsing failed:', e instanceof Error ? e.message : String(e));
+    }
+    
+    // Return safe fallback
+    return {
+      personalInfo: { summary: `${prompt.jobCategory} 분야의 전문성을 갖춘 개발자입니다.` },
+      experience: [{
+        title: "개발자",
+        company: "프로젝트",
+        duration: "진행중",
+        description: "다양한 기술을 활용한 개발 경험"
+      }],
+      skills: ["JavaScript", "React", "문제해결력"],
+      achievements: ["프로젝트 성공적 완료", "팀워크 발휘"]
+    };
   }
-}
+} 
