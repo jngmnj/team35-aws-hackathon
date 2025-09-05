@@ -79,7 +79,7 @@ export function ResumeGenerator({ onGenerate }: ResumeGeneratorProps) {
     const content = `
 이력서
 
-요약: ${resume.content.personalInfo.name}
+요약: ${resume.content.personalInfo.summary}
 
 경험:
 ${resume.content.experience.map(exp => `${exp.title} - ${exp.company} (${exp.duration})\n${exp.description}`).join('\n\n')}
@@ -145,7 +145,7 @@ ${resume.content.achievements.map(achievement => `• ${achievement}`).join('\n'
 
   if (resume) {
     const displayResume: ResumeContentDisplay = {
-      personalInfo: { summary: resume.content.personalInfo.name },
+      personalInfo: { summary: resume.content.personalInfo.summary },
       experience: resume.content.experience,
       skills: resume.content.skills,
       achievements: resume.content.achievements

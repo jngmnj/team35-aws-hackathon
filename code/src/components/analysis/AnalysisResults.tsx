@@ -29,13 +29,13 @@ export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
 
     const loadData = async () => {
       try {
-        const [existingAnalysis, documents] = await Promise.all([
-          apiClient.getAnalysis().catch(() => null),
+        const [existingAnalyses, documents] = await Promise.all([
+          apiClient.getAnalysis().catch(() => []),
           apiClient.getDocuments().catch(() => [])
         ]);
         
-        if (existingAnalysis) {
-          setAnalysis(existingAnalysis);
+        if (existingAnalyses && existingAnalyses.length > 0) {
+          setAnalysis(existingAnalyses[0]);
         }
         setDocumentCount(documents.length);
       } catch {
@@ -116,18 +116,18 @@ export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
             <Loader2 className="w-6 h-6 text-primary animate-spin" />
           </div>
         </Card>
-      ) : analysis && (
+      ) : analysis && analysis.result && (
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <PersonalityCard 
-              personalityType={analysis.personalityType}
-              strengths={analysis.strengths}
-              weaknesses={analysis.weaknesses}
+              personalityType={analysis.result.personalityType}
+              strengths={analysis.result.strengths}
+              weaknesses={analysis.result.weaknesses}
             />
             <PersonalityVisualization 
-              personalityType={analysis.personalityType}
-              strengths={analysis.strengths}
-              weaknesses={analysis.weaknesses}
+              personalityType={analysis.result.personalityType}
+              strengths={analysis.result.strengths}
+              weaknesses={analysis.result.weaknesses}
             />
           </div>
           <InsightsDisplay analysis={analysis} />

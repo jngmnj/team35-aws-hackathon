@@ -9,7 +9,15 @@ import { createErrorResponse, createSuccessResponse } from '../../shared/utils';
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
     if (event.httpMethod === 'OPTIONS') {
-      return { statusCode: 200, headers: {}, body: '' };
+      return { 
+        statusCode: 200, 
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        }, 
+        body: '' 
+      };
     }
 
     const authResult = verifyToken(event.headers.Authorization || event.headers.authorization);
@@ -116,23 +124,36 @@ async function createResume(userId: string, body: any) {
     return createErrorResponse(400, 'Valid job category is required');
   }
 
-  // Get user's documents from database
-  const result = await docClient.send(new QueryCommand({
-    TableName: TABLE_NAMES.DOCUMENTS,
-    IndexName: 'userId-index', 
-    KeyConditionExpression: 'userId = :userId',
-    ExpressionAttributeValues: {
-      ':userId': userId,
-    },
-  }));
-
-  const documents = result.Items || [];
-  
-  if (documents.length === 0) {
-    return createErrorResponse(400, 'No documents found for resume generation');
-  }
+  console.log('Creating resume for userId:', userId, 'jobCategory:', jobCategory);
 
   try {
+    // Get user's documents from database with error handling
+    const result = await docClient.send(new QueryCommand({
+      TableName: TABLE_NAMES.DOCUMENTS,
+      IndexName: 'userId-index', 
+      KeyConditionExpression: 'userId = :userId',
+      ExpressionAttributeValues: {
+        ':userId': userId,
+      },
+    }));
+
+    console.log('Documents query result count:', result.Count || 0);
+    const rawDocuments = result.Items || [];
+    
+    if (rawDocuments.length === 0) {
+      return createErrorResponse(400, 'No documents found for resume generation. Please add some documents first.');
+    }
+
+    // Map documents to the expected format
+    const documents = rawDocuments.map(doc => ({
+      type: doc.type || 'Unknown',
+      title: doc.title || 'Untitled',
+      content: doc.content || ''
+    }));
+
+    console.log('Mapped documents for resume:', documents.length);
+
+    // Generate resume with AI
     const resumeResult = await generateResume({ documents, jobCategory, jobTitle });
     const resumeId = uuidv4();
 
@@ -140,19 +161,36 @@ async function createResume(userId: string, body: any) {
       resumeId,
       userId,
       jobCategory,
-      jobTitle,
+      jobTitle: jobTitle || '',
       content: resumeResult,
       createdAt: new Date().toISOString(),
     };
 
+    // Save resume to database
     await docClient.send(new PutCommand({
       TableName: TABLE_NAMES.RESUMES,
       Item: resume,
     }));
 
+    console.log('Resume created successfully:', resumeId);
     return createSuccessResponse(resume, 201);
+    
   } catch (error) {
-    console.error('이력서 생성 실패:', error);
+    console.error('이력서 생성 실패 - 상세 오류:', error);
+    
+    // Specific error handling
+    if (error instanceof Error) {
+      if (error.message.includes('ResourceNotFoundException')) {
+        return createErrorResponse(500, 'Database configuration error. Please contact support.');
+      }
+      if (error.message.includes('AccessDeniedException')) {
+        return createErrorResponse(500, 'AI service access denied. Please contact support.');
+      }
+      if (error.message.includes('ThrottlingException')) {
+        return createErrorResponse(429, 'Service temporarily busy. Please try again in a few moments.');
+      }
+    }
+    
     return createErrorResponse(500, '이력서 생성 서비스 일시 중단. 잠시 후 다시 시도해주세요.');
   }
 }

@@ -24,7 +24,7 @@ class ApiClient {
 
   constructor() {
     this.client = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+      baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://oxunoozv13.execute-api.us-east-1.amazonaws.com/prod',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -122,24 +122,25 @@ class ApiClient {
 
   // Analysis methods
   async generateAnalysis(): Promise<AnalysisResult> {
-    const { data } = await this.client.post('/analysis/generate');
+    const { data } = await this.client.post('/analysis');
     return data.data;
   }
 
-  async getAnalysis(): Promise<AnalysisResult> {
+  async getAnalysis(): Promise<AnalysisResult[]> {
     const { data } = await this.client.get('/analysis');
-    return data.data;
+    return data.data.analyses;
   }
 
   // Resume methods
-  async generateResume(jobCategory: string): Promise<ResumeContent> {
-    const { data } = await this.client.post('/resume/generate', { jobCategory });
+  async generateResume(jobCategory: string, jobTitle?: string): Promise<ResumeContent> {
+    const { data } = await this.client.post('/resume', { jobCategory, jobTitle });
     return data.data;
   }
 
-  async getResume(jobCategory: string): Promise<ResumeContent> {
-    const { data } = await this.client.get(`/resume?jobCategory=${jobCategory}`);
-    return data.data;
+  async getResumes(jobCategory?: string): Promise<ResumeContent[]> {
+    const url = jobCategory ? `/resume?jobCategory=${jobCategory}` : '/resume';
+    const { data } = await this.client.get(url);
+    return data.data.resumes;
   }
 }
 

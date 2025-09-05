@@ -27,9 +27,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     }
 
     if (path.endsWith('/register')) {
-      return await handleRegister(body);
+      return await handleRegister(body as RegisterRequest);
     } else if (path.endsWith('/login')) {
-      return await handleLogin(body);
+      return await handleLogin(body as LoginRequest);
     }
 
     return createErrorResponse(404, 'Not found');

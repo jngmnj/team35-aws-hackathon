@@ -1,12 +1,12 @@
 'use client';
 
-import { PersonalityType } from '@/types';
+import { PersonalityType, StrengthItem, WeaknessItem } from '@/types';
 import { Card } from '@/components/ui/card';
 
 interface PersonalityVisualizationProps {
   personalityType: PersonalityType;
-  strengths: string[];
-  weaknesses: string[];
+  strengths: StrengthItem[];
+  weaknesses: WeaknessItem[];
 }
 
 export function PersonalityVisualization({ personalityType, strengths, weaknesses }: PersonalityVisualizationProps) {

@@ -6,6 +6,7 @@ import { apiClient } from '@/lib/api';
 
 export function useAnalysis() {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  const [analyses, setAnalyses] = useState<AnalysisResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -13,8 +14,11 @@ export function useAnalysis() {
     try {
       setIsLoading(true);
       setError(null);
-      const result = await apiClient.getAnalysis();
-      setAnalysis(result);
+      const results = await apiClient.getAnalysis();
+      setAnalyses(results);
+      if (results.length > 0) {
+        setAnalysis(results[0]); // 가장 최근 분석 결과
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
@@ -45,6 +49,7 @@ export function useAnalysis() {
 
   return {
     analysis,
+    analyses,
     isLoading,
     error,
     generateAnalysis,

@@ -24,12 +24,13 @@ export function useResume() {
     }
   };
 
-  const getResume = async (jobCategory: JobCategory) => {
+  const loadResumes = async (jobCategory?: JobCategory) => {
     try {
       setIsLoading(true);
       setError(null);
-      const result = await apiClient.getResume(jobCategory);
-      return result;
+      const results = await apiClient.getResumes(jobCategory);
+      setResumes(results);
+      return results;
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Unknown error');
       throw err;
@@ -45,7 +46,7 @@ export function useResume() {
     isLoading,
     error,
     generateResume,
-    getResume,
+    loadResumes,
     clearError
   };
 }

@@ -20,11 +20,10 @@ export default function ResumePage() {
     if (!selectedResume) return;
     
     const content = `
-이력서 - ${selectedResume.content.personalInfo.name}
+이력서 - ${selectedResume.jobCategory}
 
-개인정보:
-이름: ${selectedResume.content.personalInfo.name}
-이메일: ${selectedResume.content.personalInfo.email}
+요약:
+${selectedResume.content.personalInfo.summary}
 
 경험:
 ${selectedResume.content.experience.map(exp => `${exp.title} - ${exp.company} (${exp.duration})\n${exp.description}`).join('\n\n')}
@@ -90,7 +89,7 @@ ${selectedResume.content.achievements.map(achievement => `• ${achievement}`).j
           selectedResume ? (
             <ResumePreview 
               resume={{
-                personalInfo: { summary: selectedResume.content.personalInfo.name },
+                personalInfo: { summary: selectedResume.content.personalInfo.summary },
                 experience: selectedResume.content.experience,
                 skills: selectedResume.content.skills,
                 achievements: selectedResume.content.achievements
