@@ -11,9 +11,9 @@ export default function RegisterPage() {
       <div className="space-y-4">
         <RegisterForm />
         <p className="text-center text-sm text-muted-foreground">
-          Already have an account?{' '}
+          이미 계정이 있으신가요?{' '}
           <Link href="/login" className="text-primary hover:underline cursor-pointer">
-            Login here
+            로그인
           </Link>
         </p>
       </div>

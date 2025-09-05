@@ -29,12 +29,12 @@ export function LoginForm() {
 
   return (
     <Card className="w-full max-w-md p-6">
-      <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center">로그인</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <Input
             type="email"
-            placeholder="Email"
+            placeholder="이메일"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -43,7 +43,7 @@ export function LoginForm() {
         <div>
           <Input
             type="password"
-            placeholder="Password"
+            placeholder="비밀번호"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -51,7 +51,7 @@ export function LoginForm() {
         </div>
 
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? 'Logging in...' : 'Login'}
+          {isLoading ? '로그인 중...' : '로그인'}
         </Button>
       </form>
     </Card>
