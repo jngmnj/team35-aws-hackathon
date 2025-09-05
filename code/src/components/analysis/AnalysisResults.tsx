@@ -27,23 +27,16 @@ export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
       return;
     }
 
-    const loadData = async () => {
+    const loadDocumentCount = async () => {
       try {
-        const [existingAnalyses, documents] = await Promise.all([
-          apiClient.getAnalysis().catch(() => []),
-          apiClient.getDocuments().catch(() => [])
-        ]);
-        
-        if (existingAnalyses && existingAnalyses.length > 0) {
-          setAnalysis(existingAnalyses[0]);
-        }
+        const documents = await apiClient.getDocuments().catch(() => []);
         setDocumentCount(documents.length);
       } catch {
         // Handle errors silently
       }
     };
     
-    loadData();
+    loadDocumentCount();
   }, [selectedAnalysis]);
 
   const { showToast } = useToast();
@@ -102,14 +95,6 @@ export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
     <div className="space-y-8">
       {isLoading ? (
         <Card className="p-12 text-center bg-accent border-accent">
-          <div className="relative">
-            <div className="w-20 h-20 border-4 border-muted border-t-primary rounded-full animate-spin mx-auto mb-6"></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-primary" />
-              </div>
-            </div>
-          </div>
           <h3 className="text-xl font-semibold mb-2 text-foreground">분석 진행 중</h3>
           <p className="text-muted-foreground text-lg">AI가 당신의 성격을 분석하고 있습니다...</p>
           <div className="mt-6 flex justify-center">

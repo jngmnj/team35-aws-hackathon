@@ -12,6 +12,7 @@ import { DocumentType } from '@/types';
 interface DocumentEditorProps {
   onSave: (data: { title: string; type: DocumentType; content: string }) => void;
   initialData?: { title: string; type: DocumentType; content: string };
+  isModal?: boolean;
 }
 
 const placeholders = {
@@ -21,7 +22,7 @@ const placeholders = {
   achievements: '주요 성취와 수상 경력을 강조해주세요...'
 };
 
-export function DocumentEditor({ onSave, initialData }: DocumentEditorProps) {
+export function DocumentEditor({ onSave, initialData, isModal = false }: DocumentEditorProps) {
   const [title, setTitle] = useState(initialData?.title || '');
   const [type, setType] = useState<DocumentType>(initialData?.type || 'experience');
   const [isSaving, setIsSaving] = useState(false);
@@ -51,6 +52,41 @@ export function DocumentEditor({ onSave, initialData }: DocumentEditorProps) {
       setIsSaving(false);
     }
   };
+
+  if (isModal) {
+    return (
+      <div className="flex flex-col h-full">
+        <div className="flex-1 space-y-4 p-6">
+          <Input
+            placeholder="문서 제목"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          
+          <select 
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            value={type} 
+            onChange={(e) => setType(e.target.value as DocumentType)}
+          >
+            <option value="experience">경험</option>
+            <option value="skills">기술</option>
+            <option value="values">가치관</option>
+            <option value="achievements">성과</option>
+          </select>
+
+          <div className="border rounded-md p-4 min-h-[400px] max-h-[400px] overflow-y-auto prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-strong:text-gray-900 prose-ul:text-gray-700 prose-ol:text-gray-700 prose-blockquote:text-gray-600 prose-code:text-blue-600 prose-pre:bg-gray-100">
+            <EditorContent editor={editor} />
+          </div>
+        </div>
+        
+        <div className="flex-shrink-0 p-6 pt-0">
+          <Button onClick={handleSave} disabled={!title.trim() || isSaving} className="w-full">
+            {isSaving ? '저장 중...' : '저장'}
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Card className="p-6">

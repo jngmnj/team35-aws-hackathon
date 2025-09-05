@@ -130,6 +130,7 @@ export default function DocumentsPage() {
                   type: newDocumentType,
                   content: ''
                 }}
+                isModal={true}
               />
             </div>
           </DialogContent>

@@ -44,3 +44,4 @@ applications:
       variables:
         NODE_ENV: production
         NEXT_TELEMETRY_DISABLED: 1
+        NEXT_PUBLIC_API_URL: https://oxunoozv13.execute-api.us-east-1.amazonaws.com/prod

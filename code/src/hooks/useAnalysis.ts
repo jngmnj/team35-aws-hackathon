@@ -43,9 +43,7 @@ export function useAnalysis() {
 
   const clearError = () => setError(null);
 
-  useEffect(() => {
-    loadAnalysis();
-  }, []);
+  // 자동 로딩 제거 - 버튼 클릭시에만 분석 실행
 
   return {
     analysis,
