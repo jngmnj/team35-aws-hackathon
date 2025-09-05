@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ResumeContent, JobCategory } from '@/types';
 import { apiClient } from '@/lib/api';
 

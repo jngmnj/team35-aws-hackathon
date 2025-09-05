@@ -9,7 +9,7 @@ import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
 import { FileText, Sparkles, FileUser, Plus, Briefcase, Code2, Trophy } from 'lucide-react';
 
 export default function Dashboard() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { documents, isLoading } = useDocuments();
 
   const documentCounts = {

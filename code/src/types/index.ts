@@ -56,9 +56,7 @@ export interface ResumeContent {
   jobCategory: JobCategory;
   jobTitle?: string;
   content: {
-    personalInfo: {
-      summary: string;
-    };
+    personalInfo: PersonalInfo;
     experience: Experience[];
     skills: string[];
     achievements: string[];
@@ -71,6 +69,7 @@ export interface PersonalInfo {
   email: string;
   phone?: string;
   location?: string;
+  summary?: string;
 }
 
 export interface Experience {

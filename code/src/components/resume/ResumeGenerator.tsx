@@ -14,7 +14,7 @@ import { apiClient } from '@/lib/api';
 import { ResumeContent } from '@/types';
 
 interface ResumeContentDisplay {
-  personalInfo: { summary: string };
+  personalInfo: { summary?: string };
   experience: Array<{
     title: string;
     company: string;
@@ -25,17 +25,13 @@ interface ResumeContentDisplay {
   achievements: string[];
 }
 
-interface ResumeGeneratorProps {
-  onGenerate?: (category: JobCategory) => Promise<ResumeContent>;
-}
-
-export function ResumeGenerator({ onGenerate }: ResumeGeneratorProps) {
+export function ResumeGenerator() {
   const [selectedCategory, setSelectedCategory] = useState<JobCategory>();
   const [selectedTemplate, setSelectedTemplate] = useState<string>();
   const [resume, setResume] = useState<ResumeContent | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [documentCount, setDocumentCount] = useState(0);
-  const [error, setError] = useState<string | null>(null);
+
   const [isEditing, setIsEditing] = useState(false);
   const [step, setStep] = useState<'category' | 'template' | 'generate'>('category');
 
@@ -58,7 +54,7 @@ export function ResumeGenerator({ onGenerate }: ResumeGeneratorProps) {
     if (!selectedCategory || !selectedTemplate) return;
     
     setIsGenerating(true);
-    setError(null);
+
     
     try {
       const generatedResume = await apiClient.generateResume(selectedCategory);

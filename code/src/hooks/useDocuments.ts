@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Document, DocumentType } from '@/types';
 import { useAuth } from '@/lib/auth-context';
 import { apiClient } from '@/lib/api';
@@ -33,7 +33,7 @@ export function useDocuments(): UseDocumentsReturn {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  const loadDocuments = async () => {
+  const loadDocuments = useCallback(async () => {
     if (!user) return;
     
     setIsLoading(true);
@@ -47,11 +47,11 @@ export function useDocuments(): UseDocumentsReturn {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     loadDocuments();
-  }, [user]);
+  }, [loadDocuments]);
 
   const createDocument = async (data: CreateDocumentData): Promise<Document> => {
     setError(null);
