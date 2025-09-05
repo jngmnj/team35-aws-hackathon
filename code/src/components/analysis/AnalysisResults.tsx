@@ -18,7 +18,7 @@ interface AnalysisResultsProps {
 export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+
   const [documentCount, setDocumentCount] = useState(0);
 
   useEffect(() => {
@@ -43,7 +43,7 @@ export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
 
   const handleGenerateAnalysis = async () => {
     setIsLoading(true);
-    setError(null);
+
     
     try {
       const newAnalysis = await apiClient.generateAnalysis();

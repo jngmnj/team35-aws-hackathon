@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Download, Edit, Check } from 'lucide-react';
 
 interface ResumeContentDisplay {
-  personalInfo: { summary: string };
+  personalInfo: { summary?: string };
   experience: Array<{
     title: string;
     company: string;
@@ -44,7 +44,7 @@ export function ResumePreview({ resume, onDownload, onEdit }: ResumePreviewProps
           <h3 className="text-lg font-semibold mb-3 text-primary border-b border-border pb-1">
             요약
           </h3>
-          <p className="text-foreground leading-relaxed">{resume.personalInfo.summary}</p>
+          <p className="text-foreground leading-relaxed">{resume.personalInfo.summary || '요약 정보가 없습니다.'}</p>
         </section>
         
         <section>

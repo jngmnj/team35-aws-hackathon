@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { AnalysisResults } from '@/components/analysis/AnalysisResults';
 import { AnalysisHistory } from '@/components/analysis/AnalysisHistory';
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
-import { Tabs } from '@/components/ui/tabs';
+
 import { AnalysisResult } from '@/types';
 
 export default function AnalysisPage() {

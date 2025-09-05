@@ -10,19 +10,7 @@ interface PersonalityVisualizationProps {
 }
 
 export function PersonalityVisualization({ personalityType, strengths, weaknesses }: PersonalityVisualizationProps) {
-  const getPersonalityColor = (type: string) => {
-    const colors = {
-      'E': 'from-red-400 to-red-600',
-      'I': 'from-blue-400 to-blue-600',
-      'S': 'from-green-400 to-green-600',
-      'N': 'from-purple-400 to-purple-600',
-      'T': 'from-orange-400 to-orange-600',
-      'F': 'from-pink-400 to-pink-600',
-      'J': 'from-indigo-400 to-indigo-600',
-      'P': 'from-yellow-400 to-yellow-600'
-    };
-    return colors[type[0] as keyof typeof colors] || 'from-gray-400 to-gray-600';
-  };
+
 
   const strengthsPercentage = Math.min((strengths.length / 5) * 100, 100);
   const improvementPercentage = Math.min((weaknesses.length / 5) * 100, 100);

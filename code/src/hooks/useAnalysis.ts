@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { AnalysisResult } from '@/types';
 import { apiClient } from '@/lib/api';
 
