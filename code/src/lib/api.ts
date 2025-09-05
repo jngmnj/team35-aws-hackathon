@@ -37,6 +37,7 @@ class ApiClient {
     });
 
     this.client.interceptors.request.use((config) => {
+      console.log('Making request to:', config.baseURL + config.url);
       if (this.token) {
         config.headers.Authorization = `Bearer ${this.token}`;
       }
@@ -46,6 +47,16 @@ class ApiClient {
     this.client.interceptors.response.use(
       (response) => response,
       (error) => {
+        console.error('API Error Details:', {
+          url: error.config?.url,
+          method: error.config?.method,
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data,
+          code: error.code,
+          message: error.message
+        });
+        
         if (error.response?.status === 401) {
           this.clearToken();
         }

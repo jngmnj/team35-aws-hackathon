@@ -1,4 +1,4 @@
-import * as jwt from 'jsonwebtoken';
+import { verifyToken as jwtVerify } from './jwt';
 
 export interface AuthResult {
   success: boolean;
@@ -8,20 +8,23 @@ export interface AuthResult {
 }
 
 export function verifyToken(authHeader?: string): AuthResult {
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return { success: false, error: 'Missing or invalid authorization header' };
+  if (!authHeader) {
+    return { success: false, error: 'No authorization header' };
   }
 
-  const token = authHeader.substring(7);
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-    return {
-      success: true,
-      userId: decoded.userId,
-      email: decoded.email,
-    };
-  } catch (error) {
-    return { success: false, error: 'Invalid token' };
+  const token = authHeader.replace('Bearer ', '');
+  if (!token) {
+    return { success: false, error: 'No token provided' };
   }
+
+  const result = jwtVerify(token);
+  if (!result.success) {
+    return { success: false, error: result.error };
+  }
+
+  return {
+    success: true,
+    userId: result.payload?.userId,
+    email: result.payload?.email
+  };
 }
