@@ -122,24 +122,26 @@ class ApiClient {
 
   // Analysis methods
   async generateAnalysis(): Promise<AnalysisResult> {
-    const { data } = await this.client.post('/analysis/generate');
+    const { data } = await this.client.post('/analysis');
     return data.data;
   }
 
-  async getAnalysis(): Promise<AnalysisResult> {
+  async getAnalysis(): Promise<AnalysisResult | null> {
     const { data } = await this.client.get('/analysis');
-    return data.data;
+    const analyses = data.data.analyses;
+    return analyses.length > 0 ? analyses[0] : null;
   }
 
   // Resume methods
   async generateResume(jobCategory: string): Promise<ResumeContent> {
-    const { data } = await this.client.post('/resume/generate', { jobCategory });
+    const { data } = await this.client.post('/resume', { jobCategory });
     return data.data;
   }
 
-  async getResume(jobCategory: string): Promise<ResumeContent> {
+  async getResume(jobCategory: string): Promise<ResumeContent | null> {
     const { data } = await this.client.get(`/resume?jobCategory=${jobCategory}`);
-    return data.data;
+    const resumes = data.data.resumes;
+    return resumes.length > 0 ? resumes[0] : null;
   }
 }
 

@@ -120,14 +120,14 @@ export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <PersonalityCard 
-              personalityType={analysis.personalityType}
-              strengths={analysis.strengths}
-              weaknesses={analysis.weaknesses}
+              personalityType={analysis.result.personalityType}
+              strengths={analysis.result.strengths}
+              weaknesses={analysis.result.weaknesses}
             />
             <PersonalityVisualization 
-              personalityType={analysis.personalityType}
-              strengths={analysis.strengths}
-              weaknesses={analysis.weaknesses}
+              personalityType={analysis.result.personalityType}
+              strengths={analysis.result.strengths}
+              weaknesses={analysis.result.weaknesses}
             />
           </div>
           <InsightsDisplay analysis={analysis} />

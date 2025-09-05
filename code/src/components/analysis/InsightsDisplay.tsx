@@ -33,7 +33,7 @@ export function InsightsDisplay({ analysis, isLoading }: InsightsDisplayProps) {
           핵심 가치관
         </h3>
         <ul className="space-y-3" role="list" aria-label="핵심 가치관 목록">
-          {analysis.values.map((value, index) => (
+          {analysis.result.values.map((value, index) => (
             <li key={index} className="flex items-start group">
               <div className="w-2 h-2 bg-primary rounded-full mr-3 mt-2 flex-shrink-0 group-hover:bg-primary/80 transition-colors"></div>
               <span className="text-foreground leading-relaxed group-hover:text-foreground/80 transition-colors">{value}</span>
@@ -48,7 +48,7 @@ export function InsightsDisplay({ analysis, isLoading }: InsightsDisplayProps) {
           관심 분야
         </h3>
         <ul className="space-y-3" role="list" aria-label="관심 분야 목록">
-          {analysis.interests.map((interest, index) => (
+          {analysis.result.interests.map((interest, index) => (
             <li key={index} className="flex items-start group">
               <div className="w-2 h-2 bg-primary rounded-full mr-3 mt-2 flex-shrink-0 group-hover:bg-primary/80 transition-colors"></div>
               <span className="text-foreground leading-relaxed group-hover:text-foreground/80 transition-colors">{interest}</span>
