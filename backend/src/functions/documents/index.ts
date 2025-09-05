@@ -223,7 +223,7 @@ async function updateDocument(documentId: string, body: UpdateDocumentRequest, u
   // Check document ownership
   const ownershipCheck = await verifyDocumentOwnership(documentId, userId);
   if (!ownershipCheck.success) {
-    return ownershipCheck.response;
+    return ownershipCheck.response!;
   }
 
   if (!title && !content) {
@@ -310,7 +310,7 @@ async function patchDocument(documentId: string, body: PatchDocumentRequest, use
   // Check document ownership
   const ownershipCheck = await verifyDocumentOwnership(documentId, userId);
   if (!ownershipCheck.success) {
-    return ownershipCheck.response;
+    return ownershipCheck.response!;
   }
 
   // Get current document for version check
@@ -391,7 +391,7 @@ async function deleteDocument(documentId: string, userId: string): Promise<APIGa
   // Check document ownership
   const ownershipCheck = await verifyDocumentOwnership(documentId, userId);
   if (!ownershipCheck.success) {
-    return ownershipCheck.response;
+    return ownershipCheck.response!;
   }
 
   await docClient.send(new DeleteCommand({
@@ -409,7 +409,11 @@ async function deleteDocument(documentId: string, userId: string): Promise<APIGa
   };
 }
 
-async function verifyDocumentOwnership(documentId: string, userId: string) {
+async function verifyDocumentOwnership(documentId: string, userId: string): Promise<{
+  success: boolean;
+  response?: APIGatewayProxyResult;
+  document?: any;
+}> {
   const document = await docClient.send(new GetCommand({
     TableName: process.env.DOCUMENTS_TABLE_NAME,
     Key: { documentId },
