@@ -192,19 +192,18 @@ Delete document.
 }
 ```
 
-### Analysis - ⏳ **Bedrock Integration Structure Complete, Actual Implementation Needed**
+### Analysis - ✅ **Complete**
 
-#### POST /analysis/generate - ❌ **Not Implemented**
+#### POST /analysis/generate - ✅ **Implemented**
 Generate personality analysis from user documents.
 
-**Implementation Status**: Bedrock integration code structure complete, prompts and logic not implemented
+**Implementation Status**: Fully implemented with Bedrock integration and automatic document retrieval
 
 **Request Body:**
 ```json
-{
-  "includeDocumentTypes": ["experience", "skills", "values", "achievements"]
-}
+{}
 ```
+**Note**: Documents are automatically retrieved from user's saved documents
 
 **Response:**
 ```json
@@ -242,26 +241,26 @@ Generate personality analysis from user documents.
 }
 ```
 
-#### GET /analysis/{userId} - ❌ **Not Implemented**
-Get latest analysis results for user.
+#### GET /analysis - ✅ **Implemented**
+Get analysis results for authenticated user.
 
-**Implementation Status**: Not implemented
+**Implementation Status**: Fully implemented with user authentication
 
-### Resume - ❌ **Not Started**
+### Resume - ✅ **Complete**
 
-#### POST /resume/generate - ❌ **Not Implemented**
+#### POST /resume/generate - ✅ **Implemented**
 Generate resume for specific job category.
 
-**Implementation Status**: Completely not implemented
+**Implementation Status**: Fully implemented with Bedrock integration and automatic document retrieval
 
 **Request Body:**
 ```json
 {
   "jobCategory": "developer|pm|designer|marketer|data",
-  "jobTitle": "Frontend Developer",
-  "includeAnalysis": true
+  "jobTitle": "Frontend Developer"
 }
 ```
+**Note**: Documents are automatically retrieved from user's saved documents
 
 **Response:**
 ```json
@@ -300,10 +299,10 @@ Generate resume for specific job category.
 }
 ```
 
-#### GET /resume/{userId}/{jobCategory} - ❌ **Not Implemented**
-Get existing resume for user and job category.
+#### GET /resume?jobCategory={category} - ✅ **Implemented**
+Get existing resumes for authenticated user, optionally filtered by job category.
 
-**Implementation Status**: Completely not implemented
+**Implementation Status**: Fully implemented with user authentication and optional filtering
 
 ## 🚨 Priority Implementation Order
 
