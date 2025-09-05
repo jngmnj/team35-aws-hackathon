@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { FileText, Sparkles, FileUser, Home, LogOut } from 'lucide-react';
+import { FileText, Sparkles, FileUser, Home, LogOut, ClipboardCheck } from 'lucide-react';
 
 export function Navbar() {
   const { user, logout } = useAuth();
@@ -27,6 +27,10 @@ export function Navbar() {
               <Link href="/documents" className="flex items-center space-x-2 text-muted-foreground hover:text-primary cursor-pointer">
                 <FileText className="h-4 w-4" />
                 <span>문서 관리</span>
+              </Link>
+              <Link href="/tests" className="flex items-center space-x-2 text-muted-foreground hover:text-primary cursor-pointer">
+                <ClipboardCheck className="h-4 w-4" />
+                <span>성격 테스트</span>
               </Link>
               <Link href="/analysis" className="flex items-center space-x-2 text-muted-foreground hover:text-primary cursor-pointer">
                 <Sparkles className="h-4 w-4" />

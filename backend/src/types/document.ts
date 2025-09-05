@@ -1,4 +1,4 @@
-export type DocumentType = 'experience' | 'skills' | 'values' | 'achievements';
+export type DocumentType = 'experience' | 'skills' | 'values' | 'achievements' | 'daily_record' | 'mood_tracker' | 'reflection' | 'test_result';
 
 export interface BaseDocument {
   documentId: string;
@@ -27,7 +27,23 @@ export interface AchievementsDocument extends BaseDocument {
   type: 'achievements';
 }
 
-export type Document = ExperienceDocument | SkillsDocument | ValuesDocument | AchievementsDocument;
+export interface DailyRecordDocument extends BaseDocument {
+  type: 'daily_record';
+}
+
+export interface MoodTrackerDocument extends BaseDocument {
+  type: 'mood_tracker';
+}
+
+export interface ReflectionDocument extends BaseDocument {
+  type: 'reflection';
+}
+
+export interface TestResultDocument extends BaseDocument {
+  type: 'test_result';
+}
+
+export type Document = ExperienceDocument | SkillsDocument | ValuesDocument | AchievementsDocument | DailyRecordDocument | MoodTrackerDocument | ReflectionDocument | TestResultDocument;
 
 export interface DocumentValidationResult {
   isValid: boolean;
