@@ -4,6 +4,7 @@ import { DynamoDBDocumentClient, PutCommand, GetCommand, QueryCommand, UpdateCom
 import { v4 as uuidv4 } from 'uuid';
 import { verifyToken } from '../../shared/auth';
 import { validateDocumentType, validateDocumentData } from '../../shared/validation';
+import { handleDynamoDBError } from '../../shared/error-handler';
 import { DocumentType } from '../../types/document';
 
 const client = new DynamoDBClient({});
@@ -37,15 +38,31 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const method = event.httpMethod;
     const pathParameters = event.pathParameters;
 
+    let requestBody = {};
+    if (event.body && ['POST', 'PUT', 'PATCH'].includes(method)) {
+      try {
+        requestBody = JSON.parse(event.body);
+      } catch (error) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({ success: false, error: { message: 'Invalid JSON in request body' } }),
+        };
+      }
+    }
+
     switch (method) {
       case 'GET':
+        if (pathParameters?.id) {
+          return await getDocument(pathParameters.id, userId);
+        }
         return await getDocuments(userId, event.queryStringParameters);
       case 'POST':
-        return await createDocument(userId, JSON.parse(event.body || '{}'));
+        return await createDocument(userId, requestBody);
       case 'PUT':
-        return await updateDocument(pathParameters?.id!, JSON.parse(event.body || '{}'), userId);
+        return await updateDocument(pathParameters?.id!, requestBody, userId);
       case 'PATCH':
-        return await patchDocument(pathParameters?.id!, JSON.parse(event.body || '{}'), userId);
+        return await patchDocument(pathParameters?.id!, requestBody, userId);
       case 'DELETE':
         return await deleteDocument(pathParameters?.id!, userId);
       default:
@@ -55,8 +72,19 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
           body: JSON.stringify({ success: false, error: { message: 'Method not allowed' } }),
         };
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error:', error);
+    
+    // Handle DynamoDB specific errors
+    if (error.name && error.name.includes('Exception')) {
+      const dbError = handleDynamoDBError(error);
+      return {
+        statusCode: dbError.statusCode,
+        headers,
+        body: JSON.stringify({ success: false, error: dbError.error }),
+      };
+    }
+
     return {
       statusCode: 500,
       headers,
@@ -67,6 +95,38 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
 interface QueryParams {
   type?: string;
+}
+
+async function getDocument(documentId: string, userId: string) {
+  const document = await docClient.send(new GetCommand({
+    TableName: process.env.DOCUMENTS_TABLE_NAME,
+    Key: { documentId },
+  }));
+
+  if (!document.Item) {
+    return {
+      statusCode: 404,
+      headers,
+      body: JSON.stringify({ success: false, error: { message: 'Document not found' } }),
+    };
+  }
+
+  if (document.Item.userId !== userId) {
+    return {
+      statusCode: 403,
+      headers,
+      body: JSON.stringify({ success: false, error: { message: 'Access denied' } }),
+    };
+  }
+
+  return {
+    statusCode: 200,
+    headers,
+    body: JSON.stringify({
+      success: true,
+      data: document.Item,
+    }),
+  };
 }
 
 async function getDocuments(userId: string, queryParams?: QueryParams) {
@@ -173,6 +233,14 @@ interface UpdateDocumentRequest {
 
 async function updateDocument(documentId: string, body: UpdateDocumentRequest, userId: string) {
   const { title, content, type } = body;
+
+  if (!documentId) {
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ success: false, error: { message: 'Document ID is required' } }),
+    };
+  }
 
   // Check document ownership
   const ownershipCheck = await verifyDocumentOwnership(documentId, userId);
@@ -334,6 +402,14 @@ async function patchDocument(documentId: string, body: PatchDocumentRequest, use
 }
 
 async function deleteDocument(documentId: string, userId: string) {
+  if (!documentId) {
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ success: false, error: { message: 'Document ID is required' } }),
+    };
+  }
+
   // Check document ownership
   const ownershipCheck = await verifyDocumentOwnership(documentId, userId);
   if (!ownershipCheck.success) {

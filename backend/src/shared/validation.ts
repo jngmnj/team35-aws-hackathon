@@ -1,13 +1,23 @@
-import { DocumentType, DocumentValidationResult } from '../types/document';
+import { DocumentType } from '../types/document';
 
-export function validateDocumentType(type: string): type is DocumentType {
-  return ['experience', 'skills', 'values', 'achievements'].includes(type);
+export function validateEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
 }
 
-export function validateDocumentData(type: DocumentType, title: string, content?: string): DocumentValidationResult {
+export function validateDocumentType(type: string): boolean {
+  const validTypes = ['experience', 'skills', 'values', 'achievements'];
+  return validTypes.includes(type.toLowerCase());
+}
+
+export interface ValidationResult {
+  isValid: boolean;
+  errors: string[];
+}
+
+export function validateDocumentData(type: DocumentType, title: string, content?: string): ValidationResult {
   const errors: string[] = [];
 
-  // Common validation
   if (!title || title.trim().length === 0) {
     errors.push('Title is required');
   }
@@ -20,48 +30,8 @@ export function validateDocumentData(type: DocumentType, title: string, content?
     errors.push('Content must be less than 10,000 characters');
   }
 
-  // Type-specific validation
-  switch (type) {
-    case 'experience':
-      validateExperience(title, content, errors);
-      break;
-    case 'skills':
-      validateSkills(title, content, errors);
-      break;
-    case 'values':
-      validateValues(title, content, errors);
-      break;
-    case 'achievements':
-      validateAchievements(title, content, errors);
-      break;
-  }
-
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
-}
-
-function validateExperience(title: string, content: string = '', errors: string[]): void {
-  if (title && !title.match(/^[a-zA-Z0-9\s\-.,()&]+$/)) {
-    errors.push('Experience title contains invalid characters');
-  }
-}
-
-function validateSkills(title: string, content: string = '', errors: string[]): void {
-  if (title && !title.match(/^[a-zA-Z0-9\s\-.,()&/+#]+$/)) {
-    errors.push('Skills title contains invalid characters');
-  }
-}
-
-function validateValues(title: string, content: string = '', errors: string[]): void {
-  if (title && !title.match(/^[a-zA-Z0-9\s\-.,()&]+$/)) {
-    errors.push('Values title contains invalid characters');
-  }
-}
-
-function validateAchievements(title: string, content: string = '', errors: string[]): void {
-  if (title && !title.match(/^[a-zA-Z0-9\s\-.,()&]+$/)) {
-    errors.push('Achievements title contains invalid characters');
-  }
 }

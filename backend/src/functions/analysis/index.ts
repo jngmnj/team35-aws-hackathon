@@ -24,7 +24,15 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       case 'GET':
         return await getAnalysis(userId);
       case 'POST':
-        return await createAnalysis(userId, JSON.parse(event.body || '{}'));
+        let requestBody = {};
+        if (event.body) {
+          try {
+            requestBody = JSON.parse(event.body);
+          } catch (error) {
+            return createErrorResponse(400, 'Invalid JSON in request body');
+          }
+        }
+        return await createAnalysis(userId, requestBody);
       default:
         return createErrorResponse(405, 'Method not allowed');
     }
@@ -63,6 +71,20 @@ async function createAnalysis(userId: string, body: AnalysisRequest) {
 
   if (!documents || !Array.isArray(documents)) {
     return createErrorResponse(400, 'Documents array is required');
+  }
+
+  if (documents.length === 0) {
+    return createErrorResponse(400, 'At least one document is required for analysis');
+  }
+
+  // Validate document structure
+  for (const doc of documents) {
+    if (!doc.type || !doc.title || !doc.content) {
+      return createErrorResponse(400, 'Each document must have type, title, and content');
+    }
+    if (typeof doc.content !== 'string' || doc.content.trim().length === 0) {
+      return createErrorResponse(400, 'Document content cannot be empty');
+    }
   }
 
   try {
