@@ -7,6 +7,7 @@ applications:
           commands:
             - echo "Installing dependencies..."
             - npm ci
+            - npm install typescript --save-dev
             - echo "Dependencies installed successfully"
         build:
           commands:
