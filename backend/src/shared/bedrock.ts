@@ -134,13 +134,22 @@ Content: ${doc.content}
     const content = responseBody.content[0].text;
     
     try {
-      return JSON.parse(content);
+      // Remove markdown code blocks if present
+      const cleanContent = content.replace(/```json\n?|```\n?/g, '').trim();
+      return JSON.parse(cleanContent);
     } catch (parseError) {
       console.error('JSON 파싱 실패:', content);
       return {
         personalityType: { type: "ENFJ", description: "분석 중 오류 발생", traits: ["리더십", "협업", "학습지향"] },
-        strengths: ["문제해결력", "학습능력", "커뮤니케이션"],
-        weaknesses: ["완벽주의", "시간관리"],
+        strengths: [
+          { title: "문제해결력", description: "다양한 상황에서 창의적 해결책 제시", evidence: "분석 오류로 인한 기본값" },
+          { title: "학습능력", description: "새로운 기술과 지식 습득에 적극적", evidence: "분석 오류로 인한 기본값" },
+          { title: "커뮤니케이션", description: "팀원과의 원활한 소통 능력", evidence: "분석 오류로 인한 기본값" }
+        ],
+        weaknesses: [
+          { title: "완벽주의", description: "과도한 완벽 추구로 인한 시간 소요", improvement: "우선순위 설정과 적정 품질 기준 수립" },
+          { title: "시간관리", description: "업무 일정 관리의 어려움", improvement: "체계적인 일정 관리 도구 활용" }
+        ],
         values: ["팀워크", "성장", "품질"],
         interests: ["개발", "기술", "혁신"]
       };
@@ -228,7 +237,9 @@ Content: ${doc.content}
     const content = responseBody.content[0].text;
     
     try {
-      return JSON.parse(content);
+      // Remove markdown code blocks if present
+      const cleanContent = content.replace(/```json\n?|```\n?/g, '').trim();
+      return JSON.parse(cleanContent);
     } catch (parseError) {
       console.error('JSON 파싱 실패:', content);
       return {
