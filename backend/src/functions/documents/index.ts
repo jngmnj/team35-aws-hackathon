@@ -40,11 +40,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       try {
         requestBody = JSON.parse(event.body);
       } catch (error) {
-        return {
-          statusCode: 400,
-          headers,
-          body: JSON.stringify({ success: false, error: { message: 'Invalid JSON in request body' } }),
-        };
+        return createErrorResponse(400, 'Invalid JSON in request body');
       }
     }
 
