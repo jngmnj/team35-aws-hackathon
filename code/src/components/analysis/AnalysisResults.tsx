@@ -12,18 +12,26 @@ export function AnalysisResults() {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [documentCount, setDocumentCount] = useState(0);
 
   useEffect(() => {
-    const loadExistingAnalysis = async () => {
+    const loadData = async () => {
       try {
-        const existingAnalysis = await apiClient.getAnalysis();
-        setAnalysis(existingAnalysis);
+        const [existingAnalysis, documents] = await Promise.all([
+          apiClient.getAnalysis().catch(() => null),
+          apiClient.getDocuments().catch(() => [])
+        ]);
+        
+        if (existingAnalysis) {
+          setAnalysis(existingAnalysis);
+        }
+        setDocumentCount(documents.length);
       } catch {
-        // No existing analysis found
+        // Handle errors silently
       }
     };
     
-    loadExistingAnalysis();
+    loadData();
   }, []);
 
   const handleGenerateAnalysis = async () => {
@@ -31,66 +39,16 @@ export function AnalysisResults() {
     setError(null);
     
     try {
-      // Try to get existing analysis first
-      try {
-        const existingAnalysis = await apiClient.getAnalysis();
-        setAnalysis(existingAnalysis);
-        return;
-      } catch {
-        // If no existing analysis, generate new one
-      }
-      
       const newAnalysis = await apiClient.generateAnalysis();
       setAnalysis(newAnalysis);
     } catch (err: any) {
-      // Enhanced error handling with better user feedback
-      if (err.response?.status === 401) {
+      if (err.message.includes('401')) {
         setError('로그인이 필요합니다. 다시 로그인해주세요.');
-        return;
-      }
-      
-      if (err.response?.status === 429) {
+      } else if (err.message.includes('429')) {
         setError('너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요.');
-        return;
+      } else {
+        setError('분석 생성 중 오류가 발생했습니다. 다시 시도해주세요.');
       }
-      
-      // Fallback to mock data for development
-      const mockAnalysis: AnalysisResult = {
-        analysisId: 'mock-id',
-        userId: 'user-id',
-        personalityType: {
-          type: 'ENFP',
-          description: '열정적이고 창의적인 성격으로, 새로운 아이디어와 가능성을 탐구하는 것을 좋아합니다.',
-          traits: ['창의적', '열정적', '사교적', '직관적', '유연함']
-        },
-        strengths: [
-          '뛰어난 커뮤니케이션 능력',
-          '창의적 문제 해결',
-          '팀워크와 협업',
-          '새로운 아이디어 제안'
-        ],
-        weaknesses: [
-          '세부사항 관리 부족',
-          '일정 관리의 어려움',
-          '반복적인 업무에 대한 집중력 부족'
-        ],
-        values: [
-          '창의성과 혁신',
-          '인간관계와 소통',
-          '자유로운 업무 환경',
-          '개인적 성장'
-        ],
-        interests: [
-          '기술과 혁신',
-          '디자인과 UX',
-          '팀 리더십',
-          '프로젝트 기획'
-        ],
-        createdAt: new Date().toISOString()
-      };
-      
-      setAnalysis(mockAnalysis);
-      console.warn('Using mock data for development:', err.message);
     } finally {
       setIsLoading(false);
     }
@@ -105,12 +63,22 @@ export function AnalysisResults() {
           </svg>
         </div>
         <h2 className="text-2xl font-bold mb-4 text-gray-800">성격 분석 시작하기</h2>
-        <p className="text-gray-600 mb-8 text-lg leading-relaxed max-w-md mx-auto">
+        <p className="text-gray-600 mb-4 text-lg leading-relaxed max-w-md mx-auto">
           작성하신 문서를 바탕으로 AI가 당신의 성격과 특성을 분석합니다.
         </p>
+        <div className="mb-8 p-4 bg-white rounded-lg border border-blue-100">
+          <p className="text-sm text-gray-600">
+            작성된 문서: <span className="font-semibold text-blue-600">{documentCount}개</span>
+          </p>
+          {documentCount === 0 && (
+            <p className="text-sm text-orange-600 mt-2">
+              분석을 위해 먼저 문서를 작성해주세요.
+            </p>
+          )}
+        </div>
         <Button 
           onClick={handleGenerateAnalysis} 
-          disabled={isLoading}
+          disabled={isLoading || documentCount === 0}
           className="px-8 py-3 text-lg font-semibold"
           aria-label="AI 성격 분석 시작하기"
         >

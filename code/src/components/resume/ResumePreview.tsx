@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Download, Edit } from 'lucide-react';
 
-interface ResumeContent {
+interface ResumeContentDisplay {
   personalInfo: { summary: string };
   experience: Array<{
     title: string;
@@ -17,7 +17,7 @@ interface ResumeContent {
 }
 
 interface ResumePreviewProps {
-  resume: ResumeContent;
+  resume: ResumeContentDisplay;
   onDownload: () => void;
   onEdit: () => void;
 }

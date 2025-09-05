@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { JobCategorySelector, JobCategory } from './JobCategorySelector';
 import { ResumePreview } from './ResumePreview';
 import { Loader2 } from 'lucide-react';
+import { apiClient } from '@/lib/api';
+import { ResumeContent } from '@/types';
 
-interface ResumeContent {
+interface ResumeContentDisplay {
   personalInfo: { summary: string };
   experience: Array<{
     title: string;
@@ -20,77 +22,52 @@ interface ResumeContent {
 }
 
 interface ResumeGeneratorProps {
-  documentsCount: number;
   onGenerate?: (category: JobCategory) => Promise<ResumeContent>;
 }
 
-export function ResumeGenerator({ documentsCount, onGenerate }: ResumeGeneratorProps) {
+export function ResumeGenerator({ onGenerate }: ResumeGeneratorProps) {
   const [selectedCategory, setSelectedCategory] = useState<JobCategory>();
   const [resume, setResume] = useState<ResumeContent | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [documentCount, setDocumentCount] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadDocuments = async () => {
+      try {
+        const documents = await apiClient.getDocuments();
+        setDocumentCount(documents.length);
+      } catch {
+        setDocumentCount(0);
+      }
+    };
+    
+    loadDocuments();
+  }, []);
 
   const handleGenerate = async () => {
     if (!selectedCategory) return;
     
     setIsGenerating(true);
+    setError(null);
     
     try {
-      if (onGenerate) {
-        const generatedResume = await onGenerate(selectedCategory);
-        setResume(generatedResume);
+      const generatedResume = await apiClient.generateResume(selectedCategory);
+      setResume(generatedResume);
+    } catch (err: any) {
+      if (err.message.includes('401')) {
+        setError('로그인이 필요합니다. 다시 로그인해주세요.');
+      } else if (err.message.includes('429')) {
+        setError('너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요.');
       } else {
-        // Mock data fallback
-        const mockResume = generateMockResume(selectedCategory);
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        setResume(mockResume);
+        setError('이력서 생성 중 오류가 발생했습니다. 다시 시도해주세요.');
       }
-    } catch (error) {
-      console.error('Resume generation failed:', error);
     } finally {
       setIsGenerating(false);
     }
   };
 
-  const generateMockResume = (category: JobCategory): ResumeContent => {
-    const categoryMap = {
-      developer: '개발자',
-      pm: '프로덕트 매니저',
-      designer: '디자이너',
-      marketer: '마케터',
-      data: '데이터 사이언티스트'
-    };
 
-    return {
-      personalInfo: {
-        summary: `${categoryMap[category]} 분야의 전문성을 갖춘 전문가로, 3년간의 실무 경험과 팀 리더십 능력을 보유하고 있습니다.`
-      },
-      experience: [
-        {
-          title: `Senior ${categoryMap[category]}`,
-          company: "테크 스타트업",
-          duration: "2022.03 - 현재",
-          description: "팀을 이끌며 프로젝트를 성공적으로 완료하고 성과를 달성했습니다."
-        },
-        {
-          title: categoryMap[category],
-          company: "IT 기업",
-          duration: "2021.01 - 2022.02",
-          description: "다양한 프로젝트 경험을 통해 전문성을 키웠습니다."
-        }
-      ],
-      skills: category === 'developer' 
-        ? ["JavaScript", "TypeScript", "React", "Node.js", "Git"]
-        : category === 'designer'
-        ? ["Figma", "Adobe Creative Suite", "UI/UX", "프로토타이핑"]
-        : ["문제해결력", "팀워크", "커뮤니케이션", "프로젝트 관리"],
-      achievements: [
-        "프로젝트 기한 내 성공적 완료",
-        "팀 성과 향상에 기여",
-        "사용자 만족도 95% 달성",
-        "효율적인 업무 프로세스 구축"
-      ]
-    };
-  };
 
   const handleDownload = () => {
     if (!resume) return;
@@ -98,15 +75,15 @@ export function ResumeGenerator({ documentsCount, onGenerate }: ResumeGeneratorP
     const content = `
 이력서
 
-요약: ${resume.personalInfo.summary}
+요약: ${resume.content.personalInfo.name}
 
 경험:
-${resume.experience.map(exp => `${exp.title} - ${exp.company} (${exp.duration})\n${exp.description}`).join('\n\n')}
+${resume.content.experience.map(exp => `${exp.title} - ${exp.company} (${exp.duration})\n${exp.description}`).join('\n\n')}
 
-기술: ${resume.skills.join(', ')}
+기술: ${resume.content.skills.join(', ')}
 
 성과:
-${resume.achievements.map(achievement => `• ${achievement}`).join('\n')}
+${resume.content.achievements.map(achievement => `• ${achievement}`).join('\n')}
     `.trim();
 
     const blob = new Blob([content], { type: 'text/plain' });
@@ -125,9 +102,16 @@ ${resume.achievements.map(achievement => `• ${achievement}`).join('\n')}
   };
 
   if (resume) {
+    const displayResume: ResumeContentDisplay = {
+      personalInfo: { summary: resume.content.personalInfo.name },
+      experience: resume.content.experience,
+      skills: resume.content.skills,
+      achievements: resume.content.achievements
+    };
+    
     return (
       <ResumePreview 
-        resume={resume} 
+        resume={displayResume} 
         onDownload={handleDownload}
         onEdit={handleEdit}
       />
@@ -146,12 +130,17 @@ ${resume.achievements.map(achievement => `• ${achievement}`).join('\n')}
         </div>
         
         <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded">
-          작성된 문서: {documentsCount}개
+          작성된 문서: <span className="font-semibold text-blue-600">{documentCount}개</span>
+          {documentCount === 0 && (
+            <p className="text-orange-600 mt-2">
+              이력서 생성을 위해 먼저 문서를 작성해주세요.
+            </p>
+          )}
         </div>
         
         <Button 
           onClick={handleGenerate}
-          disabled={!selectedCategory || isGenerating}
+          disabled={!selectedCategory || isGenerating || documentCount === 0}
           className="w-full"
         >
           {isGenerating ? (
@@ -163,6 +152,12 @@ ${resume.achievements.map(achievement => `• ${achievement}`).join('\n')}
             '이력서 생성'
           )}
         </Button>
+        
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-600">{error}</p>
+          </div>
+        )}
       </div>
     </Card>
   );
