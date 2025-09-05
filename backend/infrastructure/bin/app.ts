@@ -6,16 +6,14 @@ import { ApiStack } from '../lib/api-stack';
 
 const app = new cdk.App();
 
-// Database Stack
-const databaseStack = new DatabaseStack(app, 'ResumeGeneratorDatabaseStack', {
+const databaseStack = new DatabaseStack(app, 'DatabaseStack', {
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION,
   },
 });
 
-// API Stack
-const apiStack = new ApiStack(app, 'ResumeGeneratorApiStack', {
+new ApiStack(app, 'ApiStack', {
   usersTable: databaseStack.usersTable,
   documentsTable: databaseStack.documentsTable,
   analysisTable: databaseStack.analysisTable,
@@ -25,5 +23,3 @@ const apiStack = new ApiStack(app, 'ResumeGeneratorApiStack', {
     region: process.env.CDK_DEFAULT_REGION,
   },
 });
-
-apiStack.addDependency(databaseStack);
