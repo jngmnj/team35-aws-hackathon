@@ -1,4 +1,16 @@
-# AI-Powered Self-Understanding & Resume Generator 개발 계획서
+# 자기성장 플랫폼 개발 계획서 - 기존 코드베이스 활용
+
+## 서비스 개요
+- "나를 기록하고, 탐구하고, 성장 과정을 시각화하여 자기인식과 커리어를 동시에 키우는 플랫폼"
+- 나에 대한 다차원 데이터(기록·테스트·피드백)를 통합
+- 강점/약점 분석 → 개선 방향 제시 → 자기소개서·이력서 활용까지 연결
+
+## 기존 코드베이스 활용 전략
+- **Backend**: 95% 재사용 (새 문서 타입만 추가)
+- **Frontend**: 85% 재사용 (UI 확장)
+- **인증/인프라**: 100% 재사용
+- **AI 분석**: 80% 재사용 (프롬프트 확장)
+- **총 개발 시간**: 6-9시간 (기존 12-15시간에서 단축)
 
 ## 현재 진행 상황 (업데이트: 2024-12-19)
 
@@ -27,99 +39,77 @@
 - **DevOps/Infrastructure (1명)**: AWS CDK, 배포 환경 구축
 - **AI Integration Specialist (1명)**: Bedrock 연동, AI 로직 구현
 
-## 개발 단계별 계획
+## 새로운 개발 단계별 계획
 
-### Phase 1: 기반 인프라 구축 (2-3시간) - **90% 완료**
+### Phase 1: 기록 시스템 확장 (1-2시간) - **기존 코드 활용**
 
-#### 병렬 작업 가능 (동시 진행)
+#### 1.1 문서 타입 확장 (30분)
+**기존 활용**:
+- 기존 `DocumentEditor` 컴포넌트 재사용
+- 기존 CRUD API 그대로 사용
+- 새로운 문서 타입만 추가
 
-**Frontend 작업 (Frontend Developer) - ✅ 완료 (90%)**
-- [x] Next.js 14 프로젝트 초기 설정
-- [x] Tailwind CSS v4 + shadcn/ui 설정
-- [x] 기본 레이아웃 및 라우팅 구조 생성
-- [x] 로그인/회원가입 UI 컴포넌트
-- [x] 문서 에디터 기본 UI (TipTap with SSR)
+**새 문서 타입**:
+- [ ] `daily_record`: 일상 기록 + 기분/에너지 레벨
+- [ ] `mood_tracker`: 감정 변화 추적
+- [ ] `reflection`: 자기 성찰 기록
+- [ ] `values_archive`: 가치관, 좌우명, 존경 인물
 
-**Backend 작업 (Backend Developer) - ✅ 완료 (100%)**
-- [x] Node.js Lambda 함수 기본 구조 설정
-- [x] 함수별 패키지 구조 및 shared 모듈 완성
-- [x] API Gateway 엔드포인트 정의
-- [x] DynamoDB 테이블 스키마 설계
-- [x] 인증 관련 Lambda 함수 구현 완료
+#### 1.2 일상 기록 UI 추가 (1시간)
+**기존 활용**:
+- 기존 `documents/page.tsx` 확장
+- 기존 `DocumentList` 컴포넌트 재사용
 
-**Infrastructure 작업 (DevOps) - ✅ 완료 (80%)**
-- [x] AWS CDK 프로젝트 초기화
-- [x] 기본 스택 구조 설정
-- [x] DynamoDB 테이블 생성 (Users, Documents, Analysis, Resumes)
-- [x] API Gateway + Lambda 연동 설정
-- [ ] AWS Cognito 사용자 풀 설정
+**새 기능**:
+- [ ] 기분/에너지 레벨 입력 필드 (1-5점 스케일)
+- [ ] 날짜별 필터링 기능
+- [ ] 간단한 차트 시각화
 
-**AI Integration 준비 (AI Specialist) - ✅ 완료 (100%)**
-- [x] AWS Bedrock 연동 코드 구조 완성
-- [x] 프롬프트 설계 및 테스트
-- [x] 성격 분석 로직 구현
-- [x] 이력서 생성 템플릿 준비
-- [x] Analysis/Resume Lambda 함수 완성
+### Phase 2: 테스트 결과 관리 시스템 (2-3시간) - **기존 코드 활용**
 
-### Phase 2: 핵심 기능 구현 (3-4시간) - **60% 완료**
+#### 2.1 테스트 목록 및 결과 저장 (1시간)
+**기존 활용**:
+- `documents` 테이블에 새 타입 추가: `test_result`
+- 기존 CRUD API 재사용
+- 기존 `DocumentList` 컴포넌트 확장
 
-#### 순차적 의존성 있는 작업
+**새 기능**:
+- [ ] MBTI, DISC, 애니어그램 등 테스트 목록 제공
+- [ ] 외부 테스트 후 결과 입력/저장
+- [ ] 테스트 히스토리 관리
 
-**Step 2.1: 인증 시스템 완성 (Frontend + Backend 협업) - ✅ Backend 완료**
-- [x] JWT 토큰 관리 구현
-- [x] 로그인/회원가입 기능 구현
-- [x] 비밀번호 해싱 및 검증
-- [x] 토큰 기반 인증 시스템
-- [ ] Cognito 연동 완료 (선택사항)
-- [ ] Frontend 연동 테스트
+#### 2.2 테스트 관리 페이지 (1-2시간)
+**기존 활용**:
+- 기존 컴포넌트 재사용: `DocumentList`, `DocumentEditor`
+- 기존 라우팅 구조 활용
 
-**Step 2.2: 문서 CRUD 구현 (Frontend + Backend 협업) - ✅ Backend 완료**
-- [x] 문서 생성/수정/삭제 API 구현
-- [x] 문서 타입별 검증 로직 (Experience, Skills, Values, Achievements)
-- [x] JWT 토큰 기반 인증 연동
-- [x] 실시간 저장 최적화 (PATCH 메서드)
-- [x] 동시 편집 충돌 방지 (버전 관리)
-- [x] 사용자 권한 검증 (소유자만 수정/삭제)
-- [x] TipTap 에디터 완성 (SSR 지원)
-- [x] 문서 타입별 UI 구분 (Experience, Skills, Values, Achievements)
-- [ ] Frontend-Backend API 연동
+**새 페이지**:
+- [ ] `/app/tests/page.tsx` 생성
+- [ ] 테스트 설명 및 외부 링크 제공
+- [ ] 결과 입력 폼 구현
 
-**Step 2.3: AI 분석 기능 구현 (AI Specialist + Backend 협업) - ✅ 완료**
-- [x] Bedrock 연동 Lambda 함수 구현
-- [x] Analysis Lambda 함수 완성 (GET/POST)
-- [x] Resume Lambda 함수 완성 (GET/POST)
-- [x] 성격 분석 프롬프트 최적화 (한국어)
-- [x] 이력서 생성 프롬프트 최적화
-- [x] 분석 결과 저장 로직 (DynamoDB)
-- [x] 에러 핸들링 및 폴백 로직
-- [x] Claude 3.5 Sonnet 모델 연동
+### Phase 3: 분석 및 시각화 확장 (3-4시간) - **기존 AI 시스템 활용**
 
-**Step 2.4: 이력서 생성 기능 (AI Specialist + Frontend 협업) - ❌ 대기**
-- [ ] 직무별 이력서 생성 로직
-- [ ] 이력서 템플릿 구현
-- [ ] 이력서 미리보기 UI
-- [ ] PDF 다운로드 기능 (선택사항)
+#### 3.1 기존 AI 분석 확장 (2시간)
+**현재 있는 것 활용**:
+- ✅ `analysis/` Lambda 함수
+- ✅ Bedrock 연동
+- ✅ 분석 결과 UI 컴포넌트들
 
-### Phase 3: 통합 및 테스트 (2-3시간) - **0% 완료**
+**확장 방법**:
+- [ ] 기존 분석 프롬프트에 새 데이터 타입 추가
+- [ ] 기록 데이터 + 테스트 결과 통합 분석
+- [ ] 기존 `AnalysisResults` 컴포넌트 확장
 
-#### 전체 팀 협업 필요
+#### 3.2 변화 추적 기능 (1-2시간)
+**기존 활용**:
+- 기존 분석 히스토리 시스템
+- 기존 UI 컴포넌트들
 
-**Step 3.1: Frontend-Backend 통합 - ❌ 대기**
-- [ ] API 연동 완료 및 테스트
-- [ ] 에러 처리 및 로딩 상태 구현
-- [ ] 사용자 플로우 테스트
-
-**Step 3.2: 배포 및 최적화 (DevOps 주도) - ❌ 대기**
-- [ ] S3 + CloudFront 배포 설정
-- [ ] Lambda 함수 배포
-- [ ] 환경 변수 및 보안 설정
-- [ ] 도메인 연결 (선택사항)
-
-**Step 3.3: 최종 테스트 및 데모 준비 - ❌ 대기**
-- [ ] End-to-end 테스트
-- [ ] 성능 최적화
-- [ ] 데모 시나리오 준비
-- [ ] 발표 자료 작성
+**새 기능**:
+- [ ] 시간대별 비교 UI 추가
+- [ ] 기간별 성장 시각화 (일주일/한달/1년)
+- [ ] 직무용 분석 옵션 추가
 
 ## 작업 의존성 분석
 
