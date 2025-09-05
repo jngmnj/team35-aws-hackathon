@@ -5,6 +5,7 @@ import { generateToken } from '../../shared/jwt';
 import { v4 as uuidv4 } from 'uuid';
 import { docClient, TABLE_NAMES } from '../../shared/database';
 import { createErrorResponse, createSuccessResponse } from '../../shared/utils';
+import { validateEmail } from '../../shared/validation';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
@@ -50,6 +51,14 @@ async function handleRegister(body: RegisterRequest) {
     return createErrorResponse(400, 'Missing required fields');
   }
 
+  if (!validateEmail(email)) {
+    return createErrorResponse(400, 'Invalid email format');
+  }
+
+  if (password.length < 6) {
+    return createErrorResponse(400, 'Password must be at least 6 characters');
+  }
+
   const existingUser = await docClient.send(new GetCommand({
     TableName: TABLE_NAMES.USERS,
     Key: { userId: email },
@@ -86,6 +95,14 @@ interface LoginRequest {
 
 async function handleLogin(body: LoginRequest) {
   const { email, password } = body;
+
+  if (!email || !password) {
+    return createErrorResponse(400, 'Email and password are required');
+  }
+
+  if (!validateEmail(email)) {
+    return createErrorResponse(400, 'Invalid email format');
+  }
 
   const result = await docClient.send(new GetCommand({
     TableName: TABLE_NAMES.USERS,
