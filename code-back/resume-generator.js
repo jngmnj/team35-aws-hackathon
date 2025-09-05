@@ -8,10 +8,16 @@ class ResumeGenerator {
   createPrompt(documents, personality, targetJob) {
     const text = documents.map(doc => `${doc.type}: ${doc.content}`).join('\n\n');
     
+    const personalityInfo = personality.mbti_type ? 
+      `MBTI: ${personality.mbti_type}, 강점: ${personality.strengths_description}` :
+      `성격: ${personality.personality_summary}`;
+    
     return `${targetJob} 직무에 최적화된 이력서를 생성해주세요:
 
 문서: ${text}
-성격: ${personality.personality_type}, 강점: ${personality.strengths.join(', ')}
+성격 분석: ${personalityInfo}
+
+
 
 JSON 형식:
 {
