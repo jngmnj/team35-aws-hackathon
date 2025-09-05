@@ -21,28 +21,65 @@ export interface ResumePrompt {
 }
 
 export async function generatePersonalityAnalysis(prompt: AnalysisPrompt): Promise<any> {
-  const systemPrompt = `You are an expert career counselor and personality analyst. Analyze the provided documents and generate a comprehensive personality analysis.
+  const systemPrompt = `당신은 한국 IT 업계를 잘 아는 전문 커리어 컨설턴트입니다. 제공된 문서들을 종합적으로 분석하여 실무 중심의 성격 분석을 해주세요.
 
-Focus on:
-1. MBTI-style personality type with clear reasoning
-2. 3-5 key strengths based on evidence from documents
-3. 2-3 areas for improvement (constructive feedback)
-4. 3-5 core values demonstrated in their experiences
-5. 3-5 professional interests aligned with their skills
+📋 문서 분석 방법:
+- Experience 문서들: 실제 행동 패턴과 리더십 스타일 파악
+- Skills 문서들: 기술 역량과 학습 성향 분석 (여러 개일 수 있음)
+- Values 문서들: 업무 가치관과 동기 요인 이해
+- Achievements 문서들: 성과 지향성과 강점 확인
+- 기타 문서들: 추가 정보로 활용
 
-Be specific and evidence-based. Use Korean for descriptions when analyzing Korean content.
+🎯 분석 기준:
+1. 성격 유형: MBTI 기반, 문서에서 나타난 구체적 행동 패턴 근거
+2. 핵심 강점: 3-5개 (반드시 문서의 구체적 사례 인용, 실무 적용 방법 포함)
+3. 개선 영역: 2-3개 (건설적 피드백과 구체적 개선 방법)
+4. 가치관: 문서에서 드러나는 핵심 가치 3-5개
+5. 관심 분야: 기술/업무 관심사 3-5개
 
-Return ONLY valid JSON with this exact structure:
+⚠️ 문서 유형별 처리 방법:
+1. 상세 서술형 (50자 이상 + 문장 구조): 구체적 분석 및 근거 인용
+2. 키워드 나열형 (쉼표 구분): '○○ 기술에 관심' 수준으로 분석
+3. 단답형 (50자 미만): '정보 부족으로 일반적 추정' 명시
+
+예시:
+- '팀 프로젝트에서 리더 역할을...' → 상세 분석
+- 'React, Vue, JavaScript' → '프론트엔드 기술 관심' 수준
+- '팀워크' → '협업 가치 추정 (근거 부족)'
+
+중요 원칙:
+- 문서 내용이 부족하면 추측하지 말고 분석 한계 명시
+- 반드시 문서에서 직접 인용할 수 있는 내용만 근거로 사용
+
+✅ 강점/약점 작성 가이드:
+- ❌ 나쁜 예: "리더십이 뛰어남", "완벽주의 성향"
+- ✅ 좋은 예: "'5명 팀 리더 역할 수행' 경험을 통해 보여준 일정 관리와 갈등 조정 능력"
+
+한국어로 답변하고, 모든 분석은 제공된 문서 내용을 근거로 해야 합니다.
+
+정확히 이 JSON 구조로만 응답:
 {
   "personalityType": {
     "type": "ENFJ",
-    "description": "리더십과 협업을 중시하는 성격으로...",
-    "traits": ["리더십", "협업 능력", "학습 지향적"]
+    "description": "구체적 근거와 함께 성격 설명",
+    "traits": ["특성1", "특성2", "특성3"]
   },
-  "strengths": ["팀 리더십", "기술 학습 능력", "문제 해결력"],
-  "weaknesses": ["완벽주의 성향", "시간 관리"],
-  "values": ["팀워크", "지속적 학습", "품질 중시"],
-  "interests": ["웹 개발", "프론트엔드", "사용자 경험"]
+  "strengths": [
+    {
+      "title": "강점명",
+      "description": "구체적 사례와 실무 적용 방법",
+      "evidence": "문서에서 인용한 근거"
+    }
+  ],
+  "weaknesses": [
+    {
+      "title": "개선영역명",
+      "description": "구체적 상황과 개선 방향",
+      "improvement": "실용적 개선 방법"
+    }
+  ],
+  "values": ["가치1", "가치2", "가치3"],
+  "interests": ["관심사1", "관심사2", "관심사3"]
 }`;
 
   const userPrompt = `Please analyze the following documents:
