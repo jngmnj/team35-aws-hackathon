@@ -6,7 +6,7 @@ export function validateEmail(email: string): boolean {
 }
 
 export function validateDocumentType(type: string): boolean {
-  const validTypes = ['experience', 'skills', 'values', 'achievements'];
+  const validTypes = ['experience', 'skills', 'values', 'achievements', 'daily_record', 'mood_tracker', 'reflection', 'test_result'];
   return validTypes.includes(type.toLowerCase());
 }
 
