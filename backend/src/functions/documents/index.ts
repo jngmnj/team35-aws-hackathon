@@ -27,11 +27,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     // Verify JWT token using shared utility
     const authResult = verifyToken(event.headers.Authorization || event.headers.authorization);
     if (!authResult.success) {
-      return {
-        statusCode: 401,
-        headers,
-        body: JSON.stringify({ success: false, error: { message: 'Unauthorized' } }),
-      };
+      return createErrorResponse(401, 'Unauthorized');
     }
 
     const userId = authResult.userId!;
