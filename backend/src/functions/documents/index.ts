@@ -2,6 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand, GetCommand, QueryCommand, UpdateCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
+import { verifyToken } from '../../shared/auth';
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -19,9 +20,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       return { statusCode: 200, headers, body: '' };
     }
 
-    // Extract userId from JWT token (simplified - should use proper JWT verification)
-    const authHeader = event.headers.Authorization || event.headers.authorization;
-    if (!authHeader?.startsWith('Bearer ')) {
+    // Verify JWT token using shared utility
+    const authResult = verifyToken(event.headers.Authorization || event.headers.authorization);
+    if (!authResult.success) {
       return {
         statusCode: 401,
         headers,
@@ -29,9 +30,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       };
     }
 
-    // For now, extract userId from token payload (should be properly verified)
-    const token = authHeader.substring(7);
-    const userId = extractUserIdFromToken(token);
+    const userId = authResult.userId!;
 
     const method = event.httpMethod;
     const pathParameters = event.pathParameters;
@@ -185,12 +184,3 @@ async function deleteDocument(documentId: string) {
   };
 }
 
-function extractUserIdFromToken(token: string): string {
-  // Simplified token parsing - should use proper JWT verification
-  try {
-    const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-    return payload.userId || payload.sub;
-  } catch {
-    throw new Error('Invalid token');
-  }
-}
