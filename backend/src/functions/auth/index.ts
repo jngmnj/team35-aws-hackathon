@@ -1,7 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { PutCommand, GetCommand } from '@aws-sdk/lib-dynamodb';
 import * as bcrypt from 'bcryptjs';
-import * as jwt from 'jsonwebtoken';
+import { generateToken } from '../../shared/jwt';
 import { v4 as uuidv4 } from 'uuid';
 import { docClient, TABLE_NAMES } from '../../shared/database';
 import { createErrorResponse, createSuccessResponse } from '../../shared/utils';
@@ -61,7 +61,7 @@ async function handleRegister(body: any) {
     },
   }));
 
-  const token = jwt.sign({ userId, email }, process.env.JWT_SECRET!, { expiresIn: '24h' });
+  const token = generateToken({ userId, email });
 
   return createSuccessResponse({ userId, email, name, token }, 201);
 }
@@ -83,11 +83,10 @@ async function handleLogin(body: any) {
     return createErrorResponse(401, 'Invalid credentials');
   }
 
-  const token = jwt.sign(
-    { userId: result.Item.userId, email: result.Item.email },
-    process.env.JWT_SECRET!,
-    { expiresIn: '24h' }
-  );
+  const token = generateToken({ 
+    userId: result.Item.userId, 
+    email: result.Item.email 
+  });
 
   return createSuccessResponse({
     userId: result.Item.userId,
