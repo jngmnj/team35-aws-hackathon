@@ -20,13 +20,11 @@ export type DocumentType = 'experience' | 'skills' | 'values' | 'achievements';
 export interface AnalysisResult {
   analysisId: string;
   userId: string;
-  result: {
-    personalityType: PersonalityType;
-    strengths: string[];
-    weaknesses: string[];
-    values: string[];
-    interests: string[];
-  };
+  personalityType: PersonalityType;
+  strengths: string[];
+  weaknesses: string[];
+  values: string[];
+  interests: string[];
   createdAt: string;
 }
 

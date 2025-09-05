@@ -1,23 +1,15 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
-import { docClient, TABLE_NAMES } from './shared/database';
-import { verifyToken } from './shared/auth';
-import { generateResume } from './shared/bedrock';
-import { createErrorResponse, createSuccessResponse } from './shared/utils';
+import { docClient, TABLE_NAMES } from '../../shared/database';
+import { verifyToken } from '../../shared/auth';
+import { generateResume } from '../../shared/bedrock';
+import { createErrorResponse, createSuccessResponse } from '../../shared/utils';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
     if (event.httpMethod === 'OPTIONS') {
-      return {
-        statusCode: 200,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        },
-        body: ''
-      };
+      return { statusCode: 200, headers: {}, body: '' };
     }
 
     const authResult = verifyToken(event.headers.Authorization || event.headers.authorization);
@@ -40,7 +32,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             return createErrorResponse(400, 'Invalid JSON in request body');
           }
         }
-        return await createResume(userId, requestBody as any);
+        return await createResume(userId, requestBody);
       default:
         return createErrorResponse(405, 'Method not allowed');
     }
@@ -92,8 +84,8 @@ async function getResumes(userId: string, queryParams: QueryParams | null) {
   try {
     const result = await docClient.send(queryCommand);
     return createSuccessResponse({
-      resumes: (result as any).Items || [],
-      total: (result as any).Count || 0,
+      resumes: result.Items || [],
+      total: result.Count || 0,
     });
   } catch (error) {
     console.error('DynamoDB query error:', error);
@@ -134,7 +126,7 @@ async function createResume(userId: string, body: any) {
     },
   }));
 
-  const documents = ((result as any).Items || []) as any[];
+  const documents = result.Items || [];
   
   if (documents.length === 0) {
     return createErrorResponse(400, 'No documents found for resume generation');

@@ -4,7 +4,7 @@
 
 ## Base URL
 ```
-https://oxunoozv13.execute-api.us-east-1.amazonaws.com/prod/  # ✅ Deployed and Working
+https://api.{your-domain}.com/v1  # ❌ Not deployed - CDK deployment needed
 ```
 
 ## Current Implementation Status
@@ -12,11 +12,9 @@ https://oxunoozv13.execute-api.us-east-1.amazonaws.com/prod/  # ✅ Deployed and
 - ✅ **Lambda Function Implementation Complete** (All APIs)
 - ✅ **API Deployment Complete** (CDK Stack deployed)
 - ✅ **API Gateway Integration Complete**
-- ✅ **Authentication API Complete** (JWT working)
-- ✅ **Documents API Complete** (CRUD operations working)
+- ✅ **Frontend Integration Complete** (All APIs working)
 - ✅ **AI Analysis API Complete** (Bedrock integration working)
 - ✅ **Resume Generation API Complete** (Bedrock integration working)
-- ✅ **Frontend Integration Fixed** (API endpoints aligned)
 
 ## Authentication
 All protected endpoints require JWT token in Authorization header:
@@ -196,7 +194,7 @@ Delete document.
 
 ### Analysis - ✅ **Complete**
 
-#### POST /analysis - ✅ **Implemented**
+#### POST /analysis/generate - ✅ **Implemented**
 Generate personality analysis from user documents.
 
 **Implementation Status**: Fully implemented with Bedrock integration and automatic document retrieval
@@ -250,7 +248,7 @@ Get analysis results for authenticated user.
 
 ### Resume - ✅ **Complete**
 
-#### POST /resume - ✅ **Implemented**
+#### POST /resume/generate - ✅ **Implemented**
 Generate resume for specific job category.
 
 **Implementation Status**: Fully implemented with Bedrock integration and automatic document retrieval

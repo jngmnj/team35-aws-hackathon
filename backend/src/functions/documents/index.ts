@@ -2,11 +2,11 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand, GetCommand, QueryCommand, UpdateCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
-import { verifyToken } from './shared/auth';
-import { validateDocumentType, validateDocumentData } from './shared/validation';
-import { handleDynamoDBError } from './shared/error-handler';
-import { createErrorResponse, createSuccessResponse } from './shared/utils';
-import { DocumentType } from './types/document';
+import { verifyToken } from '../../shared/auth';
+import { validateDocumentType, validateDocumentData } from '../../shared/validation';
+import { handleDynamoDBError } from '../../shared/error-handler';
+import { createErrorResponse, createSuccessResponse } from '../../shared/utils';
+import { DocumentType } from '../../types/document';
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -51,17 +51,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         }
         return await getDocuments(userId, event.queryStringParameters);
       case 'POST':
-        return await createDocument(userId, requestBody as CreateDocumentRequest);
+        return await createDocument(userId, requestBody);
       case 'PUT':
         if (!pathParameters?.id) {
           return createErrorResponse(400, 'Document ID is required');
         }
-        return await updateDocument(pathParameters.id, requestBody as UpdateDocumentRequest, userId);
+        return await updateDocument(pathParameters.id, requestBody, userId);
       case 'PATCH':
         if (!pathParameters?.id) {
           return createErrorResponse(400, 'Document ID is required');
         }
-        return await patchDocument(pathParameters.id, requestBody as PatchDocumentRequest, userId);
+        return await patchDocument(pathParameters.id, requestBody, userId);
       case 'DELETE':
         if (!pathParameters?.id) {
           return createErrorResponse(400, 'Document ID is required');
