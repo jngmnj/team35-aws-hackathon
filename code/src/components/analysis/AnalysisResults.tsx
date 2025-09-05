@@ -43,7 +43,18 @@ export function AnalysisResults() {
       const newAnalysis = await apiClient.generateAnalysis();
       setAnalysis(newAnalysis);
     } catch (err: any) {
-      // Fallback to mock data if API is not available
+      // Enhanced error handling with better user feedback
+      if (err.response?.status === 401) {
+        setError('로그인이 필요합니다. 다시 로그인해주세요.');
+        return;
+      }
+      
+      if (err.response?.status === 429) {
+        setError('너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요.');
+        return;
+      }
+      
+      // Fallback to mock data for development
       const mockAnalysis: AnalysisResult = {
         analysisId: 'mock-id',
         userId: 'user-id',
@@ -79,7 +90,7 @@ export function AnalysisResults() {
       };
       
       setAnalysis(mockAnalysis);
-      console.warn('API not available, using mock data:', err.message);
+      console.warn('Using mock data for development:', err.message);
     } finally {
       setIsLoading(false);
     }
@@ -101,6 +112,7 @@ export function AnalysisResults() {
           onClick={handleGenerateAnalysis} 
           disabled={isLoading}
           className="px-8 py-3 text-lg font-semibold"
+          aria-label="AI 성격 분석 시작하기"
         >
           분석 시작하기
         </Button>
@@ -148,6 +160,7 @@ export function AnalysisResults() {
               onClick={handleGenerateAnalysis} 
               variant="outline"
               className="px-6 py-2 font-semibold"
+              aria-label="성격 분석 다시 실행하기"
             >
               다시 분석하기
             </Button>
