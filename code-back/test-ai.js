@@ -22,8 +22,5 @@ async function test() {
   console.log(JSON.stringify(resume, null, 2));
 }
 
-if (process.env.AWS_ACCESS_KEY_ID) {
-  test();
-} else {
-  console.log('AWS 자격증명 설정 필요');
-}
+// AWS CLI로 설정된 자격증명 사용
+test().catch(console.error);
