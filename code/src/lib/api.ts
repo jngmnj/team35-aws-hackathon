@@ -1,6 +1,12 @@
 import axios, { AxiosInstance } from 'axios';
 import { User, Document, AnalysisResult, ResumeContent, DocumentType } from '@/types';
 
+let showToastCallback: ((message: string, type: 'success' | 'error' | 'info') => void) | null = null;
+
+export function setToastCallback(callback: (message: string, type: 'success' | 'error' | 'info') => void) {
+  showToastCallback = callback;
+}
+
 interface AuthResponse {
   user: User;
   token: string;
@@ -37,7 +43,24 @@ class ApiClient {
         if (error.response?.status === 401) {
           this.clearToken();
         }
-        const message = error.response?.data?.error?.message || error.message || 'An error occurred';
+        
+        let message = 'An error occurred';
+        if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
+          message = '서버에 연결할 수 없습니다. 네트워크 연결을 확인해주세요.';
+        } else if (error.response?.status === 500) {
+          message = '서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+        } else if (error.response?.status === 429) {
+          message = '너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요.';
+        } else if (error.response?.status === 401) {
+          message = '인증이 만료되었습니다. 다시 로그인해주세요.';
+        } else {
+          message = error.response?.data?.error?.message || error.message || message;
+        }
+        
+        if (showToastCallback) {
+          showToastCallback(message, 'error');
+        }
+        
         throw new Error(message);
       }
     );

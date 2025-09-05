@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
+import { useToast } from '@/components/ui/toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -12,7 +13,8 @@ export function RegisterForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [localError, setLocalError] = useState('');
-  const { register, isLoading, error: authError } = useAuth();
+  const { register, isLoading } = useAuth();
+  const { showToast } = useToast();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,20 +22,18 @@ export function RegisterForm() {
     setLocalError('');
     
     if (password.length < 6) {
-      setLocalError('Password must be at least 6 characters');
+      setLocalError('비밀번호는 최소 6자 이상이어야 합니다.');
       return;
     }
     
     try {
       await register(email, password, name);
+      showToast('회원가입에 성공했습니다!', 'success');
       router.push('/dashboard');
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Registration failed';
-      setLocalError(errorMessage);
+    } catch {
+      // 오류는 API 클라이언트에서 토스트로 처리됨
     }
   };
-
-  const displayError = localError || authError;
 
   return (
     <Card className="w-full max-w-md p-6">
@@ -66,7 +66,7 @@ export function RegisterForm() {
             required
           />
         </div>
-        {displayError && <p className="text-red-500 text-sm">{displayError}</p>}
+        {localError && <p className="text-red-500 text-sm">{localError}</p>}
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? 'Creating account...' : 'Register'}
         </Button>

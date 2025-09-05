@@ -42,13 +42,7 @@ export function AnalysisResults() {
       const newAnalysis = await apiClient.generateAnalysis();
       setAnalysis(newAnalysis);
     } catch (err: any) {
-      if (err.message.includes('401')) {
-        setError('로그인이 필요합니다. 다시 로그인해주세요.');
-      } else if (err.message.includes('429')) {
-        setError('너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요.');
-      } else {
-        setError('분석 생성 중 오류가 발생했습니다. 다시 시도해주세요.');
-      }
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
@@ -84,11 +78,7 @@ export function AnalysisResults() {
         >
           분석 시작하기
         </Button>
-        {error && (
-          <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-600">{error}</p>
-          </div>
-        )}
+
       </Card>
     );
   }

@@ -62,7 +62,7 @@ export function useDocuments(): UseDocumentsReturn {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create document';
       setError(errorMessage);
-      throw new Error(errorMessage);
+      throw err;
     }
   };
 
@@ -77,7 +77,7 @@ export function useDocuments(): UseDocumentsReturn {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update document';
       setError(errorMessage);
-      throw new Error(errorMessage);
+      throw err;
     }
   };
 
@@ -89,7 +89,7 @@ export function useDocuments(): UseDocumentsReturn {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete document';
       setError(errorMessage);
-      throw new Error(errorMessage);
+      throw err;
     }
   };
 
