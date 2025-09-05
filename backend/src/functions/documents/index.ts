@@ -68,11 +68,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         }
         return await deleteDocument(pathParameters.id, userId);
       default:
-        return {
-          statusCode: 405,
-          headers,
-          body: JSON.stringify({ success: false, error: { message: 'Method not allowed' } }),
-        };
+        return createErrorResponse(405, 'Method not allowed');
     }
   } catch (error: any) {
     console.error('Error:', error);
