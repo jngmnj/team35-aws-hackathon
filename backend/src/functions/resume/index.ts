@@ -24,7 +24,15 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       case 'GET':
         return await getResumes(userId, event.queryStringParameters);
       case 'POST':
-        return await createResume(userId, JSON.parse(event.body || '{}'));
+        let requestBody = {};
+        if (event.body) {
+          try {
+            requestBody = JSON.parse(event.body);
+          } catch (error) {
+            return createErrorResponse(400, 'Invalid JSON in request body');
+          }
+        }
+        return await createResume(userId, requestBody);
       default:
         return createErrorResponse(405, 'Method not allowed');
     }
@@ -96,27 +104,32 @@ interface CreateResumeRequest {
   jobTitle?: string;
 }
 
-async function createResume(userId: string, body: CreateResumeRequest) {
+async function createResume(userId: string, body: any) {
   // Validate userId to prevent injection
   if (!userId || typeof userId !== 'string' || userId.length === 0) {
     return createErrorResponse(400, 'Invalid user ID');
   }
 
-  const { documents, jobCategory, jobTitle } = body;
-
-  if (!documents || !Array.isArray(documents)) {
-    return createErrorResponse(400, 'Documents array is required');
-  }
+  const { jobCategory, jobTitle } = body;
 
   if (!jobCategory || typeof jobCategory !== 'string' || jobCategory.length === 0) {
     return createErrorResponse(400, 'Valid job category is required');
   }
 
-  // Validate documents array
-  for (const doc of documents) {
-    if (!doc.type || !doc.title || typeof doc.type !== 'string' || typeof doc.title !== 'string') {
-      return createErrorResponse(400, 'Invalid document format');
-    }
+  // Get user's documents from database
+  const result = await docClient.send(new QueryCommand({
+    TableName: TABLE_NAMES.DOCUMENTS,
+    IndexName: 'userId-index', 
+    KeyConditionExpression: 'userId = :userId',
+    ExpressionAttributeValues: {
+      ':userId': userId,
+    },
+  }));
+
+  const documents = result.Items || [];
+  
+  if (documents.length === 0) {
+    return createErrorResponse(400, 'No documents found for resume generation');
   }
 
   try {
