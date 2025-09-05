@@ -102,29 +102,14 @@ async function getDocument(documentId: string, userId: string) {
   }));
 
   if (!document.Item) {
-    return {
-      statusCode: 404,
-      headers,
-      body: JSON.stringify({ success: false, error: { message: 'Document not found' } }),
-    };
+    return createErrorResponse(404, 'Document not found');
   }
 
   if (document.Item.userId !== userId) {
-    return {
-      statusCode: 403,
-      headers,
-      body: JSON.stringify({ success: false, error: { message: 'Access denied' } }),
-    };
+    return createErrorResponse(403, 'Access denied');
   }
 
-  return {
-    statusCode: 200,
-    headers,
-    body: JSON.stringify({
-      success: true,
-      data: document.Item,
-    }),
-  };
+  return createSuccessResponse(document.Item);
 }
 
 async function getDocuments(userId: string, queryParams?: QueryParams) {
