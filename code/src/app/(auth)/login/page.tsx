@@ -11,9 +11,9 @@ export default function LoginPage() {
       <div className="space-y-4">
         <LoginForm />
         <p className="text-center text-sm text-muted-foreground">
-          Don&apos;t have an account?{' '}
+          계정이 없으신가요?{' '}
           <Link href="/register" className="text-primary hover:underline cursor-pointer">
-            Register here
+            회원가입
           </Link>
         </p>
       </div>

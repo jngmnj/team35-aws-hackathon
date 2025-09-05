@@ -37,12 +37,12 @@ export function RegisterForm() {
 
   return (
     <Card className="w-full max-w-md p-6">
-      <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center">회원가입</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <Input
             type="text"
-            placeholder="Full Name"
+            placeholder="이름"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
@@ -51,7 +51,7 @@ export function RegisterForm() {
         <div>
           <Input
             type="email"
-            placeholder="Email"
+            placeholder="이메일"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -60,7 +60,7 @@ export function RegisterForm() {
         <div>
           <Input
             type="password"
-            placeholder="Password (min 6 characters)"
+            placeholder="비밀번호 (최소 6자)"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -68,7 +68,7 @@ export function RegisterForm() {
         </div>
         {localError && <p className="text-red-500 text-sm">{localError}</p>}
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? 'Creating account...' : 'Register'}
+          {isLoading ? '계정 생성 중...' : '회원가입'}
         </Button>
       </form>
     </Card>
