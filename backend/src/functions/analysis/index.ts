@@ -57,20 +57,25 @@ async function createAnalysis(userId: string, body: any) {
     return createErrorResponse(400, 'Documents array is required');
   }
 
-  const analysisResult = await generatePersonalityAnalysis({ documents });
-  const analysisId = uuidv4();
+  try {
+    const analysisResult = await generatePersonalityAnalysis({ documents });
+    const analysisId = uuidv4();
 
-  const analysis = {
-    analysisId,
-    userId,
-    result: analysisResult,
-    createdAt: new Date().toISOString(),
-  };
+    const analysis = {
+      analysisId,
+      userId,
+      result: analysisResult,
+      createdAt: new Date().toISOString(),
+    };
 
-  await docClient.send(new PutCommand({
-    TableName: TABLE_NAMES.ANALYSIS,
-    Item: analysis,
-  }));
+    await docClient.send(new PutCommand({
+      TableName: TABLE_NAMES.ANALYSIS,
+      Item: analysis,
+    }));
 
-  return createSuccessResponse(analysis, 201);
+    return createSuccessResponse(analysis, 201);
+  } catch (error) {
+    console.error('AI 분석 실패:', error);
+    return createErrorResponse(500, 'AI 분석 서비스 일시 중단. 잠시 후 다시 시도해주세요.');
+  }
 }

@@ -78,22 +78,27 @@ async function createResume(userId: string, body: any) {
     return createErrorResponse(400, 'Job category is required');
   }
 
-  const resumeResult = await generateResume({ documents, jobCategory, jobTitle });
-  const resumeId = uuidv4();
+  try {
+    const resumeResult = await generateResume({ documents, jobCategory, jobTitle });
+    const resumeId = uuidv4();
 
-  const resume = {
-    resumeId,
-    userId,
-    jobCategory,
-    jobTitle,
-    content: resumeResult,
-    createdAt: new Date().toISOString(),
-  };
+    const resume = {
+      resumeId,
+      userId,
+      jobCategory,
+      jobTitle,
+      content: resumeResult,
+      createdAt: new Date().toISOString(),
+    };
 
-  await docClient.send(new PutCommand({
-    TableName: TABLE_NAMES.RESUMES,
-    Item: resume,
-  }));
+    await docClient.send(new PutCommand({
+      TableName: TABLE_NAMES.RESUMES,
+      Item: resume,
+    }));
 
-  return createSuccessResponse(resume, 201);
+    return createSuccessResponse(resume, 201);
+  } catch (error) {
+    console.error('이력서 생성 실패:', error);
+    return createErrorResponse(500, '이력서 생성 서비스 일시 중단. 잠시 후 다시 시도해주세요.');
+  }
 }
