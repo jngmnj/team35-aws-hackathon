@@ -47,6 +47,23 @@ frontend/
 }
 ```
 
+## TipTap Editor Configuration
+
+### SSR Setup (Required for Next.js)
+```typescript
+const editor = useEditor({
+  extensions: [StarterKit, Placeholder.configure({ placeholder: '...' })],
+  content: initialContent,
+  immediatelyRender: false, // Required for Next.js SSR
+});
+```
+
+### HTML Styling for TipTap Output
+```typescript
+// Use Tailwind arbitrary property selectors for HTML content
+className="prose prose-lg max-w-none [&_strong]:font-bold [&_em]:italic [&_h1]:text-2xl [&_h1]:font-bold [&_ul]:list-disc [&_ul]:ml-6"
+```
+
 ## Component Guidelines
 
 ### Authentication Components
@@ -68,17 +85,23 @@ interface RegisterFormProps {
 ```typescript
 // components/documents/DocumentEditor.tsx
 interface DocumentEditorProps {
-  documentId?: string;
-  type: DocumentType;
-  initialContent?: string;
-  onSave: (content: string) => void;
+  onSave: (data: { title: string; type: DocumentType; content: string }) => void;
+  initialData?: { title: string; type: DocumentType; content: string };
 }
 
 // components/documents/DocumentList.tsx
 interface DocumentListProps {
   documents: Document[];
-  onEdit: (documentId: string) => void;
+  onEdit: (document: Document) => void;
   onDelete: (documentId: string) => void;
+  onCreate: (type: DocumentType) => void;
+  onView: (document: Document) => void;
+}
+
+// components/documents/DocumentViewer.tsx
+interface DocumentViewerProps {
+  document: Document;
+  onEdit: () => void;
 }
 ```
 

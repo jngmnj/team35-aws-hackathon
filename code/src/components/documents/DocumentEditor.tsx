@@ -5,47 +5,58 @@ import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-
 import { Card } from '@/components/ui/card';
-import { useState } from 'react';
-
-export type DocumentType = 'experience' | 'skills' | 'values' | 'achievements';
+import { useState, useEffect } from 'react';
+import { DocumentType } from '@/types';
 
 interface DocumentEditorProps {
   onSave: (data: { title: string; type: DocumentType; content: string }) => void;
   initialData?: { title: string; type: DocumentType; content: string };
 }
 
+const placeholders = {
+  experience: 'Describe your work experience, projects, and achievements...',
+  skills: 'List your technical and soft skills...',
+  values: 'What values are important to you in work and life?...',
+  achievements: 'Highlight your key accomplishments and awards...'
+};
+
 export function DocumentEditor({ onSave, initialData }: DocumentEditorProps) {
   const [title, setTitle] = useState(initialData?.title || '');
   const [type, setType] = useState<DocumentType>(initialData?.type || 'experience');
+  const [isSaving, setIsSaving] = useState(false);
 
   const editor = useEditor({
     extensions: [
       StarterKit,
       Placeholder.configure({
-        placeholder: '문서 내용을 입력하세요...',
+        placeholder: placeholders[type],
       }),
     ],
     content: initialData?.content || '',
     immediatelyRender: false,
   });
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!editor || !title.trim()) return;
     
-    onSave({
-      title: title.trim(),
-      type,
-      content: editor.getHTML(),
-    });
+    setIsSaving(true);
+    try {
+      await onSave({
+        title: title.trim(),
+        type,
+        content: editor.getHTML(),
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
     <Card className="p-6">
       <div className="space-y-4">
         <Input
-          placeholder="문서 제목"
+          placeholder="Document title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
@@ -55,20 +66,22 @@ export function DocumentEditor({ onSave, initialData }: DocumentEditorProps) {
           value={type} 
           onChange={(e) => setType(e.target.value as DocumentType)}
         >
-          <option value="experience">경험</option>
-          <option value="skills">기술</option>
-          <option value="values">가치관</option>
-          <option value="achievements">성과</option>
+          <option value="experience">Experience</option>
+          <option value="skills">Skills</option>
+          <option value="values">Values</option>
+          <option value="achievements">Achievements</option>
         </select>
 
-        <div className="border rounded-md p-4 min-h-[300px]">
+        <div className="border rounded-md p-4 min-h-[500px] prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-strong:text-gray-900 prose-ul:text-gray-700 prose-ol:text-gray-700 prose-blockquote:text-gray-600 prose-code:text-blue-600 prose-pre:bg-gray-100">
           <EditorContent editor={editor} />
         </div>
 
-        <Button onClick={handleSave} disabled={!title.trim()}>
-          저장
+        <Button onClick={handleSave} disabled={!title.trim() || isSaving}>
+          {isSaving ? 'Saving...' : 'Save'}
         </Button>
       </div>
     </Card>
   );
 }
+
+export default DocumentEditor;
