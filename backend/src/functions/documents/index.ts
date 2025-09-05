@@ -209,6 +209,14 @@ interface UpdateDocumentRequest {
 async function updateDocument(documentId: string, body: UpdateDocumentRequest, userId: string) {
   const { title, content, type } = body;
 
+  if (!documentId) {
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ success: false, error: { message: 'Document ID is required' } }),
+    };
+  }
+
   // Check document ownership
   const ownershipCheck = await verifyDocumentOwnership(documentId, userId);
   if (!ownershipCheck.success) {
@@ -369,6 +377,14 @@ async function patchDocument(documentId: string, body: PatchDocumentRequest, use
 }
 
 async function deleteDocument(documentId: string, userId: string) {
+  if (!documentId) {
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ success: false, error: { message: 'Document ID is required' } }),
+    };
+  }
+
   // Check document ownership
   const ownershipCheck = await verifyDocumentOwnership(documentId, userId);
   if (!ownershipCheck.success) {
