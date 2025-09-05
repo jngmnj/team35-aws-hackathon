@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { User, Document, AnalysisResult, ResumeContent, JobCategory, DocumentType } from '@/types';
+import { User, Document, AnalysisResult, ResumeContent, DocumentType } from '@/types';
 
 interface AuthResponse {
   user: User;
@@ -88,7 +88,10 @@ class ApiClient {
 
   // Analysis methods
   async generateAnalysis(): Promise<AnalysisResult> {
-    const { data } = await this.client.post('/analysis/generate');
+    const documents = await this.getDocuments();
+    const { data } = await this.client.post('/analysis', { 
+      documents: Array.isArray(documents) ? documents : (documents as unknown as { documents: Document[] }).documents || [] 
+    });
     return data;
   }
 
@@ -98,13 +101,17 @@ class ApiClient {
   }
 
   // Resume methods
-  async generateResume(jobCategory: JobCategory): Promise<ResumeContent> {
-    const { data } = await this.client.post('/resume/generate', { jobCategory });
-    return data;
+  async generateResume(jobCategory: string): Promise<ResumeContent> {
+    const documents = await this.getDocuments();
+    const { data } = await this.client.post('/resume', { 
+      documents: Array.isArray(documents) ? documents : (documents as unknown as { documents: Document[] }).documents || [],
+      jobCategory 
+    });
+    return data.content;
   }
 
-  async getResume(jobCategory: JobCategory): Promise<ResumeContent> {
-    const { data } = await this.client.get(`/resume/${jobCategory}`);
+  async getResume(jobCategory: string): Promise<ResumeContent> {
+    const { data } = await this.client.get(`/resume?jobCategory=${jobCategory}`);
     return data;
   }
 }

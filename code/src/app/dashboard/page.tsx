@@ -1,15 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/lib/auth-context';
 import { useDocuments } from '@/hooks/useDocuments';
+import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
 import { FileText, Brain, FileUser, Plus } from 'lucide-react';
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { documents, isLoading } = useDocuments();
 
   const documentCounts = {
@@ -31,24 +31,37 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.name}!</h1>
-          <p className="text-gray-600">Track your progress and generate insights from your documents.</p>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Total Documents</p>
-                <p className="text-2xl font-bold">{totalDocuments}</p>
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gray-50">
+        <header className="bg-white shadow-sm border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <h1 className="text-xl font-semibold">AI Resume Generator</h1>
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-gray-600">Welcome, {user?.name || 'User'}</span>
+                <Button variant="outline" onClick={logout}>Logout</Button>
               </div>
-              <FileText className="h-8 w-8 text-blue-500" />
             </div>
-          </Card>
+          </div>
+        </header>
+
+        <div className="max-w-6xl mx-auto p-6">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.name}!</h1>
+            <p className="text-gray-600">Track your progress and generate insights from your documents.</p>
+          </div>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <Card className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Total Documents</p>
+                  <p className="text-2xl font-bold">{totalDocuments}</p>
+                </div>
+                <FileText className="h-8 w-8 text-blue-500" />
+              </div>
+            </Card>
 
           <Card className="p-6">
             <div className="flex items-center justify-between">
@@ -158,7 +171,8 @@ export default function Dashboard() {
             </Link>
           </Card>
         )}
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }
