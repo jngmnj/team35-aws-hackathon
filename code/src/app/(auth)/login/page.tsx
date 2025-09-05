@@ -1,9 +1,17 @@
+import Link from 'next/link';
+import { LoginForm } from '@/components/auth/LoginForm';
+
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="max-w-md w-full space-y-8">
-        <h2 className="text-3xl font-bold text-center">로그인</h2>
-        {/* Login form will be implemented here */}
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="space-y-4">
+        <LoginForm />
+        <p className="text-center text-sm text-gray-600">
+          Don't have an account?{' '}
+          <Link href="/register" className="text-blue-600 hover:underline">
+            Register here
+          </Link>
+        </p>
       </div>
     </div>
   );
