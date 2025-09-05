@@ -73,6 +73,20 @@ async function createAnalysis(userId: string, body: AnalysisRequest) {
     return createErrorResponse(400, 'Documents array is required');
   }
 
+  if (documents.length === 0) {
+    return createErrorResponse(400, 'At least one document is required for analysis');
+  }
+
+  // Validate document structure
+  for (const doc of documents) {
+    if (!doc.type || !doc.title || !doc.content) {
+      return createErrorResponse(400, 'Each document must have type, title, and content');
+    }
+    if (typeof doc.content !== 'string' || doc.content.trim().length === 0) {
+      return createErrorResponse(400, 'Document content cannot be empty');
+    }
+  }
+
   try {
     const analysisResult = await generatePersonalityAnalysis({ documents });
     const analysisId = uuidv4();
