@@ -54,12 +54,12 @@ ${selectedResume.content.achievements.map(achievement => `• ${achievement}`).j
     <ProtectedRoute>
       <div className="container mx-auto p-6 max-w-4xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">이력서 생성</h1>
-          <p className="text-gray-600">AI가 당신의 문서를 분석하여 맞춤형 이력서를 생성합니다</p>
+          <h1 className="text-3xl font-bold mb-2 text-foreground">이력서 생성</h1>
+          <p className="text-muted-foreground">AI가 당신의 문서를 분석하여 맞춤형 이력서를 생성합니다</p>
         </div>
         
         <div className="mb-6">
-          <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+          <div className="flex space-x-1 bg-muted p-1 rounded-lg">
             <button
               onClick={() => {
                 setActiveTab('create');
@@ -67,8 +67,8 @@ ${selectedResume.content.achievements.map(achievement => `• ${achievement}`).j
               }}
               className={`px-4 py-2 rounded-md font-medium transition-colors ${
                 activeTab === 'create'
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-800'
+                  ? 'bg-background text-primary shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               이력서 생성
@@ -77,8 +77,8 @@ ${selectedResume.content.achievements.map(achievement => `• ${achievement}`).j
               onClick={() => setActiveTab('history')}
               className={`px-4 py-2 rounded-md font-medium transition-colors ${
                 activeTab === 'history'
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-800'
+                  ? 'bg-background text-primary shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               이력서 기록

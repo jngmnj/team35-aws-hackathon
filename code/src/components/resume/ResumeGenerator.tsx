@@ -166,17 +166,17 @@ ${resume.content.achievements.map(achievement => `• ${achievement}`).join('\n'
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-              step === 'category' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'
+              step === 'category' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
             }`}>
               1
             </div>
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-              step === 'template' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'
+              step === 'template' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
             }`}>
               2
             </div>
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-              step === 'generate' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'
+              step === 'generate' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
             }`}>
               3
             </div>
@@ -190,7 +190,7 @@ ${resume.content.achievements.map(achievement => `• ${achievement}`).join('\n'
 
         {step === 'category' && (
           <div>
-            <h2 className="text-xl font-semibold mb-4">직무 선택</h2>
+            <h2 className="text-xl font-semibold mb-4 text-foreground">직무 선택</h2>
             <JobCategorySelector 
               selectedCategory={selectedCategory}
               onSelect={handleCategorySelect}
@@ -209,13 +209,13 @@ ${resume.content.achievements.map(achievement => `• ${achievement}`).join('\n'
         {step === 'generate' && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-semibold mb-4">이력서 생성</h2>
-              <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded">
-                선택된 직무: <span className="font-semibold text-blue-600">{selectedCategory}</span><br/>
-                선택된 템플릿: <span className="font-semibold text-blue-600">{selectedTemplate}</span><br/>
-                작성된 문서: <span className="font-semibold text-blue-600">{documentCount}개</span>
+              <h2 className="text-xl font-semibold mb-4 text-foreground">이력서 생성</h2>
+              <div className="text-sm text-muted-foreground bg-muted p-3 rounded">
+                선택된 직무: <span className="font-semibold text-primary">{selectedCategory}</span><br/>
+                선택된 템플릿: <span className="font-semibold text-primary">{selectedTemplate}</span><br/>
+                작성된 문서: <span className="font-semibold text-primary">{documentCount}개</span>
                 {documentCount === 0 && (
-                  <p className="text-orange-600 mt-2">
+                  <p className="text-destructive mt-2">
                     이력서 생성을 위해 먼저 문서를 작성해주세요.
                   </p>
                 )}
