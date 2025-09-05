@@ -16,8 +16,8 @@ export function useResume() {
       const result = await apiClient.generateResume(jobCategory);
       setResumes(prev => [result, ...prev]);
       return result;
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
       throw err;
     } finally {
       setIsLoading(false);
@@ -30,8 +30,8 @@ export function useResume() {
       setError(null);
       const result = await apiClient.getResume(jobCategory);
       return result;
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
       throw err;
     } finally {
       setIsLoading(false);

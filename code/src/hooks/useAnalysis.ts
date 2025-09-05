@@ -15,8 +15,8 @@ export function useAnalysis() {
       setError(null);
       const result = await apiClient.getAnalysis();
       setAnalysis(result);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setIsLoading(false);
     }
@@ -29,8 +29,8 @@ export function useAnalysis() {
       const result = await apiClient.generateAnalysis();
       setAnalysis(result);
       return result;
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
       throw err;
     } finally {
       setIsLoading(false);
