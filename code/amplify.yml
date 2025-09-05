@@ -37,6 +37,7 @@ applications:
           commands:
             - echo "Tests completed"
       artifacts:
+        baseDirectory: .
         files:
           - '**/*'
     env:
