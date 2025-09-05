@@ -60,11 +60,32 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       case 'POST':
         return await createDocument(userId, requestBody);
       case 'PUT':
-        return await updateDocument(pathParameters?.id!, requestBody, userId);
+        if (!pathParameters?.id) {
+          return {
+            statusCode: 400,
+            headers,
+            body: JSON.stringify({ success: false, error: { message: 'Document ID is required' } }),
+          };
+        }
+        return await updateDocument(pathParameters.id, requestBody, userId);
       case 'PATCH':
-        return await patchDocument(pathParameters?.id!, requestBody, userId);
+        if (!pathParameters?.id) {
+          return {
+            statusCode: 400,
+            headers,
+            body: JSON.stringify({ success: false, error: { message: 'Document ID is required' } }),
+          };
+        }
+        return await patchDocument(pathParameters.id, requestBody, userId);
       case 'DELETE':
-        return await deleteDocument(pathParameters?.id!, userId);
+        if (!pathParameters?.id) {
+          return {
+            statusCode: 400,
+            headers,
+            body: JSON.stringify({ success: false, error: { message: 'Document ID is required' } }),
+          };
+        }
+        return await deleteDocument(pathParameters.id, userId);
       default:
         return {
           statusCode: 405,
@@ -130,36 +151,54 @@ async function getDocument(documentId: string, userId: string) {
 }
 
 async function getDocuments(userId: string, queryParams?: QueryParams) {
+  // Validate userId to prevent injection
+  if (!userId || typeof userId !== 'string' || userId.length === 0) {
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ success: false, error: { message: 'Invalid user ID' } }),
+    };
+  }
+
   let keyConditionExpression = 'userId = :userId';
   const expressionAttributeValues: Record<string, string> = {
     ':userId': userId,
   };
 
-  // Add type filter if provided
+  // Add type filter if provided and validated
   if (queryParams?.type && validateDocumentType(queryParams.type)) {
     keyConditionExpression += ' AND #type = :type';
     expressionAttributeValues[':type'] = queryParams.type;
   }
 
-  const result = await docClient.send(new QueryCommand({
-    TableName: process.env.DOCUMENTS_TABLE_NAME,
-    IndexName: 'userId-index',
-    KeyConditionExpression: keyConditionExpression,
-    ExpressionAttributeNames: queryParams?.type ? { '#type': 'type' } : undefined,
-    ExpressionAttributeValues: expressionAttributeValues,
-  }));
+  try {
+    const result = await docClient.send(new QueryCommand({
+      TableName: process.env.DOCUMENTS_TABLE_NAME,
+      IndexName: 'userId-index',
+      KeyConditionExpression: keyConditionExpression,
+      ExpressionAttributeNames: queryParams?.type ? { '#type': 'type' } : undefined,
+      ExpressionAttributeValues: expressionAttributeValues,
+    }));
 
-  return {
-    statusCode: 200,
-    headers,
-    body: JSON.stringify({
-      success: true,
-      data: {
-        documents: result.Items || [],
-        total: result.Count || 0,
-      },
-    }),
-  };
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({
+        success: true,
+        data: {
+          documents: result.Items || [],
+          total: result.Count || 0,
+        },
+      }),
+    };
+  } catch (error) {
+    console.error('DynamoDB query error:', error);
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({ success: false, error: { message: 'Database query failed' } }),
+    };
+  }
 }
 
 interface CreateDocumentRequest {
@@ -169,6 +208,15 @@ interface CreateDocumentRequest {
 }
 
 async function createDocument(userId: string, body: CreateDocumentRequest) {
+  // Validate userId to prevent injection
+  if (!userId || typeof userId !== 'string' || userId.length === 0) {
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ success: false, error: { message: 'Invalid user ID' } }),
+    };
+  }
+
   const { type, title, content } = body;
 
   if (!type || !title) {
@@ -210,19 +258,28 @@ async function createDocument(userId: string, body: CreateDocumentRequest) {
     updatedAt: now,
   };
 
-  await docClient.send(new PutCommand({
-    TableName: process.env.DOCUMENTS_TABLE_NAME,
-    Item: document,
-  }));
+  try {
+    await docClient.send(new PutCommand({
+      TableName: process.env.DOCUMENTS_TABLE_NAME,
+      Item: document,
+    }));
 
-  return {
-    statusCode: 201,
-    headers,
-    body: JSON.stringify({
-      success: true,
-      data: document,
-    }),
-  };
+    return {
+      statusCode: 201,
+      headers,
+      body: JSON.stringify({
+        success: true,
+        data: document,
+      }),
+    };
+  } catch (error) {
+    console.error('DynamoDB put error:', error);
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({ success: false, error: { message: 'Failed to create document' } }),
+    };
+  }
 }
 
 interface UpdateDocumentRequest {
