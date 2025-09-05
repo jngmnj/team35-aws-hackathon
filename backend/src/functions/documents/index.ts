@@ -37,6 +37,19 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const method = event.httpMethod;
     const pathParameters = event.pathParameters;
 
+    let requestBody = {};
+    if (event.body && ['POST', 'PUT', 'PATCH'].includes(method)) {
+      try {
+        requestBody = JSON.parse(event.body);
+      } catch (error) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({ success: false, error: { message: 'Invalid JSON in request body' } }),
+        };
+      }
+    }
+
     switch (method) {
       case 'GET':
         if (pathParameters?.id) {
@@ -44,11 +57,11 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         }
         return await getDocuments(userId, event.queryStringParameters);
       case 'POST':
-        return await createDocument(userId, JSON.parse(event.body || '{}'));
+        return await createDocument(userId, requestBody);
       case 'PUT':
-        return await updateDocument(pathParameters?.id!, JSON.parse(event.body || '{}'), userId);
+        return await updateDocument(pathParameters?.id!, requestBody, userId);
       case 'PATCH':
-        return await patchDocument(pathParameters?.id!, JSON.parse(event.body || '{}'), userId);
+        return await patchDocument(pathParameters?.id!, requestBody, userId);
       case 'DELETE':
         return await deleteDocument(pathParameters?.id!, userId);
       default:

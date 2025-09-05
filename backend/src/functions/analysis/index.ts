@@ -24,7 +24,15 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       case 'GET':
         return await getAnalysis(userId);
       case 'POST':
-        return await createAnalysis(userId, JSON.parse(event.body || '{}'));
+        let requestBody = {};
+        if (event.body) {
+          try {
+            requestBody = JSON.parse(event.body);
+          } catch (error) {
+            return createErrorResponse(400, 'Invalid JSON in request body');
+          }
+        }
+        return await createAnalysis(userId, requestBody);
       default:
         return createErrorResponse(405, 'Method not allowed');
     }

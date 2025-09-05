@@ -15,7 +15,14 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       return { statusCode: 200, headers: {}, body: '' };
     }
 
-    const body = JSON.parse(event.body || '{}');
+    let body = {};
+    if (event.body) {
+      try {
+        body = JSON.parse(event.body);
+      } catch (error) {
+        return createErrorResponse(400, 'Invalid JSON in request body');
+      }
+    }
 
     if (path.endsWith('/register')) {
       return await handleRegister(body);
