@@ -101,21 +101,21 @@ export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
             <Loader2 className="w-6 h-6 text-primary animate-spin" />
           </div>
         </Card>
-      ) : analysis && analysis.result && (
+      ) : analysis?.result && (
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <PersonalityCard 
-              personalityType={analysis.result.personalityType}
-              strengths={analysis.result.strengths}
-              weaknesses={analysis.result.weaknesses}
+              personalityType={analysis.result?.personalityType}
+              strengths={analysis.result?.strengths}
+              weaknesses={analysis.result?.weaknesses}
             />
             <PersonalityVisualization 
-              personalityType={analysis.result.personalityType}
-              strengths={analysis.result.strengths}
-              weaknesses={analysis.result.weaknesses}
+              personalityType={analysis.result?.personalityType}
+              strengths={analysis.result?.strengths}
+              weaknesses={analysis.result?.weaknesses}
             />
           </div>
-          <InsightsDisplay analysis={analysis} />
+          {analysis && <InsightsDisplay analysis={analysis} />}
           {!selectedAnalysis && (
             <div className="text-center pt-4">
               <Button 
