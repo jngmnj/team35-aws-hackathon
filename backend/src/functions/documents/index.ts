@@ -3,6 +3,8 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand, GetCommand, QueryCommand, UpdateCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
 import { verifyToken } from '../../shared/auth';
+import { validateDocumentType, validateDocumentData } from '../../shared/validation';
+import { DocumentType } from '../../types/document';
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -37,7 +39,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     switch (method) {
       case 'GET':
-        return await getDocuments(userId);
+        return await getDocuments(userId, event.queryStringParameters);
       case 'POST':
         return await createDocument(userId, JSON.parse(event.body || '{}'));
       case 'PUT':
@@ -61,14 +63,24 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   }
 };
 
-async function getDocuments(userId: string) {
+async function getDocuments(userId: string, queryParams?: any) {
+  let keyConditionExpression = 'userId = :userId';
+  const expressionAttributeValues: any = {
+    ':userId': userId,
+  };
+
+  // Add type filter if provided
+  if (queryParams?.type && validateDocumentType(queryParams.type)) {
+    keyConditionExpression += ' AND #type = :type';
+    expressionAttributeValues[':type'] = queryParams.type;
+  }
+
   const result = await docClient.send(new QueryCommand({
     TableName: process.env.DOCUMENTS_TABLE_NAME,
     IndexName: 'userId-index',
-    KeyConditionExpression: 'userId = :userId',
-    ExpressionAttributeValues: {
-      ':userId': userId,
-    },
+    KeyConditionExpression: keyConditionExpression,
+    ExpressionAttributeNames: queryParams?.type ? { '#type': 'type' } : undefined,
+    ExpressionAttributeValues: expressionAttributeValues,
   }));
 
   return {
@@ -92,6 +104,23 @@ async function createDocument(userId: string, body: any) {
       statusCode: 400,
       headers,
       body: JSON.stringify({ success: false, error: { message: 'Missing required fields' } }),
+    };
+  }
+
+  if (!validateDocumentType(type)) {
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ success: false, error: { message: 'Invalid document type' } }),
+    };
+  }
+
+  const validation = validateDocumentData(type as DocumentType, title, content);
+  if (!validation.isValid) {
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ success: false, error: { message: 'Validation failed', details: validation.errors } }),
     };
   }
 
@@ -124,7 +153,7 @@ async function createDocument(userId: string, body: any) {
 }
 
 async function updateDocument(documentId: string, body: any) {
-  const { title, content } = body;
+  const { title, content, type } = body;
 
   if (!title && !content) {
     return {
@@ -132,6 +161,26 @@ async function updateDocument(documentId: string, body: any) {
       headers,
       body: JSON.stringify({ success: false, error: { message: 'No fields to update' } }),
     };
+  }
+
+  // If type is provided, validate the document data
+  if (type && title) {
+    if (!validateDocumentType(type)) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ success: false, error: { message: 'Invalid document type' } }),
+      };
+    }
+
+    const validation = validateDocumentData(type as DocumentType, title, content);
+    if (!validation.isValid) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ success: false, error: { message: 'Validation failed', details: validation.errors } }),
+      };
+    }
   }
 
   const updateExpression = [];
