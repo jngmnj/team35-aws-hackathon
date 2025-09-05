@@ -62,10 +62,10 @@ export function DocumentList({ documents, onEdit, onDelete, onCreate, onView, is
           </Button>
         </div>
       </div>
-      <div className="text-sm text-gray-600 line-clamp-6 whitespace-pre-wrap font-mono">
+      <div className="text-sm text-muted-foreground line-clamp-6 whitespace-pre-wrap font-mono">
         {document.content.replace(/<[^>]*>/g, '').substring(0, 200)}...
       </div>
-      <p className="text-xs text-gray-400 mt-2">
+      <p className="text-xs text-muted-foreground/70 mt-2">
 수정일: {new Date(document.updatedAt).toLocaleDateString()}
       </p>
     </Card>
@@ -74,7 +74,7 @@ export function DocumentList({ documents, onEdit, onDelete, onCreate, onView, is
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">내 문서</h2>
+        <h2 className="text-2xl font-bold text-foreground">내 문서</h2>
         <Button onClick={() => onCreate(activeTab)} disabled={isLoading}>
           {isLoading && <LoadingSpinner size="sm" />}
           <Plus className="h-4 w-4 mr-2" />
@@ -115,7 +115,7 @@ export function DocumentList({ documents, onEdit, onDelete, onCreate, onView, is
                     <DocumentCard key={document.documentId} document={document} />
                   ))
                 ) : (
-                  <div className="col-span-full text-center py-8 text-gray-500">
+                  <div className="col-span-full text-center py-8 text-muted-foreground">
                     <p>아직 {type.label} 문서가 없습니다.</p>
                     <Button 
                       className="mt-4" 

@@ -37,22 +37,22 @@ export function ResumeTemplates({ selectedCategory, onSelectTemplate, selectedTe
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">템플릿 선택</h3>
+      <h3 className="text-lg font-semibold text-foreground">템플릿 선택</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {templates.map((template) => (
           <Card 
             key={template.id}
             className={`p-4 cursor-pointer transition-all hover:shadow-md ${
               selectedTemplate === template.id 
-                ? 'ring-2 ring-blue-500 bg-blue-50' 
-                : 'hover:bg-gray-50'
+                ? 'ring-2 ring-primary bg-accent' 
+                : 'hover:bg-accent'
             }`}
             onClick={() => onSelectTemplate(template.id)}
           >
-            <h4 className="font-semibold mb-2">{template.name}</h4>
-            <p className="text-sm text-gray-600">{template.description}</p>
-            <div className="mt-3 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded border-2 border-dashed border-gray-300 flex items-center justify-center">
-              <span className="text-xs text-gray-500">템플릿 미리보기</span>
+            <h4 className="font-semibold mb-2 text-foreground">{template.name}</h4>
+            <p className="text-sm text-muted-foreground">{template.description}</p>
+            <div className="mt-3 h-16 bg-muted rounded border-2 border-dashed border-border flex items-center justify-center">
+              <span className="text-xs text-muted-foreground">템플릿 미리보기</span>
             </div>
           </Card>
         ))}
