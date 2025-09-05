@@ -39,6 +39,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     switch (method) {
       case 'GET':
+        if (pathParameters?.id) {
+          return await getDocument(pathParameters.id, userId);
+        }
         return await getDocuments(userId, event.queryStringParameters);
       case 'POST':
         return await createDocument(userId, JSON.parse(event.body || '{}'));
@@ -67,6 +70,38 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
 interface QueryParams {
   type?: string;
+}
+
+async function getDocument(documentId: string, userId: string) {
+  const document = await docClient.send(new GetCommand({
+    TableName: process.env.DOCUMENTS_TABLE_NAME,
+    Key: { documentId },
+  }));
+
+  if (!document.Item) {
+    return {
+      statusCode: 404,
+      headers,
+      body: JSON.stringify({ success: false, error: { message: 'Document not found' } }),
+    };
+  }
+
+  if (document.Item.userId !== userId) {
+    return {
+      statusCode: 403,
+      headers,
+      body: JSON.stringify({ success: false, error: { message: 'Access denied' } }),
+    };
+  }
+
+  return {
+    statusCode: 200,
+    headers,
+    body: JSON.stringify({
+      success: true,
+      data: document.Item,
+    }),
+  };
 }
 
 async function getDocuments(userId: string, queryParams?: QueryParams) {
