@@ -15,7 +15,23 @@ export interface Document {
   updatedAt: string;
 }
 
-export type DocumentType = 'experience' | 'skills' | 'values' | 'achievements';
+export type DocumentType = 'experience' | 'skills' | 'values' | 'achievements' | 'daily_record' | 'mood_tracker' | 'reflection' | 'test_result';
+
+export interface DailyRecord {
+  date: string;
+  mood: number; // 1-5 scale
+  energy: number; // 1-5 scale
+  activities: string[];
+  notes?: string;
+}
+
+export interface TestResult {
+  testType: string; // 'MBTI', 'DISC', 'Enneagram', etc.
+  result: string;
+  description?: string;
+  takenAt: string;
+  externalUrl?: string;
+}
 
 export interface AnalysisResult {
   analysisId: string;

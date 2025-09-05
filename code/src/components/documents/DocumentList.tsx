@@ -22,7 +22,11 @@ const documentTypes: { value: DocumentType; label: string }[] = [
   { value: 'experience', label: '경험' },
   { value: 'skills', label: '기술' },
   { value: 'values', label: '가치관' },
-  { value: 'achievements', label: '성과' }
+  { value: 'achievements', label: '성과' },
+  { value: 'daily_record', label: '일상기록' },
+  { value: 'mood_tracker', label: '기분추적' },
+  { value: 'reflection', label: '성찰' },
+  { value: 'test_result', label: '테스트결과' }
 ];
 
 export function DocumentList({ documents, onEdit, onDelete, onCreate, onView, isLoading, error }: DocumentListProps) {
@@ -78,12 +82,12 @@ export function DocumentList({ documents, onEdit, onDelete, onCreate, onView, is
         <Button onClick={() => onCreate(activeTab)} disabled={isLoading}>
           {isLoading && <LoadingSpinner size="sm" />}
           <Plus className="h-4 w-4 mr-2" />
-새 {activeTab === 'experience' ? '경험' : activeTab === 'skills' ? '기술' : activeTab === 'values' ? '가치관' : '성과'}
+새 {documentTypes.find(t => t.value === activeTab)?.label || '문서'}
         </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as DocumentType)}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
           {documentTypes.map(type => (
             <TabsTrigger key={type.value} value={type.value}>
               {type.label}

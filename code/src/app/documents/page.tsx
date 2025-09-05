@@ -6,6 +6,7 @@ import { useToast } from '@/components/ui/toast';
 import { DocumentList } from '@/components/documents/DocumentList';
 import { DocumentEditor } from '@/components/documents/DocumentEditor';
 import { DocumentViewer } from '@/components/documents/DocumentViewer';
+import { MoodChart } from '@/components/charts/MoodChart';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Document, DocumentType } from '@/types';
 
@@ -82,7 +83,9 @@ export default function DocumentsPage() {
 
   return (
     <div className="min-h-screen bg-background p-6">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto space-y-8">
+        <MoodChart documents={documents} />
+        
         <DocumentList
           documents={documents}
           onEdit={handleEdit}
