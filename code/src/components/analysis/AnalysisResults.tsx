@@ -7,6 +7,7 @@ import { InsightsDisplay } from './InsightsDisplay';
 import { PersonalityVisualization } from './PersonalityVisualization';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { useToast } from '@/components/ui/toast';
 import { apiClient } from '@/lib/api';
 
 interface AnalysisResultsProps {
@@ -44,6 +45,8 @@ export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
     loadData();
   }, [selectedAnalysis]);
 
+  const { showToast } = useToast();
+
   const handleGenerateAnalysis = async () => {
     setIsLoading(true);
     setError(null);
@@ -51,8 +54,9 @@ export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
     try {
       const newAnalysis = await apiClient.generateAnalysis();
       setAnalysis(newAnalysis);
+      showToast('성격 분석이 완료되었습니다!', 'success');
     } catch (err: any) {
-      setError(err.message);
+      showToast('분석 중 오류가 발생했습니다. 다시 시도해주세요.', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -79,11 +83,7 @@ export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
               분석을 위해 먼저 문서를 작성해주세요.
             </p>
           )}
-          {error && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-600">{error}</p>
-            </div>
-          )}
+
         </div>
         <Button 
           onClick={handleGenerateAnalysis} 
@@ -93,15 +93,7 @@ export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
         >
           분석 시작하기
         </Button>
-        {error && (
-          <Button 
-            onClick={() => setError(null)} 
-            variant="outline"
-            className="mt-4 px-4 py-2"
-          >
-            다시 시도
-          </Button>
-        )}
+
 
       </Card>
     );

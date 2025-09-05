@@ -97,7 +97,7 @@ export default function DocumentsPage() {
         <Dialog open={isViewerOpen} onOpenChange={setIsViewerOpen}>
           <DialogContent className="max-w-5xl h-[85vh] flex flex-col">
             <DialogHeader className="flex-shrink-0">
-              <DialogTitle>View Document</DialogTitle>
+              <DialogTitle>문서 보기</DialogTitle>
             </DialogHeader>
             <div className="flex-1 overflow-y-auto">
               {viewingDocument && (
@@ -115,7 +115,7 @@ export default function DocumentsPage() {
           <DialogContent className="max-w-5xl h-[85vh] flex flex-col">
             <DialogHeader className="flex-shrink-0">
               <DialogTitle>
-                {editingDocument ? 'Edit Document' : `Create New ${newDocumentType}`}
+                {editingDocument ? '문서 수정' : `새 ${newDocumentType === 'experience' ? '경험' : newDocumentType === 'skills' ? '기술' : newDocumentType === 'values' ? '가치관' : '성과'} 작성`}
               </DialogTitle>
             </DialogHeader>
             <div className="flex-1 overflow-y-auto">
