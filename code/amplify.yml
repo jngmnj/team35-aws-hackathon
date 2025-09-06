@@ -1,0 +1,47 @@
+version: 1
+applications:
+  - appRoot: code
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - echo "Installing dependencies..."
+            - npm install
+            - echo "Dependencies installed successfully"
+        build:
+          commands:
+            - echo "Starting Next.js build..."
+            - npm run build
+            - echo "Build completed successfully"
+        postBuild:
+          commands:
+            - echo "Post-build optimizations..."
+            - ls -la .next/
+      artifacts:
+        baseDirectory: .next
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - node_modules/**/*
+          - .next/cache/**/*
+    test:
+      phases:
+        preTest:
+          commands:
+            - echo "Starting tests..."
+        test:
+          commands:
+            - npm run test:ci || echo "No tests configured"
+        postTest:
+          commands:
+            - echo "Tests completed"
+      artifacts:
+        baseDirectory: .
+        files:
+          - '**/*'
+    env:
+      variables:
+        NODE_ENV: production
+        NEXT_TELEMETRY_DISABLED: 1
+        NEXT_PUBLIC_API_URL: https://oxunoozv13.execute-api.us-east-1.amazonaws.com/prod

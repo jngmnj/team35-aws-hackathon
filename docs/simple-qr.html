@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QR Generator</title>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial; max-width: 500px; margin: 50px auto; padding: 20px; }
+        input { width: 100%; padding: 10px; margin: 10px 0; font-size: 16px; }
+        button { width: 100%; padding: 10px; background: #007AFF; color: white; border: none; font-size: 16px; }
+        #qr { text-align: center; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>QR 코드 생성기</h1>
+    <input type="text" id="url" value="https://growlog.kro.kr/" placeholder="URL 입력">
+    <button onclick="makeQR()">QR 코드 생성</button>
+    <div id="qr"></div>
+
+    <script>
+        function makeQR() {
+            const url = document.getElementById('url').value;
+            const qrDiv = document.getElementById('qr');
+            
+            if (!url) {
+                alert('URL을 입력하세요');
+                return;
+            }
+            
+            // QR Server API 사용
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}`;
+            qrDiv.innerHTML = `<img src="${qrUrl}" alt="QR Code" style="border: 1px solid #ddd; max-width: 100%;">`;
+        }
+        
+        // 페이지 로드시 기본 QR 생성
+        window.onload = makeQR;
+        
+        // 엔터키로 생성
+        document.getElementById('url').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') makeQR();
+        });
+    </script>
+</body>
+</html>

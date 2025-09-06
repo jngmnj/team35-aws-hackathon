@@ -1,0 +1,11 @@
+node_modules/
+*.js
+*.js.map
+*.d.ts
+!jest.config.js
+!local-server-hybrid.js
+cdk.out/
+.env
+.DS_Store
+dist/
+build/

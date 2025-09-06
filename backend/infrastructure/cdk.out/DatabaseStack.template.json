@@ -1,0 +1,283 @@
+{
+ "Resources": {
+  "UsersTable9725E9C8": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "userId",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "KeySchema": [
+     {
+      "AttributeName": "userId",
+      "KeyType": "HASH"
+     }
+    ],
+    "TableName": "users"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "DatabaseStack/UsersTable/Resource"
+   }
+  },
+  "DocumentsTable7E808EE5": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "documentId",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "userId",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "GlobalSecondaryIndexes": [
+     {
+      "IndexName": "userId-index",
+      "KeySchema": [
+       {
+        "AttributeName": "userId",
+        "KeyType": "HASH"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     }
+    ],
+    "KeySchema": [
+     {
+      "AttributeName": "documentId",
+      "KeyType": "HASH"
+     }
+    ],
+    "TableName": "documents"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "DatabaseStack/DocumentsTable/Resource"
+   }
+  },
+  "AnalysisTableD62A254E": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "analysisId",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "userId",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "GlobalSecondaryIndexes": [
+     {
+      "IndexName": "userId-index",
+      "KeySchema": [
+       {
+        "AttributeName": "userId",
+        "KeyType": "HASH"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     }
+    ],
+    "KeySchema": [
+     {
+      "AttributeName": "analysisId",
+      "KeyType": "HASH"
+     }
+    ],
+    "TableName": "analysis"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "DatabaseStack/AnalysisTable/Resource"
+   }
+  },
+  "ResumesTable5D9ED611": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "resumeId",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "userId",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "jobCategory",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "GlobalSecondaryIndexes": [
+     {
+      "IndexName": "userId-jobCategory-index",
+      "KeySchema": [
+       {
+        "AttributeName": "userId",
+        "KeyType": "HASH"
+       },
+       {
+        "AttributeName": "jobCategory",
+        "KeyType": "RANGE"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     }
+    ],
+    "KeySchema": [
+     {
+      "AttributeName": "resumeId",
+      "KeyType": "HASH"
+     }
+    ],
+    "TableName": "resumes"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "DatabaseStack/ResumesTable/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/yXGSwqAIBAA0LO016lE6ADdoNrHqBNopdD0IaS7B7V6T4GqNVQFXiytm+XiDeR+RzsLvHh0d8Q1OQN5QLOQaKf45REdcTo2S4+IyREELk+loYGqCOy93I64+5Wg+30BcKfT62cAAAA="
+   },
+   "Metadata": {
+    "aws:cdk:path": "DatabaseStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "ExportsOutputFnGetAttUsersTable9725E9C8Arn5684EF99": {
+   "Value": {
+    "Fn::GetAtt": [
+     "UsersTable9725E9C8",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "DatabaseStack:ExportsOutputFnGetAttUsersTable9725E9C8Arn5684EF99"
+   }
+  },
+  "ExportsOutputRefUsersTable9725E9C857961836": {
+   "Value": {
+    "Ref": "UsersTable9725E9C8"
+   },
+   "Export": {
+    "Name": "DatabaseStack:ExportsOutputRefUsersTable9725E9C857961836"
+   }
+  },
+  "ExportsOutputFnGetAttDocumentsTable7E808EE5Arn0820EA25": {
+   "Value": {
+    "Fn::GetAtt": [
+     "DocumentsTable7E808EE5",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "DatabaseStack:ExportsOutputFnGetAttDocumentsTable7E808EE5Arn0820EA25"
+   }
+  },
+  "ExportsOutputRefDocumentsTable7E808EE5AF045745": {
+   "Value": {
+    "Ref": "DocumentsTable7E808EE5"
+   },
+   "Export": {
+    "Name": "DatabaseStack:ExportsOutputRefDocumentsTable7E808EE5AF045745"
+   }
+  },
+  "ExportsOutputFnGetAttAnalysisTableD62A254EArn25CC4225": {
+   "Value": {
+    "Fn::GetAtt": [
+     "AnalysisTableD62A254E",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "DatabaseStack:ExportsOutputFnGetAttAnalysisTableD62A254EArn25CC4225"
+   }
+  },
+  "ExportsOutputRefAnalysisTableD62A254E85895955": {
+   "Value": {
+    "Ref": "AnalysisTableD62A254E"
+   },
+   "Export": {
+    "Name": "DatabaseStack:ExportsOutputRefAnalysisTableD62A254E85895955"
+   }
+  },
+  "ExportsOutputFnGetAttResumesTable5D9ED611ArnF6A787CC": {
+   "Value": {
+    "Fn::GetAtt": [
+     "ResumesTable5D9ED611",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "DatabaseStack:ExportsOutputFnGetAttResumesTable5D9ED611ArnF6A787CC"
+   }
+  },
+  "ExportsOutputRefResumesTable5D9ED6118815535D": {
+   "Value": {
+    "Ref": "ResumesTable5D9ED611"
+   },
+   "Export": {
+    "Name": "DatabaseStack:ExportsOutputRefResumesTable5D9ED6118815535D"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}
