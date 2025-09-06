@@ -148,6 +148,11 @@ class ApiClient {
     return data.data.analyses;
   }
 
+  async getAnalyses(): Promise<AnalysisResult[]> {
+    const { data } = await this.client.get('/analysis');
+    return data.data.analyses;
+  }
+
   // Resume methods
   async generateResume(jobCategory: string, jobTitle?: string): Promise<ResumeContent> {
     const { data } = await this.client.post('/resume', { jobCategory, jobTitle });

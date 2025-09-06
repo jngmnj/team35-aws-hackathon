@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { AnalysisResults } from '@/components/analysis/AnalysisResults';
 import { AnalysisHistory } from '@/components/analysis/AnalysisHistory';
+import { GrowthTracker } from '@/components/analysis/GrowthTracker';
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
 
 import { AnalysisResult } from '@/types';
 
 export default function AnalysisPage() {
-  const [activeTab, setActiveTab] = useState<'current' | 'history'>('current');
+  const [activeTab, setActiveTab] = useState<'current' | 'history' | 'growth'>('current');
   const [selectedAnalysis, setSelectedAnalysis] = useState<AnalysisResult | null>(null);
 
   const handleSelectAnalysis = (analysis: AnalysisResult) => {
@@ -46,13 +47,27 @@ export default function AnalysisPage() {
             >
               분석 기록
             </button>
+            <button
+              onClick={() => setActiveTab('growth')}
+              className={`px-4 py-2 rounded-md font-medium transition-colors ${
+                activeTab === 'growth'
+                  ? 'bg-background text-primary shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              성장 추적
+            </button>
           </div>
         </div>
 
-        {activeTab === 'current' ? (
+        {activeTab === 'current' && (
           <AnalysisResults selectedAnalysis={selectedAnalysis} />
-        ) : (
+        )}
+        {activeTab === 'history' && (
           <AnalysisHistory onSelectAnalysis={handleSelectAnalysis} />
+        )}
+        {activeTab === 'growth' && (
+          <GrowthTracker currentAnalysis={selectedAnalysis} />
         )}
       </div>
     </ProtectedRoute>

@@ -79,11 +79,22 @@ export function DocumentList({ documents, onEdit, onDelete, onCreate, onView, is
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-foreground">내 문서</h2>
-        <Button onClick={() => onCreate(activeTab)} disabled={isLoading}>
-          {isLoading && <LoadingSpinner size="sm" />}
-          <Plus className="h-4 w-4 mr-2" />
-새 {documentTypes.find(t => t.value === activeTab)?.label || '문서'}
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={() => onCreate('daily_record')} 
+            disabled={isLoading}
+            variant="default"
+          >
+            {isLoading && <LoadingSpinner size="sm" />}
+            <Plus className="h-4 w-4 mr-2" />
+            일상기록
+          </Button>
+          <Button onClick={() => onCreate(activeTab)} disabled={isLoading} variant="outline">
+            {isLoading && <LoadingSpinner size="sm" />}
+            <Plus className="h-4 w-4 mr-2" />
+            새 {documentTypes.find(t => t.value === activeTab)?.label || '문서'}
+          </Button>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as DocumentType)}>

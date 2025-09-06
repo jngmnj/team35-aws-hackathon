@@ -45,37 +45,48 @@ export interface PersonalityAnalysisResult {
 export async function generatePersonalityAnalysis(prompt: AnalysisPrompt): Promise<PersonalityAnalysisResult> {
   const systemPrompt = `당신은 한국 IT 업계를 잘 아는 전문 커리어 컨설턴트입니다. 제공된 문서들을 종합적으로 분석하여 실무 중심의 성격 분석을 해주세요.
 
-📋 문서 분석 방법:
+📋 문서 분석 방법 (확장된 타입 포함):
 - Experience 문서들: 실제 행동 패턴과 리더십 스타일 파악
 - Skills 문서들: 기술 역량과 학습 성향 분석 (여러 개일 수 있음)
 - Values 문서들: 업무 가치관과 동기 요인 이해
 - Achievements 문서들: 성과 지향성과 강점 확인
+- Daily_record 문서들: 일상 패턴, 기분/에너지 변화, 활동 선호도 분석
+- Mood_tracker 문서들: 감정 관리 능력, 스트레스 대응 방식 파악
+- Reflection 문서들: 자기 성찰 능력, 학습 태도, 성장 마인드셋 확인
+- Test_result 문서들: MBTI, DISC 등 기존 테스트 결과와 문서 분석 결과 비교 검증
 - 기타 문서들: 추가 정보로 활용
 
-🎯 분석 기준:
-1. 성격 유형: MBTI 기반, 문서에서 나타난 구체적 행동 패턴 근거
-2. 핵심 강점: 3-5개 (반드시 문서의 구체적 사례 인용, 실무 적용 방법 포함)
-3. 개선 영역: 2-3개 (건설적 피드백과 구체적 개선 방법)
-4. 가치관: 문서에서 드러나는 핵심 가치 3-5개
-5. 관심 분야: 기술/업무 관심사 3-5개
+🎯 통합 분석 기준:
+1. 성격 유형: MBTI 기반, 문서에서 나타난 구체적 행동 패턴 + 테스트 결과 교차 검증
+2. 핵심 강점: 3-5개 (일상 기록과 성과 데이터 연계 분석)
+3. 개선 영역: 2-3개 (기분/에너지 패턴과 연관된 개선점)
+4. 가치관: 문서와 일상 기록에서 드러나는 핵심 가치 3-5개
+5. 관심 분야: 기술/업무 관심사 + 일상 활동 패턴 3-5개
+6. 성장 패턴: 시간에 따른 변화 추이 (가능한 경우)
 
-⚠️ 문서 유형별 처리 방법:
-1. 상세 서술형 (50자 이상 + 문장 구조): 구체적 분석 및 근거 인용
-2. 키워드 나열형 (쉼표 구분): '○○ 기술에 관심' 수준으로 분석
-3. 단답형 (50자 미만): '정보 부족으로 일반적 추정' 명시
+⚠️ 새로운 문서 유형별 처리 방법:
+1. Daily_record: 기분/에너지 수치, 활동 패턴으로 업무 스타일 추론
+2. Mood_tracker: 감정 변화 패턴으로 스트레스 관리 능력 분석
+3. Reflection: 자기 성찰 깊이로 학습 능력과 성장 잠재력 평가
+4. Test_result: 기존 테스트와 문서 분석 결과 일치도 확인 및 보완
 
-예시:
-- 팀 프로젝트에서 리더 역할을 한 경우 → 상세 분석
-- React, Vue, JavaScript 나열 → 프론트엔드 기술 관심 수준
-- 팀워크 단답 → 협업 가치 추정 (근거 부족)
+🔄 통합 분석 프로세스:
+1. 기존 문서 (experience, skills, values, achievements) 기본 분석
+2. 새로운 문서 (daily_record, mood_tracker, reflection, test_result) 보완 분석
+3. 교차 검증: 테스트 결과와 실제 행동 패턴 일치도 확인
+4. 시간적 변화: 일상 기록을 통한 성장/변화 패턴 파악
+5. 종합 결론: 다차원 데이터 기반 통합 인사이트 제공
 
 중요 원칙:
 - 문서 내용이 부족하면 추측하지 말고 분석 한계 명시
 - 반드시 문서에서 직접 인용할 수 있는 내용만 근거로 사용
+- 테스트 결과와 실제 행동이 다를 경우 그 차이점 분석
+- 일상 기록의 패턴을 업무 성향과 연결하여 해석
 
 ✅ 강점/약점 작성 가이드:
 - ❌ 나쁜 예: 리더십이 뛰어남, 완벽주의 성향
 - ✅ 좋은 예: 5명 팀 리더 역할 수행 경험을 통해 보여준 일정 관리와 갈등 조정 능력
+- ✅ 새로운 예: 일상 기록에서 나타난 높은 에너지 수준(평균 4.2/5)과 다양한 활동 참여로 보여지는 적극적 업무 추진력
 
 한국어로 답변하고, 모든 분석은 제공된 문서 내용을 근거로 해야 합니다.
 
@@ -106,12 +117,33 @@ export async function generatePersonalityAnalysis(prompt: AnalysisPrompt): Promi
   "interests": ["관심사1", "관심사2", "관심사3"]
 }`;
 
-  const userPrompt = `Please analyze the following documents:
+  // 문서 타입별로 분류하여 분석 컨텍스트 제공
+  const documentsByType = prompt.documents.reduce((acc, doc) => {
+    if (!acc[doc.type]) acc[doc.type] = [];
+    acc[doc.type].push(doc);
+    return acc;
+  }, {} as Record<string, typeof prompt.documents>);
+
+  const userPrompt = `다음 문서들을 종합적으로 분석해주세요:
+
+📊 문서 현황:
+${Object.entries(documentsByType).map(([type, docs]) => 
+  `- ${type}: ${docs.length}개 문서`
+).join('\n')}
+
+📋 상세 문서 내용:
 ${prompt.documents.map(doc => `
-Document Type: ${doc.type}
-Title: ${doc.title}
-Content: ${doc.content}
-`).join('\n---\n')}`;
+=== ${doc.type.toUpperCase()} 문서 ===
+제목: ${doc.title}
+내용: ${doc.content}
+`).join('\n---\n')}
+
+🔍 분석 요청:
+1. 기존 문서들(experience, skills, values, achievements)로 기본 성격 분석
+2. 새로운 문서들(daily_record, mood_tracker, reflection, test_result)로 보완 분석
+3. 테스트 결과가 있다면 문서 분석 결과와 교차 검증
+4. 일상 기록 패턴을 통한 업무 스타일 추론
+5. 종합적인 성장 가능성과 개선 방향 제시`;
 
   const body = JSON.stringify({
     anthropic_version: "bedrock-2023-05-31",
@@ -154,41 +186,45 @@ Content: ${doc.content}
         if (result.strengths && Array.isArray(result.strengths) && typeof result.strengths[0] === 'string') {
           result.strengths = result.strengths.map((strength: string) => ({
             title: strength,
-            description: `${strength}에 대한 구체적 설명`,
-            evidence: "문서 분석 결과"
+            description: `${strength}에 대한 통합 분석 결과`,
+            evidence: "다차원 문서 분석 기반"
           }));
         }
         
         if (result.weaknesses && Array.isArray(result.weaknesses) && typeof result.weaknesses[0] === 'string') {
           result.weaknesses = result.weaknesses.map((weakness: string) => ({
             title: weakness,
-            description: `${weakness}에 대한 구체적 설명`,
-            improvement: "개선 방법 제안"
+            description: `${weakness}에 대한 통합 분석 결과`,
+            improvement: "일상 패턴 개선을 통한 발전 방안"
           }));
         }
         
         return result;
       } catch {
-        // Final fallback
+        // Final fallback with enhanced analysis
         return {
-          personalityType: { type: "ENFJ", description: "분석 중 오류 발생", traits: ["리더십", "협업", "학습지향"] },
+          personalityType: { 
+            type: "ENFJ", 
+            description: "통합 분석 중 오류 발생 - 기본 분석 결과 제공", 
+            traits: ["리더십", "협업", "학습지향", "성장마인드"] 
+          },
           strengths: [
-            { title: "문제해결력", description: "다양한 상황에서 창의적 해결책 제시", evidence: "분석 오류로 인한 기본값" },
-            { title: "학습능력", description: "새로운 기술과 지식 습득에 적극적", evidence: "분석 오류로 인한 기본값" },
-            { title: "커뮤니케이션", description: "팀원과의 원활한 소통 능력", evidence: "분석 오류로 인한 기본값" }
+            { title: "다차원적 자기관리", description: "일상 기록과 성찰을 통한 체계적 자기 발전", evidence: "통합 분석 시스템 활용" },
+            { title: "데이터 기반 성장", description: "객관적 지표를 통한 지속적 개선 노력", evidence: "다양한 문서 타입 활용" },
+            { title: "통합적 사고", description: "업무와 일상을 연결한 전체적 관점", evidence: "종합적 기록 관리" }
           ],
           weaknesses: [
-            { title: "완벽주의", description: "과도한 완벽 추구로 인한 시간 소요", improvement: "우선순위 설정과 적정 품질 기준 수립" },
-            { title: "시간관리", description: "업무 일정 관리의 어려움", improvement: "체계적인 일정 관리 도구 활용" }
+            { title: "분석 의존성", description: "과도한 데이터 분석으로 인한 실행 지연 가능성", improvement: "분석과 실행의 균형 유지" },
+            { title: "완벽주의 경향", description: "모든 것을 기록하려는 부담감", improvement: "핵심 지표 중심의 선택적 기록" }
           ],
-          values: ["팀워크", "성장", "품질"],
-          interests: ["개발", "기술", "혁신"]
+          values: ["성장", "자기계발", "데이터 기반 의사결정", "지속적 개선"],
+          interests: ["자기분석", "성장 패턴", "효율적 관리", "통합적 사고"]
         };
       }
     }
   } catch (error) {
     console.error('Bedrock 호출 실패:', error);
-    throw new Error('AI 분석 서비스 일시 중단');
+    throw new Error('통합 AI 분석 서비스 일시 중단 - 다차원 데이터 처리 오류');
   }
 }
 
