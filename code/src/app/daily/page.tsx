@@ -131,7 +131,7 @@ export default function DailyPage() {
                 {dailyRecords.slice(0, 5).map((record) => (
                   <div 
                     key={record.documentId} 
-                    className="border rounded-lg p-4 hover:bg-accent transition-colors cursor-pointer"
+                    className="border border-border rounded-lg p-4 hover:bg-accent transition-colors cursor-pointer"
                     onClick={() => setSelectedRecord(record)}
                   >
                     <div className="flex justify-between items-start mb-2">
@@ -166,7 +166,21 @@ export default function DailyPage() {
                       {(() => {
                         try {
                           const data = JSON.parse(record.content);
-                          return `기분: ${data.mood}/5, 에너지: ${data.energy}/5${data.activities ? `, 활동: ${data.activities.join(', ')}` : ''}${data.notes ? `, 메모: ${data.notes.substring(0, 50)}...` : ''}`;
+                          return (
+                            <div className="flex flex-wrap gap-2 items-center">
+                              <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-xs">
+                                기분 {data.mood}/5
+                              </span>
+                              <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded text-xs">
+                                에너지 {data.energy}/5
+                              </span>
+                              {data.activities && data.activities.length > 0 && (
+                                <span className="text-xs text-muted-foreground">
+                                  활동: {data.activities.slice(0, 2).join(', ')}{data.activities.length > 2 ? '...' : ''}
+                                </span>
+                              )}
+                            </div>
+                          );
                         } catch {
                           return record.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...';
                         }
@@ -210,13 +224,13 @@ export default function DailyPage() {
                     return (
                       <>
                         <div className="grid grid-cols-2 gap-4">
-                          <div className="text-center p-3 bg-blue-50 rounded">
-                            <div className="text-2xl font-bold text-blue-600">{data.mood}/5</div>
-                            <div className="text-sm text-blue-700">기분</div>
+                          <div className="text-center p-3 bg-blue-50 dark:bg-blue-950 rounded">
+                            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{data.mood}/5</div>
+                            <div className="text-sm text-blue-700 dark:text-blue-300">기분</div>
                           </div>
-                          <div className="text-center p-3 bg-green-50 rounded">
-                            <div className="text-2xl font-bold text-green-600">{data.energy}/5</div>
-                            <div className="text-sm text-green-700">에너지</div>
+                          <div className="text-center p-3 bg-green-50 dark:bg-green-950 rounded">
+                            <div className="text-2xl font-bold text-green-600 dark:text-green-400">{data.energy}/5</div>
+                            <div className="text-sm text-green-700 dark:text-green-300">에너지</div>
                           </div>
                         </div>
                         {data.activities && data.activities.length > 0 && (
@@ -224,7 +238,7 @@ export default function DailyPage() {
                             <h4 className="font-medium mb-2">활동</h4>
                             <div className="flex flex-wrap gap-2">
                               {data.activities.map((activity: string, i: number) => (
-                                <span key={i} className="px-2 py-1 bg-gray-100 rounded text-sm">{activity}</span>
+                                <span key={i} className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded text-sm">{activity}</span>
                               ))}
                             </div>
                           </div>
@@ -232,7 +246,7 @@ export default function DailyPage() {
                         {data.notes && (
                           <div>
                             <h4 className="font-medium mb-2">메모</h4>
-                            <p className="text-sm bg-gray-50 p-3 rounded">{data.notes}</p>
+                            <p className="text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-3 rounded">{data.notes}</p>
                           </div>
                         )}
                       </>

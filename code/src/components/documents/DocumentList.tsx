@@ -77,19 +77,20 @@ export function DocumentList({ documents, onEdit, onDelete, onCreate, onView, is
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-foreground">내 문서</h2>
-        <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <h2 className="text-xl sm:text-2xl font-bold text-foreground">내 문서</h2>
+        <div className="flex flex-col sm:flex-row gap-2">
           <Button 
             onClick={() => onCreate('daily_record')} 
             disabled={isLoading}
             variant="default"
+            className="w-full sm:w-auto"
           >
             {isLoading && <LoadingSpinner size="sm" />}
             <Plus className="h-4 w-4 mr-2" />
             일상기록
           </Button>
-          <Button onClick={() => onCreate(activeTab)} disabled={isLoading} variant="outline">
+          <Button onClick={() => onCreate(activeTab)} disabled={isLoading} variant="outline" className="w-full sm:w-auto">
             {isLoading && <LoadingSpinner size="sm" />}
             <Plus className="h-4 w-4 mr-2" />
             새 {documentTypes.find(t => t.value === activeTab)?.label || '문서'}
@@ -98,9 +99,9 @@ export function DocumentList({ documents, onEdit, onDelete, onCreate, onView, is
       </div>
 
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as DocumentType)}>
-        <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-1">
           {documentTypes.map(type => (
-            <TabsTrigger key={type.value} value={type.value}>
+            <TabsTrigger key={type.value} value={type.value} className="text-xs sm:text-sm px-2 py-1">
               {type.label}
             </TabsTrigger>
           ))}
@@ -124,16 +125,16 @@ export function DocumentList({ documents, onEdit, onDelete, onCreate, onView, is
                 ))}
               </div>
             ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {getDocumentsByType(type.value).length > 0 ? (
                   getDocumentsByType(type.value).map(document => (
                     <DocumentCard key={document.documentId} document={document} />
                   ))
                 ) : (
                   <div className="col-span-full text-center py-8 text-muted-foreground">
-                    <p>아직 {type.label} 문서가 없습니다.</p>
+                    <p className="text-sm sm:text-base">아직 {type.label} 문서가 없습니다.</p>
                     <Button 
-                      className="mt-4" 
+                      className="mt-4 w-full sm:w-auto" 
                       onClick={() => onCreate(type.value)}
                       variant="outline"
                     >

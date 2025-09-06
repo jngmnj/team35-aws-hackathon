@@ -62,12 +62,12 @@ export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
 
   if (!analysis && !isLoading) {
     return (
-      <Card className="p-12 text-center bg-accent border-accent">
-        <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
-          <Sparkles className="w-10 h-10 text-primary-foreground" />
+      <Card className="p-6 sm:p-8 lg:p-12 text-center bg-accent border-accent">
+        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+          <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 text-primary-foreground" />
         </div>
-        <h2 className="text-2xl font-bold mb-4 text-foreground">성격 분석 시작하기</h2>
-        <p className="text-muted-foreground mb-4 text-lg leading-relaxed max-w-md mx-auto">
+        <h2 className="text-xl sm:text-2xl font-bold mb-4 text-foreground">성격 분석 시작하기</h2>
+        <p className="text-muted-foreground mb-4 text-base sm:text-lg leading-relaxed max-w-md mx-auto">
           작성하신 문서를 바탕으로 AI가 당신의 성격과 특성을 분석합니다.
         </p>
         <div className="mb-8 p-4 bg-background rounded-lg border border-border">
@@ -104,7 +104,7 @@ export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
         <Button 
           onClick={handleGenerateAnalysis} 
           disabled={isLoading || documentCount === 0}
-          className="px-8 py-3 text-lg font-semibold"
+          className="w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3 text-base sm:text-lg font-semibold"
           aria-label="AI 성격 분석 시작하기"
         >
           분석 시작하기
@@ -127,7 +127,7 @@ export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
         </Card>
       ) : analysis?.result && (
         <>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8 mb-8">
             <PersonalityCard 
               personalityType={analysis.result?.personalityType}
               strengths={analysis.result?.strengths}
