@@ -63,7 +63,7 @@ export function MoodChart({ documents }: MoodChartProps) {
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">최근 7일 기분 변화</h3>
-      <div className="relative bg-gray-50 rounded-lg p-4" style={{ height: chartHeight + 60 }}>
+      <div className="relative bg-gray-50 dark:bg-gray-800 rounded-lg p-4" style={{ height: chartHeight + 60 }}>
         <svg width="100%" height={chartHeight + 40} className="overflow-hidden" preserveAspectRatio="none">
           {[1, 2, 3, 4, 5].map(value => (
             <g key={value}>
@@ -72,15 +72,17 @@ export function MoodChart({ documents }: MoodChartProps) {
                 y1={30 + graphHeight - (value - 1) * (graphHeight / 4)}
                 x2="90%"
                 y2={30 + graphHeight - (value - 1) * (graphHeight / 4)}
-                stroke="#e5e7eb"
+                stroke="currentColor"
                 strokeWidth="1"
+                className="text-gray-300 dark:text-gray-600"
               />
               <text
                 x="20"
                 y={35 + graphHeight - (value - 1) * (graphHeight / 4)}
                 fontSize="12"
-                fill="#6b7280"
+                fill="currentColor"
                 textAnchor="middle"
+                className="text-gray-500 dark:text-gray-400"
               >
                 {value}
               </text>
@@ -155,9 +157,10 @@ export function MoodChart({ documents }: MoodChartProps) {
                   y1={30}
                   x2={x}
                   y2={30 + graphHeight}
-                  stroke="#e5e7eb"
+                  stroke="currentColor"
                   strokeWidth="1"
                   strokeDasharray="2,2"
+                  className="text-gray-300 dark:text-gray-600"
                 />
                 <circle 
                   cx={x} 
@@ -197,8 +200,9 @@ export function MoodChart({ documents }: MoodChartProps) {
                   x={x}
                   y={chartHeight + 30}
                   fontSize="10"
-                  fill="#6b7280"
+                  fill="currentColor"
                   textAnchor="middle"
+                  className="text-gray-500 dark:text-gray-400"
                 >
                   {record.date.getMonth() + 1}/{record.date.getDate()}
                 </text>
@@ -229,13 +233,13 @@ export function MoodChart({ documents }: MoodChartProps) {
           {selectedRecord && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-3 bg-blue-50 rounded">
-                  <div className="text-2xl font-bold text-blue-600">{selectedRecord.record.mood}/5</div>
-                  <div className="text-sm text-blue-700">기분</div>
+                <div className="text-center p-3 bg-blue-50 dark:bg-blue-950 rounded">
+                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{selectedRecord.record.mood}/5</div>
+                  <div className="text-sm text-blue-700 dark:text-blue-300">기분</div>
                 </div>
-                <div className="text-center p-3 bg-green-50 rounded">
-                  <div className="text-2xl font-bold text-green-600">{selectedRecord.record.energy}/5</div>
-                  <div className="text-sm text-green-700">에너지</div>
+                <div className="text-center p-3 bg-green-50 dark:bg-green-950 rounded">
+                  <div className="text-2xl font-bold text-green-600 dark:text-green-400">{selectedRecord.record.energy}/5</div>
+                  <div className="text-sm text-green-700 dark:text-green-300">에너지</div>
                 </div>
               </div>
               {selectedRecord.record.activities && selectedRecord.record.activities.length > 0 && (
@@ -243,7 +247,7 @@ export function MoodChart({ documents }: MoodChartProps) {
                   <h4 className="font-medium mb-2">활동</h4>
                   <div className="flex flex-wrap gap-2">
                     {selectedRecord.record.activities.map((activity, i) => (
-                      <span key={i} className="px-2 py-1 bg-gray-100 rounded text-sm">{activity}</span>
+                      <span key={i} className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded text-sm">{activity}</span>
                     ))}
                   </div>
                 </div>
@@ -251,7 +255,7 @@ export function MoodChart({ documents }: MoodChartProps) {
               {selectedRecord.record.notes && (
                 <div>
                   <h4 className="font-medium mb-2">메모</h4>
-                  <p className="text-sm bg-gray-50 p-3 rounded">{selectedRecord.record.notes}</p>
+                  <p className="text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-3 rounded">{selectedRecord.record.notes}</p>
                 </div>
               )}
             </div>
@@ -261,7 +265,7 @@ export function MoodChart({ documents }: MoodChartProps) {
       
       {hoveredRecord && (
         <div 
-          className="fixed z-50 bg-black text-white px-3 py-2 rounded text-xs pointer-events-none max-w-xs"
+          className="fixed z-50 bg-black dark:bg-gray-900 text-white px-3 py-2 rounded text-xs pointer-events-none max-w-xs border border-gray-600"
           style={{ left: mousePos.x + 10, top: mousePos.y - 50 }}
         >
           <div className="font-medium mb-1">{new Date(hoveredRecord.date).toLocaleDateString('ko-KR')}</div>
@@ -275,7 +279,7 @@ export function MoodChart({ documents }: MoodChartProps) {
       
       {hoveredIndex !== null && !hoveredRecord && (
         <div 
-          className="fixed z-50 bg-black text-white px-2 py-1 rounded text-xs pointer-events-none"
+          className="fixed z-50 bg-black dark:bg-gray-900 text-white px-2 py-1 rounded text-xs pointer-events-none border border-gray-600"
           style={{ left: mousePos.x + 10, top: mousePos.y - 30 }}
         >
           기간: {new Date(dailyRecords[hoveredIndex]?.date || '').toLocaleDateString('ko-KR')} - {new Date(dailyRecords[hoveredIndex + 1]?.date || '').toLocaleDateString('ko-KR')}
