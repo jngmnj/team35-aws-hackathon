@@ -16,10 +16,24 @@ function HomeContent() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    // S3에서 리다이렉트된 경우 처리
+    // CloudFront에서 리다이렉트된 경우 처리
     const redirect = searchParams.get('redirect');
+    const currentPath = window.location.pathname;
+    
     if (redirect && user) {
       router.replace(redirect);
+    } else if (currentPath !== '/') {
+      // CloudFront가 404를 index.html로 리다이렉트한 경우
+      const authPages = ['/login/', '/register/'];
+      const protectedPages = ['/dashboard/', '/documents/', '/analysis/', '/daily/', '/tests/', '/resume/'];
+      
+      if (authPages.includes(currentPath) && !user) {
+        // 로그인 안 된 사용자만 로그인/회원가입 페이지 접근 가능
+        router.replace(currentPath);
+      } else if (protectedPages.includes(currentPath) && user) {
+        // 로그인된 사용자만 보호된 페이지 접근 가능
+        router.replace(currentPath);
+      }
     }
   }, [searchParams, user, router]);
 
