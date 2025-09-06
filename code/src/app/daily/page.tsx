@@ -68,20 +68,20 @@ export default function DailyPage() {
     <ProtectedRoute>
       <div className="min-h-screen bg-background p-6">
         <div className="max-w-4xl mx-auto space-y-8">
-          <div className="flex justify-between items-center">
+          <div className="space-y-4">
             <div>
               <h1 className="text-3xl font-bold text-foreground flex items-center">
                 <Calendar className="w-8 h-8 mr-3 text-primary" />
                 일상기록
               </h1>
-              <p className="text-muted-foreground mt-2">
+              <p className="text-muted-foreground mt-2 break-words">
                 오늘의 기분과 활동을 기록해보세요
               </p>
             </div>
             <Button 
               onClick={() => setShowForm(true)}
               disabled={isLoading}
-              className=""
+              className="w-full sm:w-auto"
             >
               <Plus className="w-4 h-4 mr-2" />
               새 기록 작성
@@ -96,21 +96,28 @@ export default function DailyPage() {
             <MoodChart documents={dailyRecords} />
           </Card>
 
-          {showForm && (
-            <Card className="p-6">
-              <DailyRecordForm 
-                onSave={handleSave}
-                onCancel={() => {
-                  setShowForm(false);
-                  setEditingRecord(null);
-                }}
-                initialData={editingRecord ? {
-                  title: editingRecord.title,
-                  content: editingRecord.content
-                } : undefined}
-              />
-            </Card>
-          )}
+          <Dialog open={showForm} onOpenChange={setShowForm}>
+            <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+              <DialogHeader className="flex-shrink-0">
+                <DialogTitle>
+                  {editingRecord ? '일상기록 수정' : '새 일상기록 작성'}
+                </DialogTitle>
+              </DialogHeader>
+              <div className="flex-1 overflow-y-auto">
+                <DailyRecordForm 
+                  onSave={handleSave}
+                  onCancel={() => {
+                    setShowForm(false);
+                    setEditingRecord(null);
+                  }}
+                  initialData={editingRecord ? {
+                    title: editingRecord.title,
+                    content: editingRecord.content
+                  } : undefined}
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
 
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-4">최근 기록</h2>

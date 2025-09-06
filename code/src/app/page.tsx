@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { ArrowRight, Sparkles, Target, FileText } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, Suspense } from 'react';
@@ -48,6 +49,11 @@ function HomeContent() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="absolute top-4 right-4 z-10">
+        <ThemeToggle />
+      </div>
+      
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
