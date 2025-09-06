@@ -159,6 +159,10 @@ class ApiClient {
     return data.data.analyses;
   }
 
+  async deleteAnalysis(id: string): Promise<void> {
+    await this.client.delete(`/analysis/${id}`);
+  }
+
   // Resume methods
   async generateResume(jobCategory: string, jobTitle?: string): Promise<ResumeContent> {
     const { data } = await this.client.post('/resume', { jobCategory, jobTitle });
