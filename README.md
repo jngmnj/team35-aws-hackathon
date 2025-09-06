@@ -55,7 +55,8 @@ Amazon Q Developer Hackathon에서 구현한 AI 기반 자기성장 및 커리�
 
 ## 동영상 데모
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/c1gavi2Ce1o?si=e9qVGMzQ32d-zig8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+[![YouTube Video](https://img.youtube.com/vi/c1gavi2Ce1o/0.jpg)](https://www.youtube.com/watch?v=c1gavi2Ce1o)
+
 
 _전체 사용자 플로우: 회원가입 → 문서 작성 → AI 분석 → 이력서 생성_
 
@@ -219,5 +220,6 @@ aws s3 rm s3://<bucket_name> --recursive
 - **데이터 리터러시**: 개인 데이터 활용 능력 및 인사이트 도출 역량 향상
 
 이러한 다양한 활용을 통해 GrowLog는 개인의 성장과 사회 전체의 인적 자원 효율성 향상에 기여할 것으로 기대됩니다.
+
 
 
