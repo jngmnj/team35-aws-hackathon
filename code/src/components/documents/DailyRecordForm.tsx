@@ -10,15 +10,25 @@ import { DailyRecord } from '@/types';
 
 interface DailyRecordFormProps {
   onSave: (data: { title: string; content: string }) => void;
-  initialData?: DailyRecord;
+  onCancel?: () => void;
+  initialData?: { title: string; content: string };
 }
 
-export function DailyRecordForm({ onSave, initialData }: DailyRecordFormProps) {
-  const [date, setDate] = useState(initialData?.date || new Date().toISOString().split('T')[0]);
-  const [mood, setMood] = useState(initialData?.mood || 3);
-  const [energy, setEnergy] = useState(initialData?.energy || 3);
-  const [activities, setActivities] = useState(initialData?.activities?.join(', ') || '');
-  const [notes, setNotes] = useState(initialData?.notes || '');
+export function DailyRecordForm({ onSave, onCancel, initialData }: DailyRecordFormProps) {
+  // Parse initial data if provided
+  const parsedData = initialData ? (() => {
+    try {
+      return JSON.parse(initialData.content) as DailyRecord;
+    } catch {
+      return null;
+    }
+  })() : null;
+
+  const [date, setDate] = useState(parsedData?.date || new Date().toISOString().split('T')[0]);
+  const [mood, setMood] = useState(parsedData?.mood || 3);
+  const [energy, setEnergy] = useState(parsedData?.energy || 3);
+  const [activities, setActivities] = useState(parsedData?.activities?.join(', ') || '');
+  const [notes, setNotes] = useState(parsedData?.notes || '');
 
   const handleSubmit = () => {
     const recordData: DailyRecord = {
@@ -102,9 +112,16 @@ export function DailyRecordForm({ onSave, initialData }: DailyRecordFormProps) {
         />
       </div>
 
-      <Button onClick={handleSubmit} className="w-full">
-        저장하기
-      </Button>
+      <div className="flex gap-2">
+        {onCancel && (
+          <Button variant="outline" onClick={onCancel} className="flex-1">
+            취소
+          </Button>
+        )}
+        <Button onClick={handleSubmit} className="flex-1">
+          저장하기
+        </Button>
+      </div>
     </Card>
   );
 }
