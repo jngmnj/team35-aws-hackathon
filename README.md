@@ -3,7 +3,7 @@
 Amazon Q Developer Hackathon에서 구현한 AI 기반 자기성장 및 커리어 개발 플랫폼입니다.
 
 ## 어플리케이션 개요
-
+![intro](docs/screenshots/growlog.png)
 **GrowLog**는 "나를 기록하고, 탐구하고, 성장 과정을 시각화하여 자기인식과 커리어를 동시에 키우는 플랫폼"입니다.
 
 사람은 자기 자신을 객관적으로 바라보기 힘듭니다. 그렇기 때문에 우리는 남의 시선을 빌리고 상담을 신청하기도 합니다.
@@ -55,7 +55,7 @@ Amazon Q Developer Hackathon에서 구현한 AI 기반 자기성장 및 커리�
 
 ## 동영상 데모
 
-![데모 영상](docs/demo/growlog-demo.gif)
+<iframe width="560" height="315" src="https://www.youtube.com/embed/c1gavi2Ce1o?si=e9qVGMzQ32d-zig8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 _전체 사용자 플로우: 회원가입 → 문서 작성 → AI 분석 → 이력서 생성_
 
