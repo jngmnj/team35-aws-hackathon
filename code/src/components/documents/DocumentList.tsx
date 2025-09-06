@@ -66,8 +66,35 @@ export function DocumentList({ documents, onEdit, onDelete, onCreate, onView, is
           </Button>
         </div>
       </div>
-      <div className="text-sm text-muted-foreground line-clamp-6 whitespace-pre-wrap font-mono">
-        {document.content.replace(/<[^>]*>/g, '').substring(0, 200)}...
+      <div className="text-sm text-muted-foreground line-clamp-6 whitespace-pre-wrap">
+        {(() => {
+          if (document.type === 'daily_record') {
+            try {
+              const data = JSON.parse(document.content);
+              return (
+                <div className="space-y-1">
+                  <div className="flex gap-2">
+                    <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-xs">
+                      기분 {data.mood}/5
+                    </span>
+                    <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded text-xs">
+                      에너지 {data.energy}/5
+                    </span>
+                  </div>
+                  {data.activities && data.activities.length > 0 && (
+                    <p className="text-xs">활동: {data.activities.slice(0, 2).join(', ')}{data.activities.length > 2 ? '...' : ''}</p>
+                  )}
+                  {data.notes && (
+                    <p className="text-xs">{data.notes.substring(0, 100)}{data.notes.length > 100 ? '...' : ''}</p>
+                  )}
+                </div>
+              );
+            } catch {
+              return document.content.replace(/<[^>]*>/g, '').substring(0, 200) + '...';
+            }
+          }
+          return document.content.replace(/<[^>]*>/g, '').substring(0, 200) + '...';
+        })()}
       </div>
       <p className="text-xs text-muted-foreground/70 mt-2">
 수정일: {new Date(document.updatedAt).toLocaleDateString()}
@@ -99,13 +126,15 @@ export function DocumentList({ documents, onEdit, onDelete, onCreate, onView, is
       </div>
 
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as DocumentType)}>
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-1">
-          {documentTypes.map(type => (
-            <TabsTrigger key={type.value} value={type.value} className="text-xs sm:text-sm px-2 py-1">
-              {type.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <div className="overflow-x-auto">
+          <TabsList className="inline-flex w-max min-w-full gap-1">
+            {documentTypes.map(type => (
+              <TabsTrigger key={type.value} value={type.value} className="text-xs sm:text-sm px-3 py-2 whitespace-nowrap">
+                {type.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
 
         {documentTypes.map(type => (
           <TabsContent key={type.value} value={type.value} className="mt-4">

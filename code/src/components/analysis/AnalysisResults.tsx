@@ -10,13 +10,14 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/components/ui/toast';
 import { apiClient } from '@/lib/api';
-import { Sparkles, Loader2 } from 'lucide-react';
+import { Sparkles, Loader2, Trash2 } from 'lucide-react';
 
 interface AnalysisResultsProps {
   selectedAnalysis?: AnalysisResult | null;
+  onAnalysisDeleted?: () => void;
 }
 
-export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
+export function AnalysisResults({ selectedAnalysis, onAnalysisDeleted }: AnalysisResultsProps) {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -44,6 +45,19 @@ export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
   }, [selectedAnalysis]);
 
   const { showToast } = useToast();
+
+  const handleDelete = async () => {
+    if (!analysis || !confirm('정말로 이 분석 결과를 삭제하시겠습니까?')) return;
+    
+    try {
+      await apiClient.deleteAnalysis(analysis.analysisId);
+      setAnalysis(null);
+      showToast('분석 결과가 삭제되었습니다.', 'success');
+      onAnalysisDeleted?.();
+    } catch {
+      showToast('삭제에 실패했습니다.', 'error');
+    }
+  };
 
   const handleGenerateAnalysis = async () => {
     setIsLoading(true);
@@ -75,7 +89,7 @@ export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
             작성된 문서: <span className="font-semibold text-primary">{documentCount}개</span>
           </p>
           {documentTypes.length > 0 && (
-            <div className="flex flex-wrap gap-1 mb-2">
+            <div className="flex flex-wrap justify-center gap-1 mb-2">
               {documentTypes.map(type => (
                 <span key={type} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
                   {type === 'daily_record' && '일상기록'}
@@ -127,6 +141,20 @@ export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
         </Card>
       ) : analysis?.result && (
         <>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-foreground">성격 분석 결과</h2>
+            {selectedAnalysis && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleDelete}
+                className="text-destructive hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                삭제
+              </Button>
+            )}
+          </div>
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8 mb-8">
             <PersonalityCard 
               personalityType={analysis.result?.personalityType}
@@ -147,14 +175,26 @@ export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
           )}
           {!selectedAnalysis && (
             <div className="text-center pt-4">
-              <Button 
-                onClick={handleGenerateAnalysis} 
-                variant="outline"
-                className="px-6 py-2 font-semibold"
-                aria-label="성격 분석 다시 실행하기"
-              >
-                다시 분석하기
-              </Button>
+              <div className="flex justify-center gap-4">
+                <Button 
+                  onClick={handleGenerateAnalysis} 
+                  variant="outline"
+                  className="px-6 py-2 font-semibold"
+                  aria-label="성격 분석 다시 실행하기"
+                >
+                  다시 분석하기
+                </Button>
+                {analysis && (
+                  <Button
+                    variant="ghost"
+                    onClick={handleDelete}
+                    className="px-6 py-2 font-semibold text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    삭제
+                  </Button>
+                )}
+              </div>
             </div>
           )}
         </>

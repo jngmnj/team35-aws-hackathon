@@ -25,8 +25,8 @@ interface ResumePreviewProps {
 export function ResumePreview({ resume, onDownload, onEdit }: ResumePreviewProps) {
   return (
     <Card className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-foreground">생성된 이력서</h2>
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-foreground mb-4">생성된 이력서</h2>
         <div className="flex gap-2">
           <Button variant="outline" onClick={onEdit} size="sm">
             <Edit className="w-4 h-4 mr-2" />

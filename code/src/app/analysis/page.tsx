@@ -11,10 +11,17 @@ import { AnalysisResult } from '@/types';
 export default function AnalysisPage() {
   const [activeTab, setActiveTab] = useState<'current' | 'history' | 'growth'>('current');
   const [selectedAnalysis, setSelectedAnalysis] = useState<AnalysisResult | null>(null);
+  const [refreshHistory, setRefreshHistory] = useState(0);
 
   const handleSelectAnalysis = (analysis: AnalysisResult) => {
     setSelectedAnalysis(analysis);
     setActiveTab('current');
+  };
+
+  const handleAnalysisDeleted = () => {
+    setSelectedAnalysis(null);
+    setActiveTab('history');
+    setRefreshHistory(prev => prev + 1);
   };
 
   return (
@@ -26,10 +33,10 @@ export default function AnalysisPage() {
         </div>
         
         <div className="mb-6">
-          <div className="flex space-x-1 bg-muted p-1 rounded-lg">
+          <div className="flex justify-center space-x-1 bg-muted p-1 rounded-lg">
             <button
               onClick={() => setActiveTab('current')}
-              className={`px-4 py-2 rounded-md font-medium transition-colors ${
+              className={`px-2 sm:px-4 py-2 rounded-md font-medium transition-colors text-xs sm:text-sm ${
                 activeTab === 'current'
                   ? 'bg-background text-primary shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
@@ -39,7 +46,7 @@ export default function AnalysisPage() {
             </button>
             <button
               onClick={() => setActiveTab('history')}
-              className={`px-4 py-2 rounded-md font-medium transition-colors ${
+              className={`px-2 sm:px-4 py-2 rounded-md font-medium transition-colors text-xs sm:text-sm ${
                 activeTab === 'history'
                   ? 'bg-background text-primary shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
@@ -49,7 +56,7 @@ export default function AnalysisPage() {
             </button>
             <button
               onClick={() => setActiveTab('growth')}
-              className={`px-4 py-2 rounded-md font-medium transition-colors ${
+              className={`px-2 sm:px-4 py-2 rounded-md font-medium transition-colors text-xs sm:text-sm ${
                 activeTab === 'growth'
                   ? 'bg-background text-primary shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
@@ -61,10 +68,16 @@ export default function AnalysisPage() {
         </div>
 
         {activeTab === 'current' && (
-          <AnalysisResults selectedAnalysis={selectedAnalysis} />
+          <AnalysisResults 
+            selectedAnalysis={selectedAnalysis} 
+            onAnalysisDeleted={handleAnalysisDeleted}
+          />
         )}
         {activeTab === 'history' && (
-          <AnalysisHistory onSelectAnalysis={handleSelectAnalysis} />
+          <AnalysisHistory 
+            onSelectAnalysis={handleSelectAnalysis}
+            key={refreshHistory}
+          />
         )}
         {activeTab === 'growth' && (
           <GrowthTracker currentAnalysis={selectedAnalysis} />
