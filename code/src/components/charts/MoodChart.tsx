@@ -17,7 +17,7 @@ export function MoodChart({ documents }: MoodChartProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   
-  const dailyRecords = documents
+  const parsedRecords = documents
     .filter(doc => doc.type === 'daily_record')
     .map(doc => {
       try {
@@ -27,22 +27,24 @@ export function MoodChart({ documents }: MoodChartProps) {
         return null;
       }
     })
-    .filter(Boolean)
+    .filter((record): record is DailyRecord & { date: Date } => record !== null);
+
+  const dailyRecords = parsedRecords
     .reduce((acc, record) => {
-      const dateStr = record!.date.toDateString();
+      const dateStr = record.date.toDateString();
       const existing = acc.find(r => r.date.toDateString() === dateStr);
       if (existing) {
         // 같은 날짜면 평균값 사용
-        existing.mood = Math.round((existing.mood + record!.mood) / 2);
-        existing.energy = Math.round((existing.energy + record!.energy) / 2);
-        if (record!.activities) {
-          existing.activities = [...(existing.activities || []), ...record!.activities];
+        existing.mood = Math.round((existing.mood + record.mood) / 2);
+        existing.energy = Math.round((existing.energy + record.energy) / 2);
+        if (record.activities) {
+          existing.activities = [...(existing.activities || []), ...record.activities];
         }
       } else {
-        acc.push(record!);
+        acc.push(record);
       }
       return acc;
-    }, [] as NonNullable<typeof dailyRecords[0]>[])
+    }, [] as (DailyRecord & { date: Date })[])
     .sort((a, b) => a.date.getTime() - b.date.getTime())
     .slice(-7);
 
@@ -221,7 +223,7 @@ export function MoodChart({ documents }: MoodChartProps) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {selectedRecord?.record.date.toLocaleDateString('ko-KR')} 일상기록
+              {new Date(selectedRecord?.record.date || '').toLocaleDateString('ko-KR')} 일상기록
             </DialogTitle>
           </DialogHeader>
           {selectedRecord && (
@@ -262,7 +264,7 @@ export function MoodChart({ documents }: MoodChartProps) {
           className="fixed z-50 bg-black text-white px-3 py-2 rounded text-xs pointer-events-none max-w-xs"
           style={{ left: mousePos.x + 10, top: mousePos.y - 50 }}
         >
-          <div className="font-medium mb-1">{hoveredRecord.date.toLocaleDateString('ko-KR')}</div>
+          <div className="font-medium mb-1">{new Date(hoveredRecord.date).toLocaleDateString('ko-KR')}</div>
           <div>기분: {hoveredRecord.mood}/5, 에너지: {hoveredRecord.energy}/5</div>
           {hoveredRecord.activities && hoveredRecord.activities.length > 0 && (
             <div className="text-gray-300">활동: {hoveredRecord.activities.slice(0, 2).join(', ')}{hoveredRecord.activities.length > 2 ? '...' : ''}</div>
@@ -276,7 +278,7 @@ export function MoodChart({ documents }: MoodChartProps) {
           className="fixed z-50 bg-black text-white px-2 py-1 rounded text-xs pointer-events-none"
           style={{ left: mousePos.x + 10, top: mousePos.y - 30 }}
         >
-          기간: {dailyRecords[hoveredIndex]?.date.toLocaleDateString('ko-KR')} - {dailyRecords[hoveredIndex + 1]?.date.toLocaleDateString('ko-KR')}
+          기간: {new Date(dailyRecords[hoveredIndex]?.date || '').toLocaleDateString('ko-KR')} - {new Date(dailyRecords[hoveredIndex + 1]?.date || '').toLocaleDateString('ko-KR')}
         </div>
       )}
     </div>

@@ -9,7 +9,7 @@ import { apiClient } from '@/lib/api';
 import { TrendingUp, Calendar, BarChart3, Target, ArrowRight } from 'lucide-react';
 
 interface GrowthTrackerProps {
-  currentAnalysis?: AnalysisResult;
+  currentAnalysis?: AnalysisResult | null;
 }
 
 export function GrowthTracker({ currentAnalysis }: GrowthTrackerProps) {
