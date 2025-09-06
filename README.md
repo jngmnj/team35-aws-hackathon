@@ -21,7 +21,17 @@ Amazon Q Developer Hackathon에서 구현한 AI 기반 자기성장 및 커리�
 ### 1. 📝 체계적 문서 관리 시스템
 
 ![문서 관리](docs/screenshots/documents.png)
+문서등록
+![문서등록](docs/screenshots/문서등록.gif)
 
+문서수정
+![문서수정](docs/screenshots/문서수정.gif)
+
+일상기록 등록
+![일상기록 등록](docs/screenshots/일상기록_등록.gif)
+
+나의 기분변화 추적
+![일상기록-기분변화그래프](docs/screenshots/7일기분변화그래프(등록).gif)
 - **다양한 문서 타입**: 경험, 스킬, 가치관, 성취, 일상 기록 등
 - **Rich Text Editor**: TipTap 기반 고급 텍스트 편집 기능
 - **태그 및 카테고리**: 체계적인 문서 분류 및 검색
@@ -30,6 +40,8 @@ Amazon Q Developer Hackathon에서 구현한 AI 기반 자기성장 및 커리�
 
 ![AI 분석](docs/screenshots/analysis.png)
 
+성격분석
+![성격분석](docs/screenshots/성격분석_결과.gif)
 - **AWS Bedrock Claude 3.5 Sonnet**: 고도화된 AI 모델 활용
 - **다차원 분석**: 성격 유형, 강점, 가치관, 관심사 종합 분석
 - **성장 패턴 추적**: 시간에 따른 변화 및 발전 방향 제시
@@ -38,6 +50,9 @@ Amazon Q Developer Hackathon에서 구현한 AI 기반 자기성장 및 커리�
 ### 3. 📄 자동 이력서 생성
 
 ![이력서 생성](docs/screenshots/resume.png)
+
+이력서 생성
+![이력서 생성](docs/screenshots/이력서생성.gif)
 
 - **직무별 맞춤화**: 개발자, PM, 디자이너, 마케터 등 직무별 최적화
 - **개인화된 콘텐츠**: 사용자의 모든 데이터를 활용한 맞춤형 이력서
