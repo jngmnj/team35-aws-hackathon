@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import { User } from '@/types';
 import { apiClient, setToastCallback } from './api';
 import { useToast } from '@/components/ui/toast';
@@ -21,6 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { showToast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     setToastCallback(showToast);
@@ -78,6 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('user_data');
     setUser(null);
     setError(null);
+    router.push('/');
   };
 
   return (
