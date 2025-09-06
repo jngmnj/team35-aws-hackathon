@@ -16,10 +16,15 @@ function HomeContent() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    // S3에서 리다이렉트된 경우 처리
+    // CloudFront에서 리다이렉트된 경우 처리
     const redirect = searchParams.get('redirect');
+    const currentPath = window.location.pathname;
+    
     if (redirect && user) {
       router.replace(redirect);
+    } else if (currentPath !== '/' && user) {
+      // CloudFront가 404를 index.html로 리다이렉트한 경우
+      router.replace(currentPath);
     }
   }, [searchParams, user, router]);
 
