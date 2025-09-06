@@ -55,7 +55,7 @@ Amazon Q Developer Hackathon에서 구현한 AI 기반 자기성장 및 커리�
 
 ## 동영상 데모
 
-![데모 영상](docs/demo/growlog-demo.gif)
+<iframe width="560" height="315" src="https://www.youtube.com/embed/c1gavi2Ce1o?si=e9qVGMzQ32d-zig8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 _전체 사용자 플로우: 회원가입 → 문서 작성 → AI 분석 → 이력서 생성_
 
