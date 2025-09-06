@@ -24,9 +24,8 @@ export class DomainStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    // 4. SSL 인증서 (외부 도메인용 - DNS 검증 사용 불가)
-    // 수동으로 ACM에서 인증서 생성 후 ARN 입력 필요
-    // const certificate = acm.Certificate.fromCertificateArn(this, 'Certificate', 'arn:aws:acm:...');
+    // 4. SSL 인증서
+    const certificate = acm.Certificate.fromCertificateArn(this, 'Certificate', 'arn:aws:acm:us-east-1:058264361794:certificate/f8d8e894-f20f-4d63-b5c6-29dfe729eddf');
 
     // 5. CloudFront 배포
     const distribution = new cloudfront.Distribution(this, 'Distribution', {
@@ -34,8 +33,8 @@ export class DomainStack extends cdk.Stack {
         origin: origins.S3BucketOrigin.withOriginAccessControl(websiteBucket),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       },
-      // domainNames: [domainName, `www.${domainName}`],
-      // certificate: certificate,
+      domainNames: [domainName],
+      certificate: certificate,
       defaultRootObject: 'index.html',
       errorResponses: [
         {
