@@ -16,35 +16,26 @@ export class DomainStack extends cdk.Stack {
     // 1. 도메인 구매 (수동으로 AWS Console에서 구매 필요)
     // Route53 > Registered domains > Register domain
 
-    // 2. Hosted Zone 생성
-    const hostedZone = new route53.HostedZone(this, 'HostedZone', {
-      zoneName: domainName,
-    });
+    // 2. 외부 도메인용 - Hosted Zone 생성하지 않음 (kro.kr은 외부 관리)
 
     // 3. S3 버킷 (프론트엔드 호스팅)
     const websiteBucket = new s3.Bucket(this, 'WebsiteBucket', {
-      bucketName: `${domainName}-website`,
-      websiteIndexDocument: 'index.html',
-      websiteErrorDocument: 'error.html',
-      publicReadAccess: true,
+      bucketName: `growlog-kro-kr-website`,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    // 4. SSL 인증서
-    const certificate = new acm.Certificate(this, 'Certificate', {
-      domainName: domainName,
-      subjectAlternativeNames: [`www.${domainName}`],
-      validation: acm.CertificateValidation.fromDns(hostedZone),
-    });
+    // 4. SSL 인증서 (외부 도메인용 - DNS 검증 사용 불가)
+    // 수동으로 ACM에서 인증서 생성 후 ARN 입력 필요
+    // const certificate = acm.Certificate.fromCertificateArn(this, 'Certificate', 'arn:aws:acm:...');
 
     // 5. CloudFront 배포
     const distribution = new cloudfront.Distribution(this, 'Distribution', {
       defaultBehavior: {
-        origin: new origins.S3Origin(websiteBucket),
+        origin: origins.S3BucketOrigin.withOriginAccessControl(websiteBucket),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       },
-      domainNames: [domainName, `www.${domainName}`],
-      certificate: certificate,
+      // domainNames: [domainName, `www.${domainName}`],
+      // certificate: certificate,
       defaultRootObject: 'index.html',
       errorResponses: [
         {
@@ -55,21 +46,9 @@ export class DomainStack extends cdk.Stack {
       ],
     });
 
-    // 6. DNS 레코드
-    new route53.ARecord(this, 'ARecord', {
-      zone: hostedZone,
-      target: route53.RecordTarget.fromAlias(
-        new targets.CloudFrontTarget(distribution)
-      ),
-    });
-
-    new route53.ARecord(this, 'WWWARecord', {
-      zone: hostedZone,
-      recordName: 'www',
-      target: route53.RecordTarget.fromAlias(
-        new targets.CloudFrontTarget(distribution)
-      ),
-    });
+    // 6. DNS 레코드 (외부 도메인이므로 수동 CNAME 설정 필요)
+    // kro.kr 사이트에서 CNAME 레코드 설정:
+    // growlog.kro.kr -> CloudFront 도메인
 
     // Outputs
     new cdk.CfnOutput(this, 'DomainName', {
@@ -87,9 +66,9 @@ export class DomainStack extends cdk.Stack {
       description: 'S3 Bucket Name',
     });
 
-    new cdk.CfnOutput(this, 'NameServers', {
-      value: hostedZone.hostedZoneNameServers?.join(', ') || '',
-      description: 'Name Servers for Domain Registration',
+    new cdk.CfnOutput(this, 'CNAMETarget', {
+      value: distribution.distributionDomainName,
+      description: 'CNAME Target for growlog.kro.kr',
     });
   }
 }

@@ -6,7 +6,7 @@ import { DomainStack } from '../lib/domain-stack';
 const app = new cdk.App();
 
 // 도메인 이름 설정 (원하는 도메인으로 변경)
-const domainName = 'growlog.net';
+const domainName = 'growlog.kro.kr';
 
 new MainStack(app, 'AiResumeStack', {
   env: { 
