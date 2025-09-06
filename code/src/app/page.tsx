@@ -6,9 +6,21 @@ import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ArrowRight, Sparkles, Target, FileText } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, Suspense } from 'react';
 
-export default function Home() {
+function HomeContent() {
   const { user } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    // S3에서 리다이렉트된 경우 처리
+    const redirect = searchParams.get('redirect');
+    if (redirect && user) {
+      router.replace(redirect);
+    }
+  }, [searchParams, user, router]);
 
   if (user) {
     return (
@@ -177,5 +189,17 @@ export default function Home() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    }>
+      <HomeContent />
+    </Suspense>
   );
 }

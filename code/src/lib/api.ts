@@ -59,6 +59,12 @@ class ApiClient {
         
         if (error.response?.status === 401) {
           this.clearToken();
+          // 로그아웃 처리를 위해 사용자 데이터도 제거
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('user_data');
+            // 로그인 페이지로 리다이렉트
+            window.location.href = '/';
+          }
         }
         
         let message = 'An error occurred';

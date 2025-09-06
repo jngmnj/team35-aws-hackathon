@@ -26,19 +26,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setToastCallback(showToast);
-    apiClient.loadToken();
-    const token = localStorage.getItem('auth_token');
-    const userData = localStorage.getItem('user_data');
     
-    if (token && userData) {
-      try {
-        setUser(JSON.parse(userData));
-      } catch {
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('user_data');
+    const initializeAuth = async () => {
+      const token = localStorage.getItem('auth_token');
+      const userData = localStorage.getItem('user_data');
+      
+      if (token && userData) {
+        try {
+          // 토큰을 API 클라이언트에 설정
+          apiClient.setToken(token);
+          
+          // 토큰 유효성 검증을 위해 간단한 API 호출
+          await apiClient.getDocuments();
+          
+          // 토큰이 유효하면 사용자 데이터 설정
+          setUser(JSON.parse(userData));
+        } catch (error) {
+          // 토큰이 무효하거나 만료된 경우 정리
+          console.log('Token validation failed:', error);
+          apiClient.clearToken();
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('user_data');
+          setUser(null);
+        }
+      } else {
+        // 토큰이 없으면 API 클라이언트도 정리
+        apiClient.clearToken();
       }
-    }
-    setIsLoading(false);
+      
+      setIsLoading(false);
+    };
+    
+    initializeAuth();
   }, [showToast]);
 
   const login = async (email: string, password: string) => {
