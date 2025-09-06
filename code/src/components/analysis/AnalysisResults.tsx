@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { AnalysisResult } from '@/types';
 import { PersonalityCard } from './PersonalityCard';
 import { InsightsDisplay } from './InsightsDisplay';
+import { EnhancedInsightsDisplay } from './EnhancedInsightsDisplay';
 import { PersonalityVisualization } from './PersonalityVisualization';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -20,6 +21,7 @@ export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const [documentCount, setDocumentCount] = useState(0);
+  const [documentTypes, setDocumentTypes] = useState<string[]>([]);
 
   useEffect(() => {
     if (selectedAnalysis) {
@@ -31,6 +33,8 @@ export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
       try {
         const documents = await apiClient.getDocuments().catch(() => []);
         setDocumentCount(documents.length);
+        const types = [...new Set(documents.map(doc => doc.type))];
+        setDocumentTypes(types);
       } catch {
         // Handle errors silently
       }
@@ -67,15 +71,35 @@ export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
           작성하신 문서를 바탕으로 AI가 당신의 성격과 특성을 분석합니다.
         </p>
         <div className="mb-8 p-4 bg-background rounded-lg border border-border">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground mb-2">
             작성된 문서: <span className="font-semibold text-primary">{documentCount}개</span>
           </p>
+          {documentTypes.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-2">
+              {documentTypes.map(type => (
+                <span key={type} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                  {type === 'daily_record' && '일상기록'}
+                  {type === 'mood_tracker' && '기분추적'}
+                  {type === 'reflection' && '성찰'}
+                  {type === 'test_result' && '테스트결과'}
+                  {type === 'experience' && '경험'}
+                  {type === 'skills' && '기술'}
+                  {type === 'values' && '가치관'}
+                  {type === 'achievements' && '성과'}
+                </span>
+              ))}
+            </div>
+          )}
           {documentCount === 0 && (
             <p className="text-sm text-destructive mt-2">
               분석을 위해 먼저 문서를 작성해주세요.
             </p>
           )}
-
+          {documentTypes.some(type => ['daily_record', 'mood_tracker', 'reflection', 'test_result'].includes(type)) && (
+            <p className="text-sm text-green-600 mt-2">
+              ✨ 통합 분석 데이터가 포함되어 더 정확한 분석이 가능합니다!
+            </p>
+          )}
         </div>
         <Button 
           onClick={handleGenerateAnalysis} 
@@ -115,7 +139,12 @@ export function AnalysisResults({ selectedAnalysis }: AnalysisResultsProps) {
               weaknesses={analysis.result?.weaknesses}
             />
           </div>
-          {analysis && <InsightsDisplay analysis={analysis} />}
+          {analysis && (
+            <EnhancedInsightsDisplay 
+              analysis={analysis} 
+              documentTypes={documentTypes}
+            />
+          )}
           {!selectedAnalysis && (
             <div className="text-center pt-4">
               <Button 
