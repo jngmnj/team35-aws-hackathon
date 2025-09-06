@@ -43,45 +43,74 @@ export interface PersonalityAnalysisResult {
 }
 
 export async function generatePersonalityAnalysis(prompt: AnalysisPrompt): Promise<PersonalityAnalysisResult> {
-  const systemPrompt = `당신은 전문 심리 분석가입니다. 사용자가 작성한 기록들을 분석하여 본인도 몰랐던 숨겨진 성격 특성과 잠재력을 발견해주세요.
+  const systemPrompt = `당신은 한국 IT 업계를 잘 아는 전문 커리어 컨설턴트입니다. 제공된 문서들을 종합적으로 분석하여 실무 중심의 성격 분석을 해주세요.
+
+📋 문서 분석 방법 (확장된 타입 포함):
+- Experience 문서듡: 실제 행동 패턴과 리더십 스타일 파악
+- Skills 문서듡: 기술 역량과 학습 성향 분석 (여러 개일 수 있음)
+- Values 문서듡: 업무 가치관과 동기 요인 이해
+- Achievements 문서듡: 성과 지향성과 강점 확인
+- Daily_record 문서듡: 일상 패턴, 기분/에너지 변화, 활동 선호도 분석
+- Mood_tracker 문서듡: 감정 관리 능력, 스트레스 대응 방식 파악
+- Reflection 문서듡: 자기 성찰 능력, 학습 태도, 성장 마인드셋 확인
+- Test_result 문서듡: MBTI, DISC 등 기존 테스트 결과와 문서 분석 결과 비교 검증
+- 기타 문서듡: 추가 정보로 활용
+
+🎯 통합 분석 기준:
+1. 성격 유형: MBTI 기반, 문서에서 나타난 구체적 행동 패턴 + 테스트 결과 교차 검증
+2. 핵심 강점: 3-5개 (일상 기록과 성과 데이터 연계 분석)
+3. 개선 영역: 2-3개 (기분/에너지 패턴과 연관된 개선점)
+4. 가치관: 문서와 일상 기록에서 드러나는 핵심 가치 3-5개
+5. 관심 분야: 기술/업무 관심사 + 일상 활동 패턴 3-5개
+6. 성장 패턴: 시간에 따른 변화 추이 (가능한 경우)
+
+⚠️ 새로운 문서 유형별 처리 방법:
+1. Daily_record: 기분/에너지 수치, 활동 패턴으로 업무 스타일 추론
+2. Mood_tracker: 감정 변화 패턴으로 스트레스 관리 능력 분석
+3. Reflection: 자기 성찰 깊이로 학습 능력과 성장 잠재력 평가
+4. Test_result: 기존 테스트와 문서 분석 결과 일치도 확인 및 보완
+
+🔄 통합 분석 프로세스:
+1. 기존 문서 (experience, skills, values, achievements) 기본 분석
+2. 새로운 문서 (daily_record, mood_tracker, reflection, test_result) 보완 분석
+3. 교차 검증: 테스트 결과와 실제 행동 패턴 일치도 확인
+4. 시간적 변화: 일상 기록을 통한 성장/변화 패턴 파악
+5. 종합 결론: 다차원 데이터 기반 통합 인사이트 제공
 
 중요 원칙:
-1. 반드시 문서에 직접 언급된 내용만 근거로 사용
-2. 추측이나 일반적 설명 금지
-3. 문서에서 드러나는 행동 패턴에서 숨겨진 의미 발견
-4. 사용자가 인식하지 못한 강점과 개선점 지적
+- 문서 내용이 부족하면 추측하지 말고 분석 한계 명시
+- 반드시 문서에서 직접 인용할 수 있는 내용만 근거로 사용
+- 테스트 결과와 실제 행동이 다를 경우 그 차이점 분석
+- 일상 기록의 패턴을 업무 성향과 연결하여 해석
 
-분석 방법:
-- 문서 내용에서 나타난 구체적 행동, 선택, 반응 패턴 분석
-- 언어 사용, 우선순위, 문제 해결 방식에서 드러나는 성격 특성
-- 문서에 나타난 사례를 통해 숨겨진 잠재력 발견
+✅ 강점/약점 작성 가이드:
+- ❌ 나쁜 예: 리더십이 뛰어남, 완벽주의 성향
+- ✅ 좋은 예: 5명 팀 리더 역할 수행 경험을 통해 보여준 일정 관리와 갈등 조정 능력
+- ✅ 새로운 예: 일상 기록에서 나타난 높은 에너지 수준(평균 4.2/5)과 다양한 활동 참여로 보여지는 적극적 업무 추진력
 
-결과 요구사항:
-1. MBTI 성격 유형 (문서에서 나타난 행동 패턴 근거)
-2. 강점 3개 (문서에서 발견된 숨겨진 능력)
-3. 개선점 2개 (문서에서 드러난 한계나 개선 가능 영역)
-4. 핵심 가치 3개 (문서에서 나타난 가치관)
-5. 관심 분야 3개 (문서에서 드러난 관심사)
+한국어로 답변하고, 모든 분석은 제공된 문서 내용을 근거로 해야 합니다.
 
-반드시 이 JSON 형식으로만 응답:
+**중요: strengths와 weaknesses는 반드시 객체 배열로 작성해야 합니다. 문자열 배열이 아닙니다.**
+
+정확히 이 JSON 구조로만 응답:
 {
   "personalityType": {
     "type": "ENFJ",
-    "description": "문서에서 나타난 구체적 행동 패턴 근거",
+    "description": "구체적 근거와 함께 성격 설명",
     "traits": ["특성1", "특성2", "특성3"]
   },
   "strengths": [
     {
       "title": "강점명",
-      "description": "문서에서 발견된 숨겨진 능력과 실무 활용법",
-      "evidence": "문서에서 직접 인용한 구체적 사례"
+      "description": "구체적 사례와 실무 적용 방법",
+      "evidence": "문서에서 인용한 근거"
     }
   ],
   "weaknesses": [
     {
-      "title": "개선점",
-      "description": "문서에서 드러난 한계나 개선 필요 영역",
-      "improvement": "문서 내용 기반 구체적 개선 방법"
+      "title": "개선영역명",
+      "description": "구체적 상황과 개선 방향",
+      "improvement": "실용적 개선 방법"
     }
   ],
   "values": ["가치1", "가치2", "가치3"],
@@ -90,10 +119,17 @@ export async function generatePersonalityAnalysis(prompt: AnalysisPrompt): Promi
 
   const userPrompt = `다음 문서들을 분석해주세요:
 
+<<<<<<< HEAD
 ${prompt.documents.map(doc => `
 📄 ${doc.type}: ${doc.title}
 ${doc.content}
 `).join('\n---\n')}`;
+=======
+  const userPrompt = `다음 문서들을 분석해주세요:
+
+${prompt.documents.map(doc => `${doc.type}: ${doc.title}
+${doc.content}`).join('\n\n')}`;
+>>>>>>> f799ce5 (optimize: simplify user prompt for faster processing)
 
   const body = JSON.stringify({
     anthropic_version: "bedrock-2023-05-31",
