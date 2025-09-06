@@ -2,7 +2,7 @@ name: Deploy to S3
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -40,7 +40,7 @@ jobs:
     - name: Deploy to S3
       run: |
         cd code
-        aws s3 sync out/ s3://team35-hackathon-frontend --delete
+        aws s3 sync out/ s3://growlog-kro-kr-website --delete
     
     - name: Invalidate CloudFront
       if: github.ref == 'refs/heads/main'
