@@ -23,11 +23,10 @@ Amazon Q Developer Hackathon에서 구현한 AI 기반 자기성장 및 커리�
 ![문서 관리](docs/screenshots/documents.png)
 
 - **다양한 문서 타입**: 경험, 스킬, 가치관, 성취, 일상 기록 등
-- **실시간 자동 저장**: 작성 중 데이터 손실 방지
 - **Rich Text Editor**: TipTap 기반 고급 텍스트 편집 기능
 - **태그 및 카테고리**: 체계적인 문서 분류 및 검색
 
-### 2. 🤖 AI 기반 성격 분석
+### 2. 🤖 AWS Bedrock 기반 AI 성격 분석
 
 ![AI 분석](docs/screenshots/analysis.png)
 
@@ -220,6 +219,7 @@ aws s3 rm s3://<bucket_name> --recursive
 - **데이터 리터러시**: 개인 데이터 활용 능력 및 인사이트 도출 역량 향상
 
 이러한 다양한 활용을 통해 GrowLog는 개인의 성장과 사회 전체의 인적 자원 효율성 향상에 기여할 것으로 기대됩니다.
+
 
 
 
