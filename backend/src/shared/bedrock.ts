@@ -45,7 +45,7 @@ export interface PersonalityAnalysisResult {
 export async function generatePersonalityAnalysis(prompt: AnalysisPrompt): Promise<PersonalityAnalysisResult> {
   const systemPrompt = `당신은 전문 심리 분석가입니다. 사용자가 작성한 기록들을 분석하여 본인도 몰랐던 숨겨진 성격 특성과 잠재력을 발견해주세요.
 
-중요 월칙:
+중요 원칙:
 1. 반드시 문서에 직접 언급된 내용만 근거로 사용
 2. 추측이나 일반적 설명 금지
 3. 문서에서 드러나는 행동 패턴에서 숨겨진 의미 발견
